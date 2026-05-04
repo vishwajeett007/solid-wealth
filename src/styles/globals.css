@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  --wealth-bg: #f5faf8;
+  --wealth-surface: #ffffff;
+  --wealth-surface-dim: #edf3f0;
+  --wealth-border: #d6e8e2;
+  --wealth-text-primary: #0c1f1a;
+  --wealth-text-secondary: #4a6b62;
+  --wealth-text-muted: #8aada5;
+  --wealth-accent: #1cb87e;
+  --wealth-accent-light: #d6f5ea;
+  --wealth-accent-mid: #4dd4a0;
+  --wealth-accent-dark: #0e9463;
+  --wealth-gold: #c9a44d;
+  --wealth-dark-bg: #0a1612;
+  --wealth-dark-surface: #111f1a;
+  --wealth-dark-border: #1e3530;
+  --wealth-danger: #e05252;
+  --wealth-teal: #22d3ee;
+}
+
+@theme inline {
+  --color-wealth-bg: var(--wealth-bg);
+  --color-wealth-surface: var(--wealth-surface);
+  --color-wealth-surface-dim: var(--wealth-surface-dim);
+  --color-wealth-border: var(--wealth-border);
+  --color-wealth-primary: var(--wealth-text-primary);
+  --color-wealth-secondary: var(--wealth-text-secondary);
+  --color-wealth-muted: var(--wealth-text-muted);
+  --color-wealth-accent: var(--wealth-accent);
+  --color-wealth-accent-light: var(--wealth-accent-light);
+  --color-wealth-accent-mid: var(--wealth-accent-mid);
+  --color-wealth-accent-dark: var(--wealth-accent-dark);
+  --color-wealth-gold: var(--wealth-gold);
+  --color-wealth-dark-bg: var(--wealth-dark-bg);
+  --color-wealth-dark-surface: var(--wealth-dark-surface);
+  --color-wealth-dark-border: var(--wealth-dark-border);
+  --color-wealth-danger: var(--wealth-danger);
+  --color-wealth-teal: var(--wealth-teal);
+
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-sora);
+  --font-mono: var(--font-dm-mono);
+
+  --shadow-wealth-sm: 0 2px 12px rgba(12, 31, 26, 0.06);
+  --shadow-wealth-md: 0 8px 32px rgba(12, 31, 26, 0.08);
+  --shadow-wealth-lg: 0 20px 60px rgba(12, 31, 26, 0.1);
+  --shadow-wealth-xl: 0 32px 80px rgba(12, 31, 26, 0.14);
+
+  --radius-wealth-sm: 12px;
+  --radius-wealth-md: 20px;
+  --radius-wealth-lg: 28px;
+  --radius-wealth-xl: 40px;
+  --radius-wealth-pill: 9999px;
+
+  --animate-fade-up: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-float-a: floatA 5s ease-in-out infinite;
+  --animate-float-b: floatB 6.5s ease-in-out infinite;
+  --animate-ticker: ticker 28s linear infinite;
+  --animate-draw-line: drawLine 2s 0.5s cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  line-height: 1.5;
+}
+
+::selection {
+  background: var(--wealth-accent-light);
+  color: var(--wealth-text-primary);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatA {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+}
+
+@keyframes floatB {
+  0%,
+  100% {
+    transform: translateY(0) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes drawLine {
+  from {
+    stroke-dashoffset: 800;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

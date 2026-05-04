@@ -1,0 +1,26 @@
+import { AnalyticsSection } from "@/components/sections/analytics-section";
+import { CTASection } from "@/components/sections/cta-section";
+import { FeaturedLogos } from "@/components/sections/featured-logos";
+import { FeaturesSection } from "@/components/sections/features-section";
+import { HeroSection } from "@/components/sections/hero-section";
+import { MarketTicker } from "@/components/sections/market-ticker";
+import { PremiumSection } from "@/components/sections/premium-section";
+import { StatsSection } from "@/components/sections/stats-section";
+import { SectionDivider } from "@/components/ui/section-divider";
+
+export default function Home() {
+  return (
+    <>
+      <HeroSection />
+      <MarketTicker />
+      <FeaturedLogos />
+      <SectionDivider />
+      <FeaturesSection />
+      <SectionDivider />
+      <StatsSection />
+      <AnalyticsSection />
+      <PremiumSection />
+      <CTASection />
+    </>
+  );
+}
