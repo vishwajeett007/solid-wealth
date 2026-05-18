@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --wealth-bg: #f5faf8;
+  --wealth-bg: #f4f7fb;
   --wealth-surface: #ffffff;
-  --wealth-surface-dim: #edf3f0;
-  --wealth-border: #d6e8e2;
-  --wealth-text-primary: #0c1f1a;
-  --wealth-text-secondary: #4a6b62;
-  --wealth-text-muted: #8aada5;
-  --wealth-accent: #1cb87e;
-  --wealth-accent-light: #d6f5ea;
-  --wealth-accent-mid: #4dd4a0;
-  --wealth-accent-dark: #0e9463;
+  --wealth-surface-dim: #eef2f8;
+  --wealth-border: #d8e2f0;
+  --wealth-text-primary: #0f1a2c;
+  --wealth-text-secondary: #495973;
+  --wealth-text-muted: #879bb8;
+  --wealth-accent: #2563eb;
+  --wealth-accent-light: #eff6ff;
+  --wealth-accent-mid: #3b82f6;
+  --wealth-accent-dark: #1d4ed8;
   --wealth-gold: #c9a44d;
-  --wealth-dark-bg: #0a1612;
-  --wealth-dark-surface: #111f1a;
-  --wealth-dark-border: #1e3530;
-  --wealth-danger: #e05252;
-  --wealth-teal: #22d3ee;
+  --wealth-dark-bg: #080f1a;
+  --wealth-dark-surface: #0f172a;
+  --wealth-dark-border: #1e293b;
+  --wealth-danger: #ef4444;
+  --wealth-teal: #06b6d4;
 }
 
 @theme inline {
@@ -43,10 +43,10 @@
   --font-display: var(--font-sora);
   --font-mono: var(--font-dm-mono);
 
-  --shadow-wealth-sm: 0 2px 12px rgba(12, 31, 26, 0.06);
-  --shadow-wealth-md: 0 8px 32px rgba(12, 31, 26, 0.08);
-  --shadow-wealth-lg: 0 20px 60px rgba(12, 31, 26, 0.1);
-  --shadow-wealth-xl: 0 32px 80px rgba(12, 31, 26, 0.14);
+  --shadow-wealth-sm: 0 2px 12px rgba(15, 26, 44, 0.06);
+  --shadow-wealth-md: 0 8px 32px rgba(15, 26, 44, 0.08);
+  --shadow-wealth-lg: 0 20px 60px rgba(15, 26, 44, 0.1);
+  --shadow-wealth-xl: 0 32px 80px rgba(15, 26, 44, 0.14);
 
   --radius-wealth-sm: 12px;
   --radius-wealth-md: 20px;

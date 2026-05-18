@@ -22,13 +22,13 @@ const analyticsBars = [
 
 export function HeroPhone() {
   return (
-    <div className="relative mx-auto flex justify-center py-8 lg:py-10">
-      <div className="relative z-20 w-[250px] animate-float-a drop-shadow-[0_40px_80px_rgba(12,31,26,0.18)] sm:w-[290px]">
+    <div className="relative mx-auto flex justify-center py-4 lg:py-6">
+      <div className="relative z-20 w-[250px] animate-float-a drop-shadow-[0_40px_80px_rgba(15,26,44,0.18)] sm:w-[290px]">
         <div className="overflow-hidden rounded-[52px] bg-wealth-primary p-3.5">
           <div className="flex min-h-[520px] flex-col gap-3.5 overflow-hidden rounded-[40px] bg-wealth-surface px-5 py-6 sm:min-h-[560px]">
             <div className="mx-auto mb-2 h-6 w-20 rounded-xl bg-wealth-primary" />
 
-            <div className="rounded-wealth-md bg-[linear-gradient(135deg,#0C1F1A_0%,#1A3530_100%)] p-5 text-white">
+            <div className="rounded-wealth-md bg-[linear-gradient(135deg,#0f1a2c_0%,#1e293b_100%)] p-5 text-white">
               <span className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-normal text-wealth-accent-mid">
                 Total Portfolio
               </span>
@@ -43,7 +43,7 @@ export function HeroPhone() {
             <PhoneRow
               amount="+$824"
               icon={TrendingUp}
-              iconTone="green"
+              iconTone="blue"
               subtitle="Today 09:41 AM"
               title="S&P 500 Index"
               trend="positive"
@@ -121,7 +121,7 @@ export function HeroPhone() {
 type PhoneRowProps = {
   amount: string;
   icon: typeof TrendingUp;
-  iconTone: "green" | "slate";
+  iconTone: "blue" | "slate";
   subtitle: string;
   title: string;
   trend: "positive" | "negative";
@@ -140,9 +140,9 @@ function PhoneRow({
       <div
         className={cn(
           "flex size-9 shrink-0 items-center justify-center rounded-[10px]",
-          iconTone === "green"
+          iconTone === "blue"
             ? "bg-wealth-accent-light text-wealth-accent-dark"
-            : "bg-[#EEF2F0] text-wealth-secondary",
+            : "bg-[#f0f4f8] text-wealth-secondary",
         )}
       >
         <Icon aria-hidden="true" className="size-[18px]" />

@@ -21,7 +21,7 @@ export function MarketTicker() {
               className="flex items-center gap-2.5 border-r border-wealth-dark-border px-10 font-mono text-xs text-wealth-muted"
               key={`${item.name}-${index}`}
             >
-              <span className="font-medium text-[#C5E0D8]">{item.name}</span>
+              <span className="font-medium text-[#cbd5e1]">{item.name}</span>
               <span
                 className={cn(
                   "inline-flex items-center gap-1",
