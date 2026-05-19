@@ -5,7 +5,7 @@ const footerLinks = ["Privacy", "Terms", "Security", "Cookies"];
 export function Footer() {
   return (
     <footer className="border-t border-wealth-border bg-wealth-surface px-5 py-12 sm:px-8 lg:px-20">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6">
+      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-6">
         <div>
           <Link
             className="font-display text-lg font-extrabold text-wealth-primary"

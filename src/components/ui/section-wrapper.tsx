@@ -12,8 +12,8 @@ type SectionWrapperProps = {
 };
 
 const widthClasses = {
-  default: "mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-20",
-  wide: "mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20",
+  default: "mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20",
+  wide: "mx-auto w-full max-w-[1600px] px-5 sm:px-8 lg:px-20",
   full: "w-full",
 };
 

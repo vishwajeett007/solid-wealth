@@ -41,8 +41,8 @@ export function Navbar() {
         className={cn(
           "w-full transition-all duration-500 ease-out flex flex-col justify-center",
           isScrolled
-            ? "max-w-7xl rounded-[20px] bg-white/80 border border-wealth-border shadow-wealth-md py-2.5 px-6 backdrop-blur-xl"
-            : "max-w-full rounded-none bg-white/10 border-wealth-border/40 py-4 px-6 sm:px-12 lg:px-20 backdrop-blur-md shadow-none",
+            ? "max-w-[1440px] rounded-[20px] bg-white/80 border border-wealth-border shadow-wealth-md py-2.5 px-6 backdrop-blur-xl"
+            : "max-w-[1440px] rounded-none bg-transparent border-wealth-border/40 py-4 px-6 sm:px-8 lg:px-20 shadow-none",
         )}
       >
         <nav
@@ -63,7 +63,7 @@ export function Navbar() {
             {navLinks.map((link) => (
               <Link
                 className={cn(
-                  "relative mx-3 py-1 text-[14px] font-semibold text-wealth-secondary transition-all duration-300 hover:text-wealth-accent nav-link-underline",
+                  "relative mx-3 py-1 text-[16px] font-semibold text-wealth-secondary transition-all duration-300 hover:text-wealth-accent nav-link-underline",
                   link.active && "text-wealth-accent active",
                 )}
                 href={link.href}
@@ -140,7 +140,12 @@ export function Navbar() {
               aria-label="Get started with Solid Wealth"
               variant="black"
               className="w-full justify-center py-3 text-base group relative overflow-hidden"
-              icon={<ArrowRight aria-hidden="true" className="size-5 relative z-10" />}
+              icon={
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-5 relative z-10"
+                />
+              }
               onClick={() => setIsMobileMenuOpen(false)}
               size="md"
             >

@@ -50,15 +50,20 @@ export function HeroSection() {
     const tLayout = Math.min(Math.max((progress - 0.45) / 0.55, 0), 1);
 
     // 1. Background dome and concentric orbital ring (Only expands in Phase 3 Layout Transition!)
+    // Use a premium cubic ease-in-out curve to make the massive expansion feel incredibly smooth and organic
+    const easeLayout = tLayout < 0.5
+      ? 4 * tLayout * tLayout * tLayout
+      : 1 - Math.pow(-2 * tLayout + 2, 3) / 2;
+
     if (hemisphereRef.current) {
-      const translateY = 70 - tLayout * 48;
-      const scale = 1 + tLayout * 4.5;
+      const translateY = 70 - easeLayout * 48;
+      const scale = 1 + easeLayout * 4.5;
       hemisphereRef.current.style.transform = `translate(-50%, ${translateY}%) scale(${scale})`;
     }
 
     if (ringRef.current) {
-      const ringTranslateY = 70 - tLayout * 56;
-      const ringScale = 1 + tLayout * 5.6;
+      const ringTranslateY = 70 - easeLayout * 56;
+      const ringScale = 1 + easeLayout * 5.6;
       ringRef.current.style.transform = `translate(-50%, ${ringTranslateY}%) scale(${ringScale})`;
     }
 
@@ -212,7 +217,7 @@ export function HeroSection() {
     <div
       ref={containerRef}
       className="relative w-full bg-wealth-bg z-10"
-      style={{ height: SCROLL_TRACK_HEIGHT }}
+      style={{ height: isMobile ? "150vh" : SCROLL_TRACK_HEIGHT }}
     >
       {/* Sticky Hero Container */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
@@ -246,7 +251,7 @@ export function HeroSection() {
         />
 
         {/* Content Layout wrapper */}
-        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-22 z-10 relative h-full pt-16">
+        <div className="mx-auto w-full max-w-[1600px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-22 z-10 relative h-full pt-16">
           {/* Column 1: Text Content */}
           <div
             ref={textRef}
