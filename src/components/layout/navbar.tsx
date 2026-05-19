@@ -42,7 +42,7 @@ export function Navbar() {
           "w-full transition-all duration-500 ease-out flex flex-col justify-center",
           isScrolled
             ? "max-w-7xl rounded-[20px] bg-white/80 border border-wealth-border shadow-wealth-md py-2.5 px-6 backdrop-blur-xl"
-            : "max-w-full rounded-none bg-white/60 border-b border-wealth-border/40 py-4 px-6 sm:px-12 lg:px-20 backdrop-blur-md shadow-none",
+            : "max-w-full rounded-none bg-white/10 border-wealth-border/40 py-4 px-6 sm:px-12 lg:px-20 backdrop-blur-md shadow-none",
         )}
       >
         <nav

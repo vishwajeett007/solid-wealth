@@ -14,7 +14,7 @@ export function HeroSection() {
   // =========================================================================
   // ⚙️ MANUAL SCROLL & VISUAL SPEED CONFIGURATION
   // =========================================================================
-  
+
   // 1. SCROLL_TRACK_HEIGHT: Controls how long the user scrolls in the hero section.
   //    INCREASE this value to make the scroll speed slower and more relaxed!
   const SCROLL_TRACK_HEIGHT = "310vh";
@@ -63,7 +63,7 @@ export function HeroSection() {
 
     // 3. Section Label badge: Hidden initially, reveals at the end of the scroll (60% to 100% progress)
     if (labelRef.current) {
-      const labelProgress = Math.max(0, (progress - 0.60) / 0.40);
+      const labelProgress = Math.max(0, (progress - 0.6) / 0.4);
       labelRef.current.style.opacity = `${labelProgress}`;
       labelRef.current.style.transform = `translate3d(0, ${(1 - labelProgress) * -10}px, 0)`;
     }
@@ -71,19 +71,20 @@ export function HeroSection() {
     // 4. Column 1 Sub-Content: Subtitle, Buttons, and Active Investors
     //    These start fully hidden (opacity 0) and reveal gracefully at the end of the scroll (60% to 100% progress)
     if (subContentRef.current) {
-      const subProgress = Math.max(0, (progress - 0.60) / 0.40);
+      const subProgress = Math.max(0, (progress - 0.6) / 0.4);
       const subOpacity = subProgress;
       const subTranslateY = (1 - subProgress) * 20; // 20px slide-up reveal
-      
+
       subContentRef.current.style.opacity = `${subOpacity}`;
       subContentRef.current.style.transform = `translate3d(0, ${subTranslateY}px, 0)`;
     }
 
     // 5. Column 2: Phone Mockup illustration
     if (phoneRef.current) {
-      const phoneOpacity = window.innerWidth < 1024
-        ? Math.max(0, (progress - 0.05) / 0.95)
-        : Math.max(0, (progress - 0.15) / 0.85);
+      const phoneOpacity =
+        window.innerWidth < 1024
+          ? Math.max(0, (progress - 0.05) / 0.95)
+          : Math.max(0, (progress - 0.15) / 0.85);
 
       if (window.innerWidth < 1024) {
         // Mobile slide-up
@@ -118,7 +119,8 @@ export function HeroSection() {
     const handleScroll = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const totalHeight = containerRef.current.offsetHeight - window.innerHeight;
+      const totalHeight =
+        containerRef.current.offsetHeight - window.innerHeight;
       if (totalHeight <= 0) return;
 
       const scrolled = -rect.top;
@@ -143,7 +145,7 @@ export function HeroSection() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    
+
     // Start continuous paint loop
     animFrameId = requestAnimationFrame(tick);
 
@@ -172,7 +174,7 @@ export function HeroSection() {
         {/* Cinematic Expanding bottom hemisphere */}
         <div
           ref={hemisphereRef}
-          className="absolute bottom-0 left-1/2 rounded-full bg-gradient-to-b from-wealth-accent-light via-blue-100/50 to-wealth-bg pointer-events-none z-0"
+          className="absolute bottom-0 left-1/2 -translate-y-[15%] sm:translate-y-[0%] rounded-full bg-gradient-to-b from-blue-300/60 via-blue-200/50 to-wealth-bg pointer-events-none z-0"
           style={{
             width: "1200px",
             height: "1200px",
@@ -194,15 +196,18 @@ export function HeroSection() {
             }}
           >
             {/* Section label badge: Hidden initially, slides down and fades in at the end of the scroll */}
-            <div ref={labelRef} style={{ opacity: 0, transform: "translate3d(0, -10px, 0)" }}>
+            {/* <div
+              ref={labelRef}
+              style={{ opacity: 0, transform: "translate3d(0, -10px, 0)" }}
+            >
               <SectionLabel className="animate-fade-up">
                 Next-Gen Wealth Platform
               </SectionLabel>
-            </div>
+            </div> */}
 
             <h1
               className={cn(
-                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] text-4xl sm:text-5xl lg:text-6xl",
+                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] text-4xl sm:text-5xl lg:text-6xl mr-4 mt-10 sm:mt-0",
                 isMobile && "text-center",
               )}
             >
@@ -226,9 +231,9 @@ export function HeroSection() {
                   isMobile && "text-center",
                 )}
               >
-                Experience next-generation wealth management. Transparent, secure,
-                and designed for the modern investor who values clarity over
-                complexity.
+                Experience next-generation wealth management. Transparent,
+                secure, and designed for the modern investor who values clarity
+                over complexity.
               </p>
 
               <div
@@ -283,7 +288,7 @@ export function HeroSection() {
         {/* Cinematic Bouncing Scroll down Arrow */}
         <div
           ref={scrollArrowRef}
-          className="absolute bottom-8 left-[50%] -translate-x-1/2 top-[80%] flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300 z-20"
+          className="absolute bottom-8 left-[50%] -translate-x-1/2 top-[64%] sm:top-[80%] flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300 z-20"
         >
           <span className="text-[11px] font-bold tracking-widest uppercase text-wealth-secondary/80 font-mono animate-pulse">
             Scroll to explore
