@@ -20,10 +20,15 @@ const analyticsBars = [
   { className: "h-full", active: true },
 ];
 
-export function HeroPhone() {
+export function HeroPhone({ shouldFloat = false }: { shouldFloat?: boolean }) {
   return (
     <div className="relative mx-auto flex justify-center py-4 lg:py-6">
-      <div className="relative z-20 w-[250px] animate-float-a drop-shadow-[0_40px_80px_rgba(15,26,44,0.18)] sm:w-[290px]">
+      <div
+        className={cn(
+          "relative z-20 w-[250px] drop-shadow-[0_40px_80px_rgba(15,26,44,0.18)] sm:w-[290px]",
+          shouldFloat && "animate-float-a"
+        )}
+      >
         <div className="overflow-hidden rounded-[52px] bg-wealth-primary p-3.5">
           <div className="flex min-h-[520px] flex-col gap-3.5 overflow-hidden rounded-[40px] bg-wealth-surface px-5 py-6 sm:min-h-[560px]">
             <div className="mx-auto mb-2 h-6 w-20 rounded-xl bg-wealth-primary" />
@@ -78,7 +83,7 @@ export function HeroPhone() {
         </div>
       </div>
 
-      <div className="absolute left-0 top-16 z-30 hidden w-[200px] animate-float-b rounded-wealth-md border border-white/60 bg-white/90 p-4 shadow-wealth-lg backdrop-blur-xl lg:-left-12 lg:block xl:-left-20">
+      <div className="phone-floating-card-left absolute left-0 top-16 z-30 hidden w-[200px] rounded-wealth-md border border-white/60 bg-white/90 p-4 shadow-wealth-lg backdrop-blur-xl lg:-left-12 lg:block xl:-left-20" style={{ opacity: 0, transform: "translate3d(-20px, 0, 0)" }}>
         <div className="mb-2.5 flex size-9 items-center justify-center rounded-[10px] bg-wealth-accent-light text-wealth-accent-dark">
           <Wallet aria-hidden="true" className="size-5" />
         </div>
@@ -93,7 +98,7 @@ export function HeroPhone() {
         </p>
       </div>
 
-      <div className="absolute bottom-20 right-0 z-30 hidden w-[200px] animate-float-a rounded-wealth-md border border-white/60 bg-white/90 p-4 shadow-wealth-lg backdrop-blur-xl [animation-delay:800ms] lg:-right-10 lg:block xl:-right-16">
+      <div className="phone-floating-card-right absolute bottom-20 right-0 z-30 hidden w-[200px] rounded-wealth-md border border-white/60 bg-white/90 p-4 shadow-wealth-lg backdrop-blur-xl lg:-right-10 lg:block xl:-right-16" style={{ opacity: 0, transform: "translate3d(20px, 0, 0)" }}>
         <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-wealth-muted">
           <BarChart3 aria-hidden="true" className="size-4 text-wealth-accent" />
           Analytics Overview

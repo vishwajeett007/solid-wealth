@@ -42,17 +42,23 @@ export function HeroSection() {
 
   // Directly updates DOM nodes on every frame (bypasses React render loop for 120 FPS performance)
   const updateElements = (progress: number) => {
-    // 1. Expanding hemisphere dome background
+    // Define precise scroll timeline ranges:
+    // 0% - 30%: Partial Phone Reveal (only 50-60% becomes visible below title area)
+    // 30% - 45%: Stable Hold State
+    // 45% - 100%: Layout Transition + Full Reveal (phone shifts right, expands fully visible)
+    const tReveal = Math.min(Math.max(progress / 0.30, 0), 1);
+    const tLayout = Math.min(Math.max((progress - 0.45) / 0.55, 0), 1);
+
+    // 1. Background dome and concentric orbital ring (Only expands in Phase 3 Layout Transition!)
     if (hemisphereRef.current) {
-      const translateY = 70 - progress * 48;
-      const scale = 1 + progress * 4.5;
+      const translateY = 70 - tLayout * 48;
+      const scale = 1 + tLayout * 4.5;
       hemisphereRef.current.style.transform = `translate(-50%, ${translateY}%) scale(${scale})`;
     }
 
-    // Expanding atmospheric halo ring around the hemisphere (creates a premium orbital 3D parallax)
     if (ringRef.current) {
-      const ringTranslateY = 70 - progress * 56;
-      const ringScale = 1 + progress * 5.6;
+      const ringTranslateY = 70 - tLayout * 56;
+      const ringScale = 1 + tLayout * 5.6;
       ringRef.current.style.transform = `translate(-50%, ${ringTranslateY}%) scale(${ringScale})`;
     }
 
@@ -64,26 +70,27 @@ export function HeroSection() {
         textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
       } else {
         // Desktop centering-to-split parallax transition
-        const txDesktop = (1 - progress) * 43;
-        const tyDesktop = (1 - progress) * -7;
-        const textScale = 0.96 + progress * 0.04;
+        // In Phase 2 (Partial Phone Reveal): Text slides reactively upward (0vh -> -5vh) based on tReveal to naturally make visual room for the phone
+        // In Phase 3 (Hold State): Text remains locked and stable at -5vh vertical position
+        // In Phase 4 (Layout Transition): Text shifts left (43% -> 0%) and elevates to its rested top-column layout position (-5vh -> -12vh)
+        const txDesktop = (1 - tLayout) * 43;
+        const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -12;
+        const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
       }
     }
 
-    // 3. Section Label badge: Hidden initially, reveals at the end of the scroll (60% to 100% progress)
+    // 3. Section Label badge: Hidden initially, reveals in Phase 3 Layout Transition
     if (labelRef.current) {
-      const labelProgress = Math.max(0, (progress - 0.6) / 0.4);
-      labelRef.current.style.opacity = `${labelProgress}`;
-      labelRef.current.style.transform = `translate3d(0, ${(1 - labelProgress) * -10}px, 0)`;
+      labelRef.current.style.opacity = `${tLayout}`;
+      labelRef.current.style.transform = `translate3d(0, ${(1 - tLayout) * -10}px, 0)`;
     }
 
     // 4. Column 1 Sub-Content: Subtitle, Buttons, and Active Investors
-    //    These start fully hidden (opacity 0) and reveal gracefully at the end of the scroll (60% to 100% progress)
+    //    These start fully hidden (opacity 0) and reveal gracefully in Phase 3 Layout Transition
     if (subContentRef.current) {
-      const subProgress = Math.max(0, (progress - 0.6) / 0.4);
-      const subOpacity = subProgress;
-      const subTranslateY = (1 - subProgress) * 20; // 20px slide-up reveal
+      const subOpacity = tLayout;
+      const subTranslateY = (1 - tLayout) * 20; // 20px slide-up reveal
 
       subContentRef.current.style.opacity = `${subOpacity}`;
       subContentRef.current.style.transform = `translate3d(0, ${subTranslateY}px, 0)`;
@@ -93,8 +100,8 @@ export function HeroSection() {
     if (phoneRef.current) {
       const phoneOpacity =
         window.innerWidth < 1024
-          ? Math.max(0, (progress - 0.05) / 0.95)
-          : Math.max(0, (progress - 0.15) / 0.85);
+          ? Math.max(0, (progress - 0.02) / 0.98)
+          : tReveal; // Reaches exactly 1.0 (100% opacity) at the end of Phase 2 Phone Reveal and remains 100%
 
       if (window.innerWidth < 1024) {
         // Mobile slide-up
@@ -103,10 +110,31 @@ export function HeroSection() {
         phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobile}vh, 0) scale(${phoneScaleMobile})`;
       } else {
         // Desktop curve transition
-        const phoneTxDesktop = (1 - progress) * 50;
-        const phoneTyDesktop = (1 - progress) * 25;
-        const phoneScaleDesktop = 0.7 + progress * 0.3;
-        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop})`;
+        // In Phase 2 (Partial Phone Reveal): phoneTxDesktop is locked centered at -68%, rises from bottom (ty: 44vh -> 26vh, stopping safely below title with only 50-60% visible), scale (0.8 -> 0.95), rotate (-5deg -> -2deg)
+        // In Phase 3 (Hold State): stays stable and locked: tx is -68%, ty is 26vh, scale is 0.95, rotate is -2deg
+        // In Phase 4 (Layout Transition + Full Reveal): phoneTxDesktop shifts to right (from -68% to 0%), ty rises up to layout position (from 26vh to -2vh, revealing remaining 40% phone body), scale expands (0.95 -> 1.05), rotate settles (-2deg -> 0deg)
+        const phoneTxDesktop = (1 - tLayout) * -68;
+        const phoneTyDesktop = (1 - tReveal) * 18 + (1 - tLayout) * 26 + tLayout * -2;
+        const phoneScaleDesktop = 0.8 + tReveal * 0.15 + tLayout * 0.10;
+        const phoneRotateDesktop = (1 - tReveal) * -3 + (1 - tLayout) * -2;
+
+        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
+
+        // Drive Left and Right floating cards dynamically (Only reveal in Phase 4 Layout Transition!)
+        const floatingCardLeft = phoneRef.current.querySelector(
+          ".phone-floating-card-left",
+        ) as HTMLDivElement;
+        const floatingCardRight = phoneRef.current.querySelector(
+          ".phone-floating-card-right",
+        ) as HTMLDivElement;
+        if (floatingCardLeft) {
+          floatingCardLeft.style.opacity = `${tLayout}`;
+          floatingCardLeft.style.transform = `translate3d(${(1 - tLayout) * -24}px, 0, 0)`;
+        }
+        if (floatingCardRight) {
+          floatingCardRight.style.opacity = `${tLayout}`;
+          floatingCardRight.style.transform = `translate3d(${(1 - tLayout) * 24}px, 0, 0)`;
+        }
       }
       phoneRef.current.style.opacity = `${phoneOpacity}`;
     }
@@ -218,7 +246,7 @@ export function HeroSection() {
         />
 
         {/* Content Layout wrapper */}
-        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 z-10 relative h-full pt-16">
+        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-22 z-10 relative h-full pt-16">
           {/* Column 1: Text Content */}
           <div
             ref={textRef}
@@ -331,7 +359,7 @@ export function HeroSection() {
           {/* Column 2: Mobile UI Mockup */}
           <div className="absolute lg:relative bottom-[-260px] xs:bottom-[-280px] md:bottom-[-320px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[170px] xs:max-w-[190px] md:max-w-[220px] lg:max-w-none z-30 lg:z-10">
             <div ref={phoneRef} style={{ opacity: 0 }}>
-              <HeroPhone />
+              <HeroPhone shouldFloat={isRevealed} />
             </div>
           </div>
         </div>
