@@ -329,7 +329,7 @@ export function HeroSection() {
           </div>
 
           {/* Column 2: Mobile UI Mockup */}
-          <div className="absolute lg:relative bottom-[-100px] md:bottom-[-150px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[280px] xs:max-w-[320px] md:max-w-[360px] lg:max-w-none z-0 lg:z-10">
+          <div className="absolute lg:relative bottom-[-260px] xs:bottom-[-280px] md:bottom-[-320px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[170px] xs:max-w-[190px] md:max-w-[220px] lg:max-w-none z-30 lg:z-10">
             <div ref={phoneRef} style={{ opacity: 0 }}>
               <HeroPhone />
             </div>
