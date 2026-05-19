@@ -7,6 +7,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { HeroPhone } from "@/components/sections/hero-phone";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
+import { SplitText } from "@/components/ui/split-text";
 import { avatarImages } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ export function HeroSection() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const hemisphereRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,7 @@ export function HeroSection() {
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
 
   // Directly updates DOM nodes on every frame (bypasses React render loop for 120 FPS performance)
   const updateElements = (progress: number) => {
@@ -44,6 +47,13 @@ export function HeroSection() {
       const translateY = 70 - progress * 48;
       const scale = 1 + progress * 4.5;
       hemisphereRef.current.style.transform = `translate(-50%, ${translateY}%) scale(${scale})`;
+    }
+
+    // Expanding atmospheric halo ring around the hemisphere (creates a premium orbital 3D parallax)
+    if (ringRef.current) {
+      const ringTranslateY = 70 - progress * 56;
+      const ringScale = 1 + progress * 5.6;
+      ringRef.current.style.transform = `translate(-50%, ${ringTranslateY}%) scale(${ringScale})`;
     }
 
     // 2. Column 1: Main Text Container
@@ -140,6 +150,13 @@ export function HeroSection() {
 
       updateElements(currentProgress.current);
 
+      // Trigger or reset the subtitle split-text stagger based on 60% animation progress
+      if (currentProgress.current > 0.6) {
+        setIsRevealed(true);
+      } else {
+        setIsRevealed(false);
+      }
+
       animFrameId = requestAnimationFrame(tick);
     };
 
@@ -174,13 +191,29 @@ export function HeroSection() {
         {/* Cinematic Expanding bottom hemisphere */}
         <div
           ref={hemisphereRef}
-          className="absolute bottom-0 left-1/2 -translate-y-[15%] sm:translate-y-[0%] rounded-full bg-gradient-to-b from-blue-300/60 via-blue-200/50 to-wealth-bg pointer-events-none z-0"
+          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full bg-gradient-to-b from-blue-300/60 via-blue-200/50 to-wealth-bg pointer-events-none z-0"
           style={{
             width: "1200px",
             height: "1200px",
             transform: "translate(-50%, 70%) scale(1)",
             transformOrigin: "center center",
             opacity: 0.9,
+          }}
+        />
+
+        {/* Cinematic Concentric Orbital Halo Ring */}
+        <div
+          ref={ringRef}
+          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full border-4 border-blue-600/80 bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(37,99,235,0.18),inset_0_0_50px_rgba(37,99,235,0.1)]"
+          style={{
+            width: "1250px",
+            height: "1250px",
+            transform: "translate(-50%, 70%) scale(1)",
+            transformOrigin: "center center",
+            opacity: 0.9,
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 1%, black 32%)",
+            maskImage: "linear-gradient(to bottom, transparent 1%, black 32%)",
           }}
         />
 
@@ -207,16 +240,18 @@ export function HeroSection() {
 
             <h1
               className={cn(
-                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] text-4xl sm:text-5xl lg:text-6xl mr-4 mt-10 sm:mt-0",
+                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] mr-4 mt-10 sm:mt-0",
+                "text-[8vw] xs:text-[7.5vw] sm:text-5xl lg:text-6xl",
                 isMobile && "text-center",
               )}
             >
-              Reimagine{" "}
-              <span className="bg-gradient-to-r from-wealth-accent to-wealth-teal bg-clip-text text-transparent">
-                money,
+              <span className="block whitespace-nowrap">
+                Reimagine{" "}
+                <span className="bg-gradient-to-r from-wealth-accent to-wealth-teal bg-clip-text text-transparent">
+                  money,
+                </span>
               </span>
-              <br className="hidden sm:block" />
-              Simple solutions
+              <span className="block whitespace-nowrap">Simple solutions</span>
             </h1>
 
             {/* Sub-Content container: Hidden initially, fades and slides up at the end of the scroll */}
@@ -225,16 +260,19 @@ export function HeroSection() {
               className="flex flex-col gap-6 w-full"
               style={{ opacity: 0, transform: "translate3d(0, 20px, 0)" }}
             >
-              <p
-                className={cn(
-                  "max-w-[460px] animate-fade-up text-[17px] leading-relaxed text-wealth-secondary [animation-delay:200ms]",
-                  isMobile && "text-center",
-                )}
-              >
-                Experience next-generation wealth management. Transparent,
-                secure, and designed for the modern investor who values clarity
-                over complexity.
-              </p>
+              <SplitText
+                text="Experience next-generation wealth management. Transparent, secure, and designed for the modern investor who values clarity over complexity."
+                className="max-w-[460px] text-[17px] leading-relaxed text-wealth-secondary"
+                delay={20}
+                duration={0.6}
+                ease="power3.out"
+                splitType="words"
+                from={{ opacity: 0, y: 15 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                textAlign={isMobile ? "center" : "left"}
+                trigger={isRevealed}
+              />
 
               <div
                 className={cn(
@@ -290,7 +328,7 @@ export function HeroSection() {
           ref={scrollArrowRef}
           className="absolute bottom-8 left-[50%] -translate-x-1/2 top-[64%] sm:top-[80%] flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300 z-20"
         >
-          <span className="text-[11px] font-bold tracking-widest uppercase text-wealth-secondary/80 font-mono animate-pulse">
+          <span className="text-[11px] pb-2 font-bold tracking-widest uppercase text-wealth-secondary/80 font-mono animate-pulse">
             Scroll to explore
           </span>
           <div className="flex size-10 items-center justify-center rounded-full bg-white border border-wealth-border shadow-wealth-sm text-wealth-accent animate-bounce">

@@ -24,7 +24,7 @@ export type MarketItem = {
 };
 
 export const navLinks = [
-  { label: "Solutions", href: "#solutions", active: true },
+  { label: "Solutions", href: "#solutions" },
   { label: "Analytics", href: "#analytics" },
   { label: "Features", href: "#features" },
   { label: "About", href: "#about" },

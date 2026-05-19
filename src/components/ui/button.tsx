@@ -7,7 +7,8 @@ type ButtonVariant =
   | "ghost"
   | "accent"
   | "white"
-  | "outline-white";
+  | "outline-white"
+  | "black";
 
 type ButtonSize = "sm" | "md" | "lg";
 
@@ -29,6 +30,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-white text-wealth-primary shadow-[0_4px_20px_rgba(0,0,0,0.20)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.25)]",
   "outline-white":
     "border border-white/30 bg-transparent text-white hover:border-white",
+  black:
+    "bg-black text-white hover:bg-black/90",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

@@ -52,18 +52,19 @@ export function Navbar() {
           {/* Logo */}
           <Link
             className="bg-gradient-to-r from-wealth-accent to-wealth-teal bg-clip-text font-display text-xl font-extrabold tracking-normal text-transparent hover:opacity-90 transition-opacity duration-200"
+            style={{ fontFamily: "var(--font-righteous)" }}
             href="/"
           >
-            LuxeFinance
+            Solid Wealth
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             {navLinks.map((link) => (
               <Link
                 className={cn(
-                  "relative px-4 py-2 rounded-full text-[14px] font-semibold text-wealth-secondary transition-all duration-300 hover:text-wealth-accent hover:bg-wealth-accent/5",
-                  link.active && "text-wealth-accent bg-wealth-accent-light/50",
+                  "relative mx-3 py-1 text-[14px] font-semibold text-wealth-secondary transition-all duration-300 hover:text-wealth-accent nav-link-underline",
+                  link.active && "text-wealth-accent active",
                 )}
                 href={link.href}
                 key={link.label}
@@ -76,17 +77,19 @@ export function Navbar() {
           {/* CTA & Mobile Burger Toggle */}
           <div className="flex items-center gap-3">
             <Button
-              aria-label="Get started with LuxeFinance"
-              className="hidden sm:inline-flex group"
+              aria-label="Get started with Solid Wealth"
+              variant="black"
+              className="hidden sm:inline-flex group relative overflow-hidden"
               icon={
                 <ArrowRight
                   aria-hidden="true"
-                  className="size-4 transition-transform duration-200 group-hover:translate-x-1"
+                  className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"
                 />
               }
               size="sm"
             >
-              Get Started
+              <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-44 pointer-events-none z-0" />
+              <span className="relative z-10">Get Started</span>
             </Button>
 
             {/* Mobile Hamburger Button */}
@@ -134,13 +137,15 @@ export function Navbar() {
             </div>
             <div className="h-px bg-wealth-border/60 w-full my-1" />
             <Button
-              aria-label="Get started with LuxeFinance"
-              className="w-full justify-center py-3 text-base"
-              icon={<ArrowRight aria-hidden="true" className="size-5" />}
+              aria-label="Get started with Solid Wealth"
+              variant="black"
+              className="w-full justify-center py-3 text-base group relative overflow-hidden"
+              icon={<ArrowRight aria-hidden="true" className="size-5 relative z-10" />}
               onClick={() => setIsMobileMenuOpen(false)}
               size="md"
             >
-              Get Started
+              <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-[450px] pointer-events-none z-0" />
+              <span className="relative z-10">Get Started</span>
             </Button>
           </div>
         )}

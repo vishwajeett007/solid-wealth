@@ -9,12 +9,13 @@ export function Footer() {
         <div>
           <Link
             className="font-display text-lg font-extrabold text-wealth-primary"
+            style={{ fontFamily: "var(--font-righteous)" }}
             href="/"
           >
-            LuxeFinance
+            Solid Wealth
           </Link>
           <p className="mt-1 text-xs text-wealth-muted">
-            Copyright 2024 LuxeFinance - Atmospheric Minimalism in Wealth
+            Copyright 2026 Solid Wealth - Atmospheric Minimalism in Wealth
             Management
           </p>
         </div>

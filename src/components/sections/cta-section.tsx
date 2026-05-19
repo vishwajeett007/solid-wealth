@@ -9,7 +9,7 @@ export function CTASection() {
             Start growing your wealth today
           </h2>
           <p className="mt-3 text-[15px] text-wealth-muted">
-            Join 14 million investors who trust LuxeFinance with their
+            Join 14 million investors who trust Solid Wealth with their
             financial future.
           </p>
         </div>

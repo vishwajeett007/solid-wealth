@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Mono, DM_Sans, Sora } from "next/font/google";
+import { DM_Mono, DM_Sans, Sora, Righteous } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { Footer } from "@/components/layout/footer";
@@ -25,8 +25,15 @@ const dmMono = DM_Mono({
   display: "swap",
 });
 
+const righteous = Righteous({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-righteous",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "LuxeFinance | Reimagine money, Simple solutions",
+  title: "Solid Wealth | Reimagine money, Simple solutions",
   description:
     "Next-generation wealth management with secure investing, smart analytics, instant transfers, and premium advisory services.",
 };
@@ -38,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${sora.variable} ${dmSans.variable} ${dmMono.variable}`}
+      className={`${sora.variable} ${dmSans.variable} ${dmMono.variable} ${righteous.variable}`}
       lang="en"
     >
       <body className="min-h-screen overflow-x-hidden bg-wealth-bg font-sans text-wealth-primary antialiased">
