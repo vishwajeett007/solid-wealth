@@ -59,8 +59,8 @@ export function HeroSection() {
     // 2. Column 1: Main Text Container
     if (textRef.current) {
       if (window.innerWidth < 1024) {
-        // Mobile layout centering
-        const tyMobile = (1 - progress) * -5;
+        // Mobile layout centering - shifted slightly higher towards top
+        const tyMobile = (1 - progress) * -5 - 12;
         textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
       } else {
         // Desktop centering-to-split parallax transition
@@ -240,8 +240,8 @@ export function HeroSection() {
 
             <h1
               className={cn(
-                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] mr-4 mt-10 sm:mt-0",
-                "text-[8vw] xs:text-[7.5vw] sm:text-5xl lg:text-6xl",
+                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] mr-4 sm:mt-0",
+                "text-[10vw] xs:text-[9vw] sm:text-5xl lg:text-6xl",
                 isMobile && "text-center",
               )}
             >
@@ -326,8 +326,10 @@ export function HeroSection() {
           </div>
 
           {/* Column 2: Mobile UI Mockup */}
-          <div ref={phoneRef} style={{ opacity: 0 }}>
-            <HeroPhone />
+          <div className="absolute lg:relative bottom-[-100px] md:bottom-[-150px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[280px] xs:max-w-[320px] md:max-w-[360px] lg:max-w-none z-0 lg:z-10">
+            <div ref={phoneRef} style={{ opacity: 0 }}>
+              <HeroPhone />
+            </div>
           </div>
         </div>
 
