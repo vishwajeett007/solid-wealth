@@ -281,10 +281,18 @@ export function HeroSection() {
                 )}
               >
                 <Button
-                  icon={<ArrowRight aria-hidden="true" className="size-4" />}
+                  variant="black"
+                  className="group relative overflow-hidden"
+                  icon={
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"
+                    />
+                  }
                   size="lg"
                 >
-                  Get Started
+                  <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-56 pointer-events-none z-0" />
+                  <span className="relative z-10">Get Started</span>
                 </Button>
                 <Button size="lg" variant="ghost">
                   Learn More

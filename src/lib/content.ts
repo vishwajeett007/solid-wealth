@@ -23,7 +23,13 @@ export type MarketItem = {
   direction: "up" | "down";
 };
 
-export const navLinks = [
+export type NavLinkItem = {
+  label: string;
+  href: string;
+  active?: boolean;
+};
+
+export const navLinks: NavLinkItem[] = [
   { label: "Solutions", href: "#solutions" },
   { label: "Analytics", href: "#analytics" },
   { label: "Features", href: "#features" },
