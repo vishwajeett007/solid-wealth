@@ -64,10 +64,10 @@ export function HeroSection() {
         textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
       } else {
         // Desktop centering-to-split parallax transition
-        const txDesktop = (1 - progress) * 23;
+        const txDesktop = (1 - progress) * 43;
         const tyDesktop = (1 - progress) * -7;
         const textScale = 0.96 + progress * 0.04;
-        textRef.current.style.transform = `translate3d(${txDesktop}vw, ${tyDesktop}vh, 0) scale(${textScale})`;
+        textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
       }
     }
 
@@ -103,10 +103,10 @@ export function HeroSection() {
         phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobile}vh, 0) scale(${phoneScaleMobile})`;
       } else {
         // Desktop curve transition
-        const phoneTxDesktop = (1 - progress) * -23;
+        const phoneTxDesktop = (1 - progress) * 50;
         const phoneTyDesktop = (1 - progress) * 25;
         const phoneScaleDesktop = 0.7 + progress * 0.3;
-        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}vw, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop})`;
+        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop})`;
       }
       phoneRef.current.style.opacity = `${phoneOpacity}`;
     }
@@ -218,7 +218,7 @@ export function HeroSection() {
         />
 
         {/* Content Layout wrapper */}
-        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-2 lg:gap-16 z-10 relative h-full pt-16">
+        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 z-10 relative h-full pt-16">
           {/* Column 1: Text Content */}
           <div
             ref={textRef}
@@ -240,10 +240,13 @@ export function HeroSection() {
 
             <h1
               className={cn(
-                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] mr-4",
-                "text-[10vw] xs:text-[9vw] sm:text-5xl lg:text-6xl",
+                "animate-fade-up font-bold text-wealth-primary [animation-delay:100ms]",
+                "text-[10vw] xs:text-[9vw] sm:text-6xl lg:text-[68px] xl:text-[76px] leading-none tracking-normal",
                 isMobile && "text-center",
               )}
+              style={{
+                fontFamily: '"Google Sans", var(--font-dm-sans), sans-serif',
+              }}
             >
               <span className="block whitespace-nowrap">
                 Reimagine{" "}
