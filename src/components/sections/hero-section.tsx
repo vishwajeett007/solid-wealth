@@ -240,7 +240,7 @@ export function HeroSection() {
 
             <h1
               className={cn(
-                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] mr-4 sm:mt-0",
+                "animate-fade-up font-display font-extrabold leading-tight tracking-normal text-wealth-primary [animation-delay:100ms] mr-4",
                 "text-[10vw] xs:text-[9vw] sm:text-5xl lg:text-6xl",
                 isMobile && "text-center",
               )}
