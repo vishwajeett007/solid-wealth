@@ -1,64 +1,123 @@
-import Image from "next/image";
-import { BadgeCheck } from "lucide-react";
+"use client";
 
-import { SectionHeading } from "@/components/ui/section-heading";
-import { SectionLabel } from "@/components/ui/section-label";
-import { SectionWrapper } from "@/components/ui/section-wrapper";
-import { sectionIcons, statsImage, wealthStats } from "@/lib/content";
+import React, { useEffect, useState, useRef } from "react";
+
+function AnimatedCounter({
+  endValue,
+  duration = 2000,
+  suffix = "",
+}: {
+  endValue: number;
+  duration?: number;
+  suffix?: string;
+}) {
+  const [count, setCount] = useState(0);
+  const nodeRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (nodeRef.current) {
+      observer.observe(nodeRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
+  useEffect(() => {
+    if (!hasAnimated) return;
+
+    let startTime: number | null = null;
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+
+      // Easing function for smooth deceleration
+      const easeOut = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(easeOut * endValue));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [hasAnimated, endValue, duration]);
+
+  return (
+    <div
+      ref={nodeRef}
+      className="text-[48px] md:text-[64px] font-normal tracking-tighter text-black mt-3 leading-none"
+    >
+      {count}
+      {suffix}
+    </div>
+  );
+}
 
 export function StatsSection() {
   return (
-    <SectionWrapper
-      className="py-16 sm:py-20"
-      id="solutions"
-      innerClassName="grid items-center gap-12 lg:grid-cols-2 lg:gap-20"
-      width="wide"
-    >
-      <div className="flex flex-col gap-10">
-        <div>
-          <SectionLabel icon={sectionIcons.globe}>Global Scale</SectionLabel>
-          <SectionHeading className="mt-4">
-            Global Scale,
-            <br />
-            Personal Touch
-          </SectionHeading>
-          <p className="mt-4 max-w-[420px] text-base leading-relaxed text-wealth-secondary">
-            We bridge the gap between institutional power and individual control
-            - giving every investor access to tools once reserved for the
-            ultra-wealthy.
-          </p>
+    <section id="about" className="w-full bg-[#f4f5f7] py-20 px-5 md:px-8">
+      <div className="max-w-[1440px] mx-auto bg-white p-10 md:p-20 md:pr-0 shadow-sm border border-gray-100 rounded-3xl">
+        {/* Top Half: Heading and Text */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 mb-10">
+          <div>
+            <h2 className="text-4xl md:text-[56px] leading-[1.1] font-medium tracking-tight text-black">
+              WE TURN IDEAS
+              <br />
+              INTO VISUAL
+              <br />
+              MASTERPIECES
+            </h2>
+          </div>
+          <div className="flex flex-col justify-center items-start">
+            <p className="text-[#64748b] text-[15px] leading-relaxed mb-8 max-w-[500px]">
+              Whether it's an engaging explainer video, a vibrant social media
+              campaign, or captivating motion graphics, we bring creativity and
+              expertise to every project.
+            </p>
+            <button className="px-8 py-3.5 bg-black text-white text-sm font-semibold hover:bg-gray-800 transition-colors rounded-md">
+              Know More About us
+            </button>
+          </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-3">
-          {wealthStats.map((stat) => (
-            <div key={stat.label}>
-              <p className="font-display text-4xl font-extrabold leading-none text-wealth-primary sm:text-5xl">
-                {stat.value}
-                <span className="text-wealth-accent">{stat.suffix}</span>
-              </p>
-              <p className="mt-2 text-xs font-semibold uppercase tracking-normal text-wealth-muted">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative min-h-[360px] overflow-hidden rounded-wealth-xl shadow-wealth-xl sm:min-h-[480px]">
-        <Image
-          alt={statsImage.alt}
-          className="object-cover"
-          fill
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          src={statsImage.src}
-        />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-wealth-dark-bg/80 to-transparent p-6 sm:p-8">
-          <div className="inline-flex items-center gap-2 rounded-wealth-pill border border-wealth-accent/40 bg-wealth-accent/20 px-4 py-2 text-sm font-semibold text-wealth-accent-mid">
-            <BadgeCheck aria-hidden="true" className="size-4" />
-            SOC 2 Type II Certified | $2.4B+ AUM
+        {/* Bottom Half: Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 border-t border-gray-100 pt-16">
+          <div>
+            <p className="text-xs md:text-sm font-semibold tracking-wider text-[#64748b] uppercase">
+              PROJECTS DELIVERED
+            </p>
+            <AnimatedCounter endValue={200} suffix="+" />
+          </div>
+          <div>
+            <p className="text-xs md:text-sm font-semibold tracking-wider text-[#64748b] uppercase">
+              HAPPY CLIENTS
+            </p>
+            <AnimatedCounter endValue={100} suffix="+" />
+          </div>
+          <div>
+            <p className="text-xs md:text-sm font-semibold tracking-wider text-[#64748b] uppercase">
+              YEARS OF EXPERIENCE
+            </p>
+            <AnimatedCounter endValue={15} suffix="" />
+          </div>
+          <div>
+            <p className="text-xs md:text-sm font-semibold tracking-wider text-[#64748b] uppercase">
+              CLIENTS SATISFACTION
+            </p>
+            <AnimatedCounter endValue={95} suffix="%" />
           </div>
         </div>
       </div>
-    </SectionWrapper>
+    </section>
   );
 }

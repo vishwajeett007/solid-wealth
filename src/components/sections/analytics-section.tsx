@@ -7,7 +7,11 @@ import { sectionIcons } from "@/lib/content";
 
 export function AnalyticsSection() {
   return (
-    <SectionWrapper className="py-16 sm:py-20" id="analytics" width="wide">
+    <SectionWrapper
+      className="bg-white py-16 sm:py-20"
+      id="analytics"
+      width="wide"
+    >
       <div className="relative grid overflow-hidden rounded-wealth-xl border border-wealth-dark-border bg-[radial-gradient(circle_at_top_right,rgba(254,152,0,0.16)_0%,rgba(254,152,0,0)_42%),#080f1a] p-7 sm:p-10 lg:grid-cols-2 lg:gap-16 lg:p-16">
         <div className="relative z-10">
           <SectionLabel icon={sectionIcons.trending} tone="dark">
@@ -57,11 +61,7 @@ export function AnalyticsSection() {
                   y1="0%"
                   y2="100%"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor="#fe9800"
-                    stopOpacity="0.25"
-                  />
+                  <stop offset="0%" stopColor="#fe9800" stopOpacity="0.25" />
                   <stop offset="100%" stopColor="#fe9800" stopOpacity="0" />
                 </linearGradient>
               </defs>

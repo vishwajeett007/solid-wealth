@@ -30,10 +30,10 @@ export type NavLinkItem = {
 };
 
 export const navLinks: NavLinkItem[] = [
-  { label: "Solutions", href: "#solutions" },
-  { label: "Analytics", href: "#analytics" },
   { label: "Features", href: "#features" },
-  { label: "About", href: "#about" },
+  { label: "About Us", href: "#about" },
+  { label: "Mutual Funds", href: "#mutual-funds" },
+  { label: "Contact", href: "#contact" },
 ];
 
 export const avatarImages = [

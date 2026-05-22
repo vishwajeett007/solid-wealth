@@ -6,6 +6,8 @@ import { HeroSection } from "@/components/sections/hero-section";
 import { MarketTicker } from "@/components/sections/market-ticker";
 import { PremiumSection } from "@/components/sections/premium-section";
 import { StatsSection } from "@/components/sections/stats-section";
+import { MutualFundsSection } from "@/components/sections/mutual-funds-section";
+import { DownloadAppSection } from "@/components/sections/download-app-section";
 import { SectionDivider } from "@/components/ui/section-divider";
 
 export default function Home() {
@@ -13,14 +15,14 @@ export default function Home() {
     <>
       <HeroSection />
       <MarketTicker />
-      <FeaturedLogos />
-      <SectionDivider />
       <FeaturesSection />
-      <SectionDivider />
       <StatsSection />
-      <AnalyticsSection />
-      <PremiumSection />
+      <MutualFundsSection />
+      <FeaturedLogos />
+      {/* <AnalyticsSection /> */}
+      {/* <PremiumSection /> */}
       <CTASection />
+      <DownloadAppSection />
     </>
   );
 }
