@@ -79,8 +79,8 @@ export function HeroSection() {
         // Desktop centering-to-split parallax transition
         // In Phase 2 (Partial Phone Reveal): Text slides reactively upward (0vh -> -5vh) based on tReveal to naturally make visual room for the phone
         // In Phase 3 (Hold State): Text remains locked and stable at -5vh vertical position
-        // In Phase 4 (Layout Transition): Text shifts left (43% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
-        const txDesktop = (1 - tLayout) * 43;
+        // In Phase 4 (Layout Transition): Text shifts left (55% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
+        const txDesktop = (1 - tLayout) * 55;
         const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4;
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
@@ -122,37 +122,23 @@ export function HeroSection() {
 
       if (window.innerWidth < 1024) {
         // Mobile slide-up
-        const phoneTyMobile = (1 - progress) * 25;
+        const phoneTyMobile = (1 - progress) * 50;
         const phoneScaleMobile = 0.8 + progress * 0.2;
         phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobile}vh, 0) scale(${phoneScaleMobile})`;
       } else {
         // Desktop curve transition
-        // In Phase 2 (Partial Phone Reveal): phoneTxDesktop is locked centered at -68%, rises from bottom (ty: 44vh -> 26vh, stopping safely below title with only 50-60% visible), scale (0.8 -> 0.95), rotate (-5deg -> -2deg)
-        // In Phase 3 (Hold State): stays stable and locked: tx is -68%, ty is 26vh, scale is 0.95, rotate is -2deg
-        // In Phase 4 (Layout Transition + Full Reveal): phoneTxDesktop shifts to right (from -68% to 0%), ty rises up to layout position (from 26vh to 6vh, revealing remaining 40% phone body), scale expands (0.95 -> 1.05), rotate settles (-2deg -> 0deg)
-        const phoneTxDesktop = (1 - tLayout) * -68;
+        // In Phase 2 (Partial Phone Reveal): phoneTxDesktop is locked centered at -55%, rises from bottom (ty: 86vh -> 26vh)
+        // In Phase 3 (Hold State): stays stable and locked: tx is -55%, ty is 26vh, scale is 0.95, rotate is -2deg
+        // In Phase 4 (Layout Transition + Full Reveal): phoneTxDesktop shifts to right (from -55% to 0%), ty rises up to layout position (from 26vh to 6vh)
+        const phoneTxDesktop = (1 - tLayout) * -55;
         const phoneTyDesktop =
-          (1 - tReveal) * 18 + (1 - tLayout) * 26 + tLayout * 6;
+          (1 - tReveal) * 60 + (1 - tLayout) * 26 + tLayout * 6;
         const phoneScaleDesktop = 0.8 + tReveal * 0.15 + tLayout * 0.1;
         const phoneRotateDesktop = (1 - tReveal) * -3 + (1 - tLayout) * -2;
 
         phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
 
-        // Drive Left and Right floating cards dynamically (Only reveal in Phase 4 Layout Transition!)
-        const floatingCardLeft = phoneRef.current.querySelector(
-          ".phone-floating-card-left",
-        ) as HTMLDivElement;
-        const floatingCardRight = phoneRef.current.querySelector(
-          ".phone-floating-card-right",
-        ) as HTMLDivElement;
-        if (floatingCardLeft) {
-          floatingCardLeft.style.opacity = `${tLayout}`;
-          floatingCardLeft.style.transform = `translate3d(${(1 - tLayout) * -24}px, 0, 0)`;
-        }
-        if (floatingCardRight) {
-          floatingCardRight.style.opacity = `${tLayout}`;
-          floatingCardRight.style.transform = `translate3d(${(1 - tLayout) * 24}px, 0, 0)`;
-        }
+
       }
       phoneRef.current.style.opacity = `${phoneOpacity}`;
     }
@@ -371,7 +357,7 @@ export function HeroSection() {
                     />
                   ))}
                 </div>
-                <p className="text-[13px] font-medium text-wealth-secondary">
+                <p className="hidden sm:block text-[13px] font-medium text-wealth-secondary">
                   <strong className="font-bold text-wealth-primary">
                     50,000+
                   </strong>{" "}
@@ -382,9 +368,9 @@ export function HeroSection() {
           </div>
 
           {/* Column 2: Mobile UI Mockup */}
-          <div className="absolute lg:relative bottom-[-260px] xs:bottom-[-280px] md:bottom-[-320px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[170px] xs:max-w-[190px] md:max-w-[220px] lg:max-w-none z-30 lg:z-10">
+          <div className="absolute lg:relative bottom-[-260px] xs:bottom-[-280px] md:bottom-[-320px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[240px] xs:max-w-[280px] md:max-w-[340px] lg:max-w-none z-30 lg:z-10">
             <div ref={phoneRef} style={{ opacity: 0 }}>
-              <HeroPhone shouldFloat={isRevealed} />
+              <HeroPhone />
             </div>
           </div>
         </div>
