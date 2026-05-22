@@ -34,6 +34,7 @@ export function HeroSection() {
   const phoneRef = useRef<HTMLDivElement>(null);
   const subContentRef = useRef<HTMLDivElement>(null);
   const scrollArrowRef = useRef<HTMLDivElement>(null);
+  const moneyTextRef = useRef<HTMLSpanElement>(null);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -83,6 +84,16 @@ export function HeroSection() {
         const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4;
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
+      }
+    }
+
+    if (moneyTextRef.current) {
+      if (progress > 0.6) {
+        moneyTextRef.current.classList.remove("text-[#fe9800]");
+        moneyTextRef.current.classList.add("text-white");
+      } else {
+        moneyTextRef.current.classList.remove("text-white");
+        moneyTextRef.current.classList.add("text-[#fe9800]");
       }
     }
 
@@ -218,7 +229,7 @@ export function HeroSection() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full bg-wealth-bg z-10"
+      className="relative w-full bg-white/80 z-10"
       style={{ height: isMobile ? "150vh" : SCROLL_TRACK_HEIGHT }}
     >
       {/* Sticky Hero Container */}
@@ -226,7 +237,7 @@ export function HeroSection() {
         {/* Cinematic Expanding bottom hemisphere */}
         <div
           ref={hemisphereRef}
-          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full bg-gradient-to-b from-blue-300/60 via-blue-200/50 to-wealth-bg pointer-events-none z-0"
+          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full bg-[#fe9800] pointer-events-none z-0"
           style={{
             width: "1200px",
             height: "1200px",
@@ -239,7 +250,7 @@ export function HeroSection() {
         {/* Cinematic Concentric Orbital Halo Ring */}
         <div
           ref={ringRef}
-          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full border-4 border-blue-600/80 bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(37,99,235,0.18),inset_0_0_50px_rgba(37,99,235,0.1)]"
+          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full border-4 border-[#fe9800] bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(254,152,0,0.18),inset_0_0_50px_rgba(254,152,0,0.1)]"
           style={{
             width: "1250px",
             height: "1250px",
@@ -275,7 +286,7 @@ export function HeroSection() {
 
             <h1
               className={cn(
-                "animate-fade-up font-bold text-wealth-primary [animation-delay:100ms]",
+                "animate-fade-up font-bold text-[#0B1F3A] [animation-delay:100ms]",
                 "text-[10vw] xs:text-[9vw] sm:text-6xl lg:text-[68px] xl:text-[76px] leading-none tracking-normal",
                 isMobile && "text-center",
               )}
@@ -285,7 +296,10 @@ export function HeroSection() {
             >
               <span className="block whitespace-nowrap">
                 Reimagine{" "}
-                <span className="bg-gradient-to-r from-wealth-accent to-wealth-teal bg-clip-text text-transparent">
+                <span
+                  ref={moneyTextRef}
+                  className="drop-shadow-md transition-colors duration-500 text-[#fe9800]"
+                >
                   money,
                 </span>
               </span>
@@ -300,7 +314,7 @@ export function HeroSection() {
             >
               <SplitText
                 text="Experience next-generation wealth management. Transparent, secure, and designed for the modern investor who values clarity over complexity."
-                className="max-w-[460px] text-[17px] leading-relaxed text-wealth-secondary"
+                className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820]"
                 delay={20}
                 duration={0.6}
                 ease="power3.out"
@@ -332,7 +346,11 @@ export function HeroSection() {
                   <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-56 pointer-events-none z-0" />
                   <span className="relative z-10">Get Started</span>
                 </Button>
-                <Button size="lg" variant="ghost">
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="bg-white text-black border-black"
+                >
                   Learn More
                 </Button>
               </div>

@@ -8,7 +8,7 @@ import { sectionIcons } from "@/lib/content";
 export function AnalyticsSection() {
   return (
     <SectionWrapper className="py-16 sm:py-20" id="analytics" width="wide">
-      <div className="relative grid overflow-hidden rounded-wealth-xl border border-wealth-dark-border bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16)_0%,rgba(37,99,235,0)_42%),#080f1a] p-7 sm:p-10 lg:grid-cols-2 lg:gap-16 lg:p-16">
+      <div className="relative grid overflow-hidden rounded-wealth-xl border border-wealth-dark-border bg-[radial-gradient(circle_at_top_right,rgba(254,152,0,0.16)_0%,rgba(254,152,0,0)_42%),#080f1a] p-7 sm:p-10 lg:grid-cols-2 lg:gap-16 lg:p-16">
         <div className="relative z-10">
           <SectionLabel icon={sectionIcons.trending} tone="dark">
             80% Performance Increase
@@ -37,7 +37,7 @@ export function AnalyticsSection() {
               Portfolio Growth - 6M
             </span>
             <div className="flex gap-3">
-              <LegendItem color="blue" label="Equity" />
+              <LegendItem color="primary" label="Equity" />
               <LegendItem color="teal" label="Fixed Income" />
             </div>
           </div>
@@ -59,10 +59,10 @@ export function AnalyticsSection() {
                 >
                   <stop
                     offset="0%"
-                    stopColor="#3b82f6"
+                    stopColor="#fe9800"
                     stopOpacity="0.25"
                   />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#fe9800" stopOpacity="0" />
                 </linearGradient>
               </defs>
               <path
@@ -73,7 +73,7 @@ export function AnalyticsSection() {
                 className="animate-draw-line"
                 d="M0,140 Q50,120 100,125 T200,75 T300,85 T400,18"
                 fill="none"
-                stroke="#3b82f6"
+                stroke="#fe9800"
                 strokeDasharray="800"
                 strokeLinecap="round"
                 strokeWidth="3"
@@ -103,7 +103,7 @@ export function AnalyticsSection() {
 }
 
 type LegendItemProps = {
-  color: "blue" | "teal";
+  color: "primary" | "teal";
   label: string;
 };
 
@@ -112,7 +112,7 @@ function LegendItem({ color, label }: LegendItemProps) {
     <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#879bb8]">
       <span
         className={
-          color === "blue"
+          color === "primary"
             ? "size-2 rounded-full bg-wealth-accent"
             : "size-2 rounded-full bg-wealth-teal"
         }

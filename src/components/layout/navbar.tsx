@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
-
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -33,16 +33,16 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-out",
-        isScrolled ? "top-4 px-4 sm:px-6" : "top-0 px-0",
+        "fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-out ",
+        isScrolled ? "top-4 px-4 sm:px-6" : "top-0 px-0 bg-white/80",
       )}
     >
       <div
         className={cn(
           "w-full transition-all duration-500 ease-out flex flex-col justify-center",
           isScrolled
-            ? "max-w-[1440px] rounded-[20px] bg-white/80 border border-wealth-border shadow-wealth-md py-2.5 px-6 backdrop-blur-xl"
-            : "max-w-[1440px] rounded-none bg-transparent border-wealth-border/40 py-4 px-6 sm:px-8 lg:px-20 shadow-none",
+            ? "max-w-[1440px] rounded-[20px] shadow-wealth-md py-2.5 px-6 bg-white/80 backdrop-blur-xl border border-white/80"
+            : "max-w-[1440px] rounded-none py-4 px-6 sm:px-8 lg:px-20 shadow-none bg-transparent border-transparent",
         )}
       >
         <nav
@@ -51,13 +51,19 @@ export function Navbar() {
         >
           {/* Logo */}
           <Link
-            className="bg-gradient-to-r from-wealth-accent to-wealth-teal bg-clip-text font-display text-xl font-extrabold tracking-normal text-transparent hover:opacity-90 transition-opacity duration-200"
+            className="bg-[#fe9800] bg-clip-text font-display text-xl font-extrabold tracking-normal text-transparent hover:opacity-90 transition-opacity duration-200 flex items-center"
             style={{ fontFamily: "var(--font-righteous)" }}
             href="/"
           >
+            <Image
+              src="/logo1.png"
+              alt="Logo"
+              width={20}
+              height={20}
+              className="inline-flex mr-2"
+            />
             Solid Wealth
           </Link>
-
           {/* Desktop Navigation Links */}
           <div className="hidden items-center gap-2 md:flex">
             {navLinks.map((link) => (

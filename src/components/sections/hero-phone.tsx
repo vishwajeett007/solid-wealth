@@ -48,7 +48,7 @@ export function HeroPhone({ shouldFloat = false }: { shouldFloat?: boolean }) {
             <PhoneRow
               amount="+$824"
               icon={TrendingUp}
-              iconTone="blue"
+              iconTone="primary"
               subtitle="Today 09:41 AM"
               title="S&P 500 Index"
               trend="positive"
@@ -126,7 +126,7 @@ export function HeroPhone({ shouldFloat = false }: { shouldFloat?: boolean }) {
 type PhoneRowProps = {
   amount: string;
   icon: typeof TrendingUp;
-  iconTone: "blue" | "slate";
+  iconTone: "primary" | "slate";
   subtitle: string;
   title: string;
   trend: "positive" | "negative";
@@ -145,7 +145,7 @@ function PhoneRow({
       <div
         className={cn(
           "flex size-9 shrink-0 items-center justify-center rounded-[10px]",
-          iconTone === "blue"
+          iconTone === "primary"
             ? "bg-wealth-accent-light text-wealth-accent-dark"
             : "bg-[#f0f4f8] text-wealth-secondary",
         )}

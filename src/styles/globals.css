@@ -8,10 +8,10 @@
   --wealth-text-primary: #0f1a2c;
   --wealth-text-secondary: #495973;
   --wealth-text-muted: #879bb8;
-  --wealth-accent: #2563eb;
-  --wealth-accent-light: #eff6ff;
-  --wealth-accent-mid: #3b82f6;
-  --wealth-accent-dark: #1d4ed8;
+  --wealth-accent: #fe9800;
+  --wealth-accent-light: #fff3e0;
+  --wealth-accent-mid: #f57c00;
+  --wealth-accent-dark: #e65100;
   --wealth-gold: #c9a44d;
   --wealth-dark-bg: #080f1a;
   --wealth-dark-surface: #0f172a;
@@ -148,7 +148,7 @@ body {
   left: 0;
   width: 0;
   height: 2px;
-  background-color: var(--wealth-accent, #2563eb);
+  background-color: var(--wealth-accent, #fe9800);
   transition: width 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 10;
 }

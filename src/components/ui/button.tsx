@@ -21,11 +21,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-wealth-primary text-white shadow-[0_4px_16px_rgba(15,26,44,0.18)] hover:bg-wealth-accent hover:shadow-[0_8px_24px_rgba(37,99,235,0.30)]",
+    "bg-wealth-primary text-white shadow-[0_4px_16px_rgba(15,26,44,0.18)] hover:bg-wealth-accent hover:shadow-[0_8px_24px_rgba(254,152,0,0.30)]",
   ghost:
     "border border-wealth-border bg-transparent text-wealth-primary hover:border-wealth-accent hover:text-wealth-accent",
   accent:
-    "bg-wealth-accent text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)] hover:bg-wealth-accent-dark hover:shadow-[0_12px_40px_rgba(37,99,235,0.45)]",
+    "bg-wealth-accent text-white shadow-[0_8px_30px_rgba(254,152,0,0.35)] hover:bg-wealth-accent-dark hover:shadow-[0_12px_40px_rgba(254,152,0,0.45)]",
   white:
     "bg-white text-wealth-primary shadow-[0_4px_20px_rgba(0,0,0,0.20)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.25)]",
   "outline-white":
