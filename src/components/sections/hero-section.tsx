@@ -46,14 +46,15 @@ export function HeroSection() {
     // 0% - 30%: Partial Phone Reveal (only 50-60% becomes visible below title area)
     // 30% - 45%: Stable Hold State
     // 45% - 100%: Layout Transition + Full Reveal (phone shifts right, expands fully visible)
-    const tReveal = Math.min(Math.max(progress / 0.30, 0), 1);
+    const tReveal = Math.min(Math.max(progress / 0.3, 0), 1);
     const tLayout = Math.min(Math.max((progress - 0.45) / 0.55, 0), 1);
 
     // 1. Background dome and concentric orbital ring (Only expands in Phase 3 Layout Transition!)
     // Use a premium cubic ease-in-out curve to make the massive expansion feel incredibly smooth and organic
-    const easeLayout = tLayout < 0.5
-      ? 4 * tLayout * tLayout * tLayout
-      : 1 - Math.pow(-2 * tLayout + 2, 3) / 2;
+    const easeLayout =
+      tLayout < 0.5
+        ? 4 * tLayout * tLayout * tLayout
+        : 1 - Math.pow(-2 * tLayout + 2, 3) / 2;
 
     if (hemisphereRef.current) {
       const translateY = 70 - easeLayout * 48;
@@ -71,15 +72,15 @@ export function HeroSection() {
     if (textRef.current) {
       if (window.innerWidth < 1024) {
         // Mobile layout centering - shifted slightly higher towards top
-        const tyMobile = (1 - progress) * -5 - 12;
+        const tyMobile = (1 - progress) * -5 - 4;
         textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
       } else {
         // Desktop centering-to-split parallax transition
         // In Phase 2 (Partial Phone Reveal): Text slides reactively upward (0vh -> -5vh) based on tReveal to naturally make visual room for the phone
         // In Phase 3 (Hold State): Text remains locked and stable at -5vh vertical position
-        // In Phase 4 (Layout Transition): Text shifts left (43% -> 0%) and elevates to its rested top-column layout position (-5vh -> -12vh)
+        // In Phase 4 (Layout Transition): Text shifts left (43% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
         const txDesktop = (1 - tLayout) * 43;
-        const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -12;
+        const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4;
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
       }
@@ -117,10 +118,11 @@ export function HeroSection() {
         // Desktop curve transition
         // In Phase 2 (Partial Phone Reveal): phoneTxDesktop is locked centered at -68%, rises from bottom (ty: 44vh -> 26vh, stopping safely below title with only 50-60% visible), scale (0.8 -> 0.95), rotate (-5deg -> -2deg)
         // In Phase 3 (Hold State): stays stable and locked: tx is -68%, ty is 26vh, scale is 0.95, rotate is -2deg
-        // In Phase 4 (Layout Transition + Full Reveal): phoneTxDesktop shifts to right (from -68% to 0%), ty rises up to layout position (from 26vh to -2vh, revealing remaining 40% phone body), scale expands (0.95 -> 1.05), rotate settles (-2deg -> 0deg)
+        // In Phase 4 (Layout Transition + Full Reveal): phoneTxDesktop shifts to right (from -68% to 0%), ty rises up to layout position (from 26vh to 6vh, revealing remaining 40% phone body), scale expands (0.95 -> 1.05), rotate settles (-2deg -> 0deg)
         const phoneTxDesktop = (1 - tLayout) * -68;
-        const phoneTyDesktop = (1 - tReveal) * 18 + (1 - tLayout) * 26 + tLayout * -2;
-        const phoneScaleDesktop = 0.8 + tReveal * 0.15 + tLayout * 0.10;
+        const phoneTyDesktop =
+          (1 - tReveal) * 18 + (1 - tLayout) * 26 + tLayout * 6;
+        const phoneScaleDesktop = 0.8 + tReveal * 0.15 + tLayout * 0.1;
         const phoneRotateDesktop = (1 - tReveal) * -3 + (1 - tLayout) * -2;
 
         phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
