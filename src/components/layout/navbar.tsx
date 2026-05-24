@@ -80,7 +80,7 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA & Mobile Burger Toggle */}
+          {/*Mobile Burger Toggle */}
           <div className="flex items-center gap-3">
             <Button
               aria-label="Get started with Solid Wealth"
@@ -131,7 +131,7 @@ export function Navbar() {
                   className={cn(
                     "flex w-full items-center px-4 py-3 rounded-xl text-base font-semibold text-wealth-secondary transition-all duration-200 hover:text-wealth-accent hover:bg-wealth-accent/5",
                     link.active &&
-                      "text-wealth-accent bg-wealth-accent-light/50",
+                    "text-wealth-accent bg-wealth-accent-light/50",
                   )}
                   href={link.href}
                   key={link.label}

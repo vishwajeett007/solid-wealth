@@ -57,15 +57,18 @@ export function HeroSection() {
         ? 4 * tLayout * tLayout * tLayout
         : 1 - Math.pow(-2 * tLayout + 2, 3) / 2;
 
+    // Small vertical offset to nudge the main heading slightly higher
+    const textYOffset = isMobile ? -8 : -8; // in vh
+
     if (hemisphereRef.current) {
       const translateY = 70 - easeLayout * 48;
-      const scale = 1 + easeLayout * 4.5;
+      const scale = 1.15 + easeLayout * 4.5;
       hemisphereRef.current.style.transform = `translate(-50%, ${translateY}%) scale(${scale})`;
     }
 
     if (ringRef.current) {
       const ringTranslateY = 70 - easeLayout * 56;
-      const ringScale = 1 + easeLayout * 5.6;
+      const ringScale = 1.15 + easeLayout * 5.6;
       ringRef.current.style.transform = `translate(-50%, ${ringTranslateY}%) scale(${ringScale})`;
     }
 
@@ -73,17 +76,28 @@ export function HeroSection() {
     if (textRef.current) {
       if (window.innerWidth < 1024) {
         // Mobile layout centering - shifted slightly higher towards top
-        const tyMobile = (1 - progress) * -5 - 4;
+        const tyMobile = (1 - progress) * -5 - 4 + textYOffset * (1 - tLayout);
         textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
+        textRef.current.style.textAlign = "center";
+        textRef.current.style.alignItems = "center";
       } else {
         // Desktop centering-to-split parallax transition
         // In Phase 2 (Partial Phone Reveal): Text slides reactively upward (0vh -> -5vh) based on tReveal to naturally make visual room for the phone
         // In Phase 3 (Hold State): Text remains locked and stable at -5vh vertical position
         // In Phase 4 (Layout Transition): Text shifts left (55% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
         const txDesktop = (1 - tLayout) * 55;
-        const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4;
+        const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4 + textYOffset * (1 - tLayout);
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
+
+        // Transition text alignment from center -> left as layout animation progresses
+        if (tLayout > 0.5) {
+          textRef.current.style.textAlign = "left";
+          textRef.current.style.alignItems = "flex-start";
+        } else {
+          textRef.current.style.textAlign = "center";
+          textRef.current.style.alignItems = "center";
+        }
       }
     }
 
@@ -115,14 +129,17 @@ export function HeroSection() {
 
     // 5. Column 2: Phone Mockup illustration
     if (phoneRef.current) {
-      const phoneOpacity =
-        window.innerWidth < 1024
-          ? Math.max(0, (progress - 0.02) / 0.98)
-          : tReveal; // Reaches exactly 1.0 (100% opacity) at the end of Phase 2 Phone Reveal and remains 100%
+      let phoneOpacity: number;
+      if (window.innerWidth < 1024) {
+        // On mobile keep phone visible by default and use a smaller initial offset
+        phoneOpacity = 1;
+      } else {
+        phoneOpacity = tReveal; // Reaches exactly 1.0 (100% opacity) at the end of Phase 2 Phone Reveal and remains 100%
+      }
 
       if (window.innerWidth < 1024) {
-        // Mobile slide-up
-        const phoneTyMobile = (1 - progress) * 50;
+        // Mobile slide-up (reduced initial vertical offset so phone is visible)
+        const phoneTyMobile = (1 - progress) * 20; // was 50
         const phoneScaleMobile = 0.8 + progress * 0.2;
         phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobile}vh, 0) scale(${phoneScaleMobile})`;
       } else {
@@ -225,9 +242,9 @@ export function HeroSection() {
           ref={hemisphereRef}
           className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full bg-[#fe9800] pointer-events-none z-0"
           style={{
-            width: "1200px",
-            height: "1200px",
-            transform: "translate(-50%, 70%) scale(1)",
+            width: "1350px",
+            height: "1350px",
+            transform: "translate(-50%, 70%) scale(1.15)",
             transformOrigin: "center center",
             opacity: 0.9,
           }}
@@ -238,9 +255,9 @@ export function HeroSection() {
           ref={ringRef}
           className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full border-4 border-[#fe9800] bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(254,152,0,0.18),inset_0_0_50px_rgba(254,152,0,0.1)]"
           style={{
-            width: "1250px",
-            height: "1250px",
-            transform: "translate(-50%, 70%) scale(1)",
+            width: "1400px",
+            height: "1400px",
+            transform: "translate(-50%, 70%) scale(1.15)",
             transformOrigin: "center center",
             opacity: 0.9,
             WebkitMaskImage:
@@ -256,8 +273,8 @@ export function HeroSection() {
             ref={textRef}
             className="flex flex-col gap-6 relative z-20"
             style={{
-              textAlign: isMobile ? "center" : "left",
-              alignItems: isMobile ? "center" : "flex-start",
+              textAlign: "center",
+              alignItems: "center",
             }}
           >
             {/* Section label badge: Hidden initially, slides down and fades in at the end of the scroll */}
@@ -274,7 +291,6 @@ export function HeroSection() {
               className={cn(
                 "animate-fade-up font-bold text-[#0B1F3A] [animation-delay:100ms]",
                 "text-[10vw] xs:text-[9vw] sm:text-6xl lg:text-[68px] xl:text-[76px] leading-none tracking-normal",
-                isMobile && "text-center",
               )}
               style={{
                 fontFamily: '"Google Sans", var(--font-dm-sans), sans-serif',

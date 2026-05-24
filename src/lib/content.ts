@@ -33,6 +33,7 @@ export const navLinks: NavLinkItem[] = [
   { label: "Features", href: "/#features" },
   { label: "About Us", href: "/#about" },
   { label: "Mutual Funds", href: "/#mutual-funds" },
+  { label: "Calculators", href: "/calculators" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/#contact" },
 ];
