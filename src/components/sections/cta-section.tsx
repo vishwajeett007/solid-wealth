@@ -10,7 +10,7 @@ export function CTASection() {
             Contact Us
           </span>
           <h2 className="text-4xl md:text-5xl font-display font-bold text-wealth-primary mb-5">
-            04. Get in Touch with Us
+            Get in Touch with Us
           </h2>
           <p className="text-wealth-secondary text-[17px] md:text-lg mb-8 leading-relaxed max-w-[500px]">
             Have questions about CAN registration or our Risk Analyzer? Our team

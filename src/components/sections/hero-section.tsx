@@ -18,7 +18,7 @@ export function HeroSection() {
 
   // 1. SCROLL_TRACK_HEIGHT: Controls how long the user scrolls in the hero section.
   //    INCREASE this value to make the scroll speed slower and more relaxed!
-  const SCROLL_TRACK_HEIGHT = "310vh";
+  const SCROLL_TRACK_HEIGHT = "260vh";
 
   // 2. ACTIVE_ANIMATION_RATIO: Controls when the animations reach 100% complete (value: 0.1 to 1.0).
   //    E.g. 0.5 means the animation completes halfway through the scroll container track.
@@ -38,6 +38,8 @@ export function HeroSection() {
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
+  const isMobileRef = useRef(typeof window !== "undefined" ? window.innerWidth < 1024 : false);
+  const isRevealedRef = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
 
@@ -63,51 +65,61 @@ export function HeroSection() {
     if (hemisphereRef.current) {
       const translateY = 70 - easeLayout * 48;
       const scale = 1.15 + easeLayout * 4.5;
-      hemisphereRef.current.style.transform = `translate(-50%, ${translateY}%) scale(${scale})`;
+      hemisphereRef.current.style.transform = `translate3d(-50%, ${translateY}%, 0) scale(${scale})`;
     }
 
     if (ringRef.current) {
       const ringTranslateY = 70 - easeLayout * 56;
       const ringScale = 1.15 + easeLayout * 5.6;
-      ringRef.current.style.transform = `translate(-50%, ${ringTranslateY}%) scale(${ringScale})`;
+      ringRef.current.style.transform = `translate3d(-50%, ${ringTranslateY}%, 0) scale(${ringScale})`;
     }
 
     // 2. Column 1: Main Text Container
     if (textRef.current) {
-      if (window.innerWidth < 1024) {
+      if (isMobileRef.current) {
         // Mobile layout centering - shifted slightly higher towards top
         const tyMobile = (1 - progress) * -5 - 4 + textYOffset * (1 - tLayout);
         textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
-        textRef.current.style.textAlign = "center";
-        textRef.current.style.alignItems = "center";
+        if (textRef.current.style.textAlign !== "center") {
+          textRef.current.style.textAlign = "center";
+          textRef.current.style.alignItems = "center";
+        }
       } else {
         // Desktop centering-to-split parallax transition
         // In Phase 2 (Partial Phone Reveal): Text slides reactively upward (0vh -> -5vh) based on tReveal to naturally make visual room for the phone
         // In Phase 3 (Hold State): Text remains locked and stable at -5vh vertical position
-        // In Phase 4 (Layout Transition): Text shifts left (55% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
-        const txDesktop = (1 - tLayout) * 55;
+        // In Phase 4 (Layout Transition): Text shifts left (30% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
+        const txDesktop = (1 - tLayout) * 45;
         const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4 + textYOffset * (1 - tLayout);
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
 
         // Transition text alignment from center -> left as layout animation progresses
         if (tLayout > 0.5) {
-          textRef.current.style.textAlign = "left";
-          textRef.current.style.alignItems = "flex-start";
+          if (textRef.current.style.textAlign !== "left") {
+            textRef.current.style.textAlign = "left";
+            textRef.current.style.alignItems = "flex-start";
+          }
         } else {
-          textRef.current.style.textAlign = "center";
-          textRef.current.style.alignItems = "center";
+          if (textRef.current.style.textAlign !== "center") {
+            textRef.current.style.textAlign = "center";
+            textRef.current.style.alignItems = "center";
+          }
         }
       }
     }
 
     if (moneyTextRef.current) {
       if (progress > 0.6) {
-        moneyTextRef.current.classList.remove("text-[#fe9800]");
-        moneyTextRef.current.classList.add("text-white");
+        if (!moneyTextRef.current.classList.contains("text-white")) {
+          moneyTextRef.current.classList.remove("text-[#fe9800]");
+          moneyTextRef.current.classList.add("text-white");
+        }
       } else {
-        moneyTextRef.current.classList.remove("text-white");
-        moneyTextRef.current.classList.add("text-[#fe9800]");
+        if (!moneyTextRef.current.classList.contains("text-[#fe9800]")) {
+          moneyTextRef.current.classList.remove("text-white");
+          moneyTextRef.current.classList.add("text-[#fe9800]");
+        }
       }
     }
 
@@ -130,14 +142,14 @@ export function HeroSection() {
     // 5. Column 2: Phone Mockup illustration
     if (phoneRef.current) {
       let phoneOpacity: number;
-      if (window.innerWidth < 1024) {
+      if (isMobileRef.current) {
         // On mobile keep phone visible by default and use a smaller initial offset
         phoneOpacity = 1;
       } else {
         phoneOpacity = tReveal; // Reaches exactly 1.0 (100% opacity) at the end of Phase 2 Phone Reveal and remains 100%
       }
 
-      if (window.innerWidth < 1024) {
+      if (isMobileRef.current) {
         // Mobile slide-up (reduced initial vertical offset so phone is visible)
         const phoneTyMobile = (1 - progress) * 20; // was 50
         const phoneScaleMobile = 0.8 + progress * 0.2;
@@ -165,9 +177,13 @@ export function HeroSection() {
       const arrowOpacity = Math.max(0, 1 - progress * 4.5);
       scrollArrowRef.current.style.opacity = `${arrowOpacity}`;
       if (arrowOpacity <= 0) {
-        scrollArrowRef.current.style.display = "none";
+        if (scrollArrowRef.current.style.display !== "none") {
+          scrollArrowRef.current.style.display = "none";
+        }
       } else {
-        scrollArrowRef.current.style.display = "flex";
+        if (scrollArrowRef.current.style.display !== "flex") {
+          scrollArrowRef.current.style.display = "flex";
+        }
       }
     }
   };
@@ -200,10 +216,10 @@ export function HeroSection() {
       updateElements(currentProgress.current);
 
       // Trigger or reset the subtitle split-text stagger based on 60% animation progress
-      if (currentProgress.current > 0.6) {
-        setIsRevealed(true);
-      } else {
-        setIsRevealed(false);
+      const shouldReveal = currentProgress.current > 0.6;
+      if (shouldReveal !== isRevealedRef.current) {
+        isRevealedRef.current = shouldReveal;
+        setIsRevealed(shouldReveal);
       }
 
       animFrameId = requestAnimationFrame(tick);
@@ -216,7 +232,11 @@ export function HeroSection() {
     animFrameId = requestAnimationFrame(tick);
 
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+      const mobile = window.innerWidth < 1024;
+      if (isMobileRef.current !== mobile) {
+        isMobileRef.current = mobile;
+        setIsMobile(mobile);
+      }
       updateElements(currentProgress.current);
     };
     checkMobile();
@@ -244,9 +264,10 @@ export function HeroSection() {
           style={{
             width: "1350px",
             height: "1350px",
-            transform: "translate(-50%, 70%) scale(1.15)",
+            transform: "translate3d(-50%, 70%, 0) scale(1.15)",
             transformOrigin: "center center",
             opacity: 0.9,
+            willChange: "transform",
           }}
         />
 
@@ -257,9 +278,10 @@ export function HeroSection() {
           style={{
             width: "1400px",
             height: "1400px",
-            transform: "translate(-50%, 70%) scale(1.15)",
+            transform: "translate3d(-50%, 70%, 0) scale(1.15)",
             transformOrigin: "center center",
             opacity: 0.9,
+            willChange: "transform",
             WebkitMaskImage:
               "linear-gradient(to bottom, transparent 1%, black 32%)",
             maskImage: "linear-gradient(to bottom, transparent 1%, black 32%)",
@@ -267,11 +289,11 @@ export function HeroSection() {
         />
 
         {/* Content Layout wrapper */}
-        <div className="mx-auto w-full max-w-[1600px] px-5 sm:px-8 lg:px-20 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-22 z-10 relative h-full pt-16">
+        <div className="mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-15 xl:px-18 grid items-center gap-8 lg:grid-cols-[1.2fr_0.8fr] xl:grid-cols-[1.15fr_0.85fr] lg:gap-8 xl:gap-16 z-10 relative h-full pt-16">
           {/* Column 1: Text Content */}
           <div
             ref={textRef}
-            className="flex flex-col gap-6 relative z-20"
+            className="flex flex-col gap-6 relative z-20 min-w-0"
             style={{
               textAlign: "center",
               alignItems: "center",
@@ -289,12 +311,9 @@ export function HeroSection() {
 
             <h1
               className={cn(
-                "animate-fade-up font-bold text-[#0B1F3A] [animation-delay:100ms]",
-                "text-[10vw] xs:text-[9vw] sm:text-6xl lg:text-[68px] xl:text-[76px] leading-none tracking-normal",
+                "animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]",
+                "text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[100px] leading-[1.1] tracking-tight",
               )}
-              style={{
-                fontFamily: '"Google Sans", var(--font-dm-sans), sans-serif',
-              }}
             >
               <span className="block whitespace-nowrap">
                 Reimagine{" "}

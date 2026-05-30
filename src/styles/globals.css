@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --wealth-bg: #f4f7fb;
-  --wealth-surface: #ffffff;
+  --wealth-bg: #FFFDF4;
+  --wealth-surface: #FFFDF4;
   --wealth-surface-dim: #eef2f8;
   --wealth-border: #d8e2f0;
   --wealth-text-primary: #0f1a2c;
@@ -21,6 +21,7 @@
 }
 
 @theme inline {
+  --color-white: #FFFDF4;
   --color-wealth-bg: var(--wealth-bg);
   --color-wealth-surface: var(--wealth-surface);
   --color-wealth-surface-dim: var(--wealth-surface-dim);

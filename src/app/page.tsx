@@ -16,12 +16,12 @@ export default function Home() {
       <HeroSection />
       <MarketTicker />
       <FeaturesSection />
-      <StatsSection />
+      {/* <StatsSection /> */}
       <MutualFundsSection />
-      <FeaturedLogos />
+      {/* <FeaturedLogos /> */}
       {/* <AnalyticsSection /> */}
       {/* <PremiumSection /> */}
-      <CTASection />
+      {/* <CTASection /> */}
       <DownloadAppSection />
     </>
   );

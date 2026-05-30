@@ -41,8 +41,8 @@ export function Navbar() {
         className={cn(
           "w-full transition-all duration-500 ease-out flex flex-col justify-center",
           isScrolled
-            ? "max-w-[1440px] rounded-[20px] shadow-wealth-md py-2.5 px-6 bg-white/80 backdrop-blur-xl border border-white/80"
-            : "max-w-[1440px] rounded-none py-4 px-6 sm:px-8 lg:px-20 shadow-none bg-transparent border-transparent",
+            ? "max-w-[1000px] lg:max-w-[1200px] rounded-[15px] shadow-lg py-3 px-6 lg:px-8 bg-white/90 backdrop-blur-xl border border-gray-200"
+            : "max-w-full rounded-none py-6 px-4 sm:px-8 lg:px-16 shadow-none bg-transparent border-transparent",
         )}
       >
         <nav
@@ -51,16 +51,19 @@ export function Navbar() {
         >
           {/* Logo */}
           <Link
-            className="bg-[#fe9800] bg-clip-text font-display text-xl font-extrabold tracking-normal text-transparent hover:opacity-90 transition-opacity duration-200 flex items-center"
+            className={cn(
+              "bg-[#fe9800] bg-clip-text font-display font-extrabold tracking-normal text-transparent hover:opacity-90 transition-all duration-500 flex items-center",
+              isScrolled ? "text-xl" : "text-[28px]"
+            )}
             style={{ fontFamily: "var(--font-righteous)" }}
             href="/"
           >
             <Image
               src="/logo1.png"
               alt="Logo"
-              width={20}
-              height={20}
-              className="inline-flex mr-2"
+              width={32}
+              height={32}
+              className={cn("inline-flex mr-2 transition-all duration-500", isScrolled ? "w-6 h-6" : "w-8 h-8")}
             />
             Solid Wealth
           </Link>
@@ -69,8 +72,9 @@ export function Navbar() {
             {navLinks.map((link) => (
               <Link
                 className={cn(
-                  "relative mx-3 py-1 text-[16px] font-semibold text-wealth-secondary transition-all duration-300 hover:text-wealth-accent nav-link-underline",
+                  "relative mx-3 font-semibold text-wealth-secondary transition-all duration-500 hover:text-wealth-accent nav-link-underline",
                   link.active && "text-wealth-accent active",
+                  isScrolled ? "text-[15px] py-1" : "text-[18px] py-2"
                 )}
                 href={link.href}
                 key={link.label}
@@ -85,14 +89,16 @@ export function Navbar() {
             <Button
               aria-label="Get started with Solid Wealth"
               variant="black"
-              className="hidden sm:inline-flex group relative overflow-hidden"
+              className={cn(
+                "hidden sm:inline-flex group relative overflow-hidden transition-all duration-500",
+                isScrolled ? "h-9 px-4 text-sm" : "h-12 px-7 text-base"
+              )}
               icon={
                 <ArrowRight
                   aria-hidden="true"
                   className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"
                 />
               }
-              size="sm"
             >
               <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-44 pointer-events-none z-0" />
               <span className="relative z-10">Get Started</span>

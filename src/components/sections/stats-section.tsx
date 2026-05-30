@@ -65,7 +65,7 @@ function AnimatedCounter({
 
 export function StatsSection() {
   return (
-    <section id="about" className="w-full bg-[#f4f5f7] py-20 px-5 md:px-8">
+    <section id="about" className="w-full bg-[#FFFDF4] py-20 px-5 md:px-8">
       <div className="max-w-[1440px] mx-auto bg-white p-10 md:p-20 md:pr-0 shadow-sm border border-gray-100 rounded-3xl">
         {/* Top Half: Heading and Text */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 mb-10">

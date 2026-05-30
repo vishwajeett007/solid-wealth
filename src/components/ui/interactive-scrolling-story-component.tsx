@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
+import ScrollStack, { ScrollStackItem } from "@/components/ui/ScrollStack";
+
 const slidesData = [
   {
     title: "01. Portfolio Dashboard",
@@ -13,7 +15,7 @@ const slidesData = [
     subtitle: "To simplify decision-making, the dashboard features:",
     bullets: ["Clear Visuals", "Quick Insights", "Customizable Views"],
     image: "/feature.png",
-    bgColor: "#ffffff",
+    bgColor: "#FFFDF4",
     textColor: "#0f1a2c",
   },
   {
@@ -23,7 +25,7 @@ const slidesData = [
     subtitle: "Core benefits include:",
     bullets: ["Direct Integration", "Simplified Steps", "Faster Approvals"],
     image: "/feature1.png",
-    bgColor: "#ffffff",
+    bgColor: "#FFFDF4",
     textColor: "#0f1a2c",
   },
   {
@@ -33,194 +35,75 @@ const slidesData = [
     subtitle: "Core benefits include:",
     bullets: ["Direct Integration", "Simplified Steps", "Faster Approvals"],
     image: "/feature2.png",
-    bgColor: "#ffffff",
+    bgColor: "#FFFDF4",
     textColor: "#0f1a2c",
   },
 ];
 
 export function ScrollingFeatureShowcase() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const stickyPanelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const container = scrollContainerRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const scrollableHeight = container.offsetHeight - window.innerHeight;
-
-      if (scrollableHeight <= 0) return;
-
-      // Calculate how far the user has scrolled through this specific container
-      // 0 means just entered the top of the viewport, 1 means reached the end of its sticky duration
-      let progress = 0;
-      if (rect.top <= 0) {
-        progress = Math.min(1, Math.max(0, -rect.top / scrollableHeight));
-      }
-
-      // Map progress to an index
-      const newActiveIndex = Math.min(
-        slidesData.length - 1,
-        Math.max(0, Math.floor(progress * slidesData.length)),
-      );
-
-      if (newActiveIndex !== activeIndex) {
-        setActiveIndex(newActiveIndex);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initialize on mount
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeIndex]);
-
-  const scrollToSlide = (index: number) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    // We calculate the absolute page Y position for the target slide
-    const scrollableHeight = container.offsetHeight - window.innerHeight;
-    const stepHeight = scrollableHeight / slidesData.length;
-
-    // The exact position on the page where this slide starts
-    const targetY =
-      window.scrollY +
-      container.getBoundingClientRect().top +
-      stepHeight * index;
-
-    window.scrollTo({ top: targetY, behavior: "smooth" });
-  };
-
-  const dynamicStyles = {
-    backgroundColor: slidesData[activeIndex].bgColor,
-    color: slidesData[activeIndex].textColor,
-    transition: "background-color 0.7s ease, color 0.7s ease",
-  };
-
   return (
-    <div
-      ref={scrollContainerRef}
-      className="relative z-20 w-full bg-white"
-      style={{ height: `${slidesData.length * 120}vh` }}
-    >
-      <div
-        ref={stickyPanelRef}
-        className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden"
-        style={dynamicStyles}
+    <div className="w-full bg-[#FFFDF4] py-20">
+      <div className="max-w-[1400px] mx-auto px-4 mb-16 text-center">
+        <span className="inline-flex items-center px-4 py-1.5 text-sm font-bold uppercase tracking-wider rounded-full bg-wealth-accent/10 text-wealth-accent mb-4">
+          Features
+        </span>
+        <h2 className="text-4xl md:text-6xl font-black text-[#0f1a2c] tracking-tight">
+          Powerful Tools for Modern Investors
+        </h2>
+      </div>
+
+      <ScrollStack
+        useWindowScroll={true}
+        itemDistance={280}
+        itemStackDistance={60}
+        stackPosition="25%"
+        scaleEndPosition="10%"
+        baseScale={0.85}
+        blurAmount={4}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 h-full w-full max-w-[1400px] mx-auto px-6 md:px-16">
-          {/* Left Column: Text Content & Pagination */}
-          <div className="relative flex flex-col justify-center h-full py-16 md:pr-12">
-            {/* Badge */}
-            <div className="absolute top-[20%] left-0">
-              <span className="inline-flex items-center px-4 py-1.5 text-sm font-bold uppercase tracking-wider rounded-md bg-wealth-accent text-white shadow-sm">
-                Features
-              </span>
-            </div>
-
-            <div className="relative h-[400px] w-full flex flex-col justify-center mt-12">
-              {slidesData.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-all duration-700 ease-in-out flex flex-col justify-center ${
-                    index === activeIndex
-                      ? "opacity-100 translate-y-0 pointer-events-auto"
-                      : "opacity-0 translate-y-10 pointer-events-none"
-                  }`}
-                >
-                  <h2 className="text-4xl md:text-5xl lg:text-[54px] font-display font-bold tracking-tight text-wealth-primary mb-6 leading-tight">
-                    {slide.title}
-                  </h2>
-                  <p className="text-lg md:text-[19px] leading-relaxed text-wealth-secondary mb-6 max-w-[540px]">
-                    {slide.description}
+        {slidesData.map((slide, index) => (
+          <ScrollStackItem key={index}>
+            <div className="flex flex-col md:flex-row h-full w-full bg-white rounded-[40px] shadow-2xl shadow-black/5 overflow-hidden border border-gray-100">
+              {/* Left Content */}
+              <div className="flex-1 p-10 md:p-16 flex flex-col justify-center relative">
+                <h3 className="text-3xl md:text-5xl font-black text-[#0f1a2c] mb-6 leading-tight">
+                  {slide.title}
+                </h3>
+                <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-6">
+                  {slide.description}
+                </p>
+                {slide.subtitle && (
+                  <p className="text-lg text-gray-700 font-medium mb-4">
+                    {slide.subtitle}
                   </p>
-                  {slide.subtitle && (
-                    <p className="text-lg md:text-[19px] leading-relaxed text-wealth-secondary mb-5 max-w-[540px]">
-                      {slide.subtitle}
-                    </p>
-                  )}
-                  {slide.bullets && slide.bullets.length > 0 && (
-                    <ul className="space-y-4">
-                      {slide.bullets.map((bullet, i) => (
-                        <li
-                          key={i}
-                          className="flex items-center text-lg md:text-[19px] text-wealth-secondary font-medium"
-                        >
-                          <span className="w-2 h-2 rounded-full bg-wealth-primary mr-4 flex-shrink-0" />
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="absolute bottom-[10%] left-0 flex items-center gap-6">
-              <button
-                onClick={() => scrollToSlide(Math.max(0, activeIndex - 1))}
-                className={cn(
-                  "flex size-12 items-center justify-center rounded-full transition-all duration-300",
-                  activeIndex === 0
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                    : "bg-gray-200 text-wealth-primary hover:bg-gray-300 hover:scale-105 shadow-sm",
                 )}
-                disabled={activeIndex === 0}
-              >
-                <ArrowLeft className="size-5" />
-              </button>
-              <span className="text-xl font-bold text-wealth-primary tracking-widest">
-                0{activeIndex + 1}/0{slidesData.length}
-              </span>
-              <button
-                onClick={() =>
-                  scrollToSlide(
-                    Math.min(slidesData.length - 1, activeIndex + 1),
-                  )
-                }
-                className={cn(
-                  "flex size-12 items-center justify-center rounded-full transition-all duration-300",
-                  activeIndex === slidesData.length - 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                    : "bg-wealth-primary text-white hover:bg-wealth-primary/90 hover:scale-105 shadow-md",
+                {slide.bullets && slide.bullets.length > 0 && (
+                  <ul className="space-y-3">
+                    {slide.bullets.map((bullet, i) => (
+                      <li key={i} className="flex items-center text-lg text-gray-600 font-medium">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#fe9800] mr-4 flex-shrink-0" />
+                        {bullet}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-                disabled={activeIndex === slidesData.length - 1}
-              >
-                <ArrowRight className="size-5" />
-              </button>
-            </div>
-          </div>
+              </div>
 
-          {/* Right Column: Image Content */}
-          <div className="hidden md:flex items-center justify-center relative h-full w-full">
-            <div className="relative w-full max-w-[600px] h-[600px]">
-              {slidesData.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                    index === activeIndex
-                      ? "opacity-100 scale-100"
-                      : index < activeIndex
-                        ? "opacity-0 scale-95 -translate-y-8"
-                        : "opacity-0 scale-105 translate-y-8"
-                  }`}
-                >
+              {/* Right Image */}
+              <div className="flex-1 relative min-h-[300px] md:min-h-full bg-gray-50 flex items-center justify-center p-8">
+                <div className="relative w-full h-[400px] md:h-[500px]">
                   <Image
                     src={slide.image}
                     alt={slide.title}
                     fill
-                    className="object-contain"
-                    priority={index === 0}
+                    className="object-contain drop-shadow-xl"
                   />
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </ScrollStackItem>
+        ))}
+      </ScrollStack>
     </div>
   );
 }

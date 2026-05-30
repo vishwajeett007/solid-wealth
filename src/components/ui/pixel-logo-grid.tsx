@@ -753,7 +753,7 @@ export const PixelLogoGrid = ({
   heading = "Recognized by top financial publications across the globe",
 }: ComponentProps = {}) => {
   return (
-    <section className="w-full bg-[#f4f5f7] px-4 py-20 md:px-12 md:py-24">
+    <section className="w-full bg-[#FFFDF4] px-4 py-20 md:px-12 md:py-24">
       <div
         className="grid grid-cols-2 md:grid-cols-5 max-w-[1160px] mx-auto gap-px bg-gray-200 border border-gray-200 shadow-sm rounded-xl overflow-hidden"
         style={{ gridTemplateRows: "repeat(4, 96px)" }}
