@@ -67,25 +67,28 @@ export function MutualFundsSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFund, setSelectedFund] = useState<Fund | null>(null);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const categories = ["All", "Small Cap", "Mid Cap", "Large Cap", "Hybrid", "Sectoral"];
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsSearchFocused(false);
-      }
-    };
-    if (isSearchFocused) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchFocused]);
-
-  useEffect(() => {
     async function fetchData() {
       try {
+        const CACHE_KEY = "solidwealth_mf_data";
+        const CACHE_TIME = "solidwealth_mf_time";
+        const REVALIDATE_MS = 3600 * 1000; // 1 hour
+
+        const cachedStr = localStorage.getItem(CACHE_KEY);
+        const cachedTimeStr = localStorage.getItem(CACHE_TIME);
+
+        if (cachedStr && cachedTimeStr) {
+          const cachedTime = parseInt(cachedTimeStr, 10);
+          if (Date.now() - cachedTime < REVALIDATE_MS) {
+            setAllFunds(JSON.parse(cachedStr));
+            setIsLoading(false);
+            return;
+          }
+        }
+
         const response = await fetch("https://solidwealthindia.com/api/nav/company-summary/");
         const data: ApiResponse = await response.json();
 
@@ -97,11 +100,11 @@ export function MutualFundsSection() {
               const category = getCategory(scheme.scheme_name);
               const risk = getRisk(scheme.scheme_name, category);
               const returnRate = getReturnRate(scheme.scheme_code);
-              
+
               // format nav to locale string safely
               const parsedNav = parseFloat(scheme.net_asset_value);
-              const navString = isNaN(parsedNav) 
-                ? scheme.net_asset_value 
+              const navString = isNaN(parsedNav)
+                ? scheme.net_asset_value
                 : parsedNav.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
               loadedFunds.push({
@@ -119,6 +122,9 @@ export function MutualFundsSection() {
           }
         });
 
+        localStorage.setItem(CACHE_KEY, JSON.stringify(loadedFunds));
+        localStorage.setItem(CACHE_TIME, Date.now().toString());
+
         setAllFunds(loadedFunds);
       } catch (error) {
         console.error("Failed to fetch dynamic mutual funds:", error);
@@ -133,8 +139,8 @@ export function MutualFundsSection() {
   const pagesData = React.useMemo(() => {
     const filtered = allFunds.filter((fund) => {
       const matchesCategory = selectedCategory === "All" || fund.category === selectedCategory;
-      const matchesSearch = fund.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            fund.company.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = fund.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        fund.company.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
 
@@ -145,34 +151,44 @@ export function MutualFundsSection() {
     return pages;
   }, [allFunds, selectedCategory, searchQuery]);
 
+  const totalPages = pagesData.length;
+  const paginationItems = React.useMemo(() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i);
+    if (activeIndex <= 3) return [0, 1, 2, 3, 4, '...', totalPages - 1];
+    if (activeIndex >= totalPages - 4) return [0, '...', totalPages - 5, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1];
+    return [0, '...', activeIndex - 1, activeIndex, activeIndex + 1, '...', totalPages - 1];
+  }, [activeIndex, totalPages]);
+
   return (
-    <section 
-      id="mutual-funds" 
-      className={cn(
-        "w-full bg-white py-20 md:py-28 px-4 md:px-8 overflow-hidden relative transition-all duration-300",
-        isSearchFocused ? "z-[99]" : "z-10"
-      )}
+    <section
+      id="mutual-funds"
+      className="w-full bg-[#FFFDF4] pt-20 md:pt-28 pb-10 md:pb-15 px-4 md:px-8 overflow-hidden relative"
     >
       <div className="max-w-[1400px] mx-auto flex flex-col items-center">
 
         {/* Header */}
-        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-[#0B1F3A] text-center mb-10">
-          Create wealth by investing in mutual funds.
-        </h2>
+        <div className="flex flex-col items-center mb-10 text-center">
+          <span className="inline-flex items-center justify-center px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-full bg-[#FFEFC2] text-[#fe9800] mb-6 shadow-sm">
+            Mutual Funds
+          </span>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-[#1a2332]">
+            Invest <span className="text-[#fe9800]">Smart</span>, Solid Wealth
+          </h2>
+        </div>
 
         {/* Filters and Search Bar Container */}
-        <div className="w-full flex flex-col md:flex-row items-center justify-between gap-6 mb-12 max-w-[1400px]">
-          {/* Category Filter Pills (Wrapped naturally, no X scroll) */}
-          <div className="flex flex-wrap items-center gap-2.5 justify-start w-full md:w-auto">
+        <div className="w-full relative flex flex-col-reverse md:flex-row items-center justify-center gap-6 md:gap-0 mb-16 max-w-[1400px] min-h-[48px]">
+          {/* Category Filter Pills */}
+          <div className="flex flex-row overflow-x-auto no-scrollbar items-center justify-start md:justify-center gap-2 p-1.5 sm:p-2 bg-[#FFF9EA] rounded-[2rem] sm:rounded-full max-w-full z-20 w-full md:w-auto">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => { setSelectedCategory(cat); setActiveIndex(0); }}
                 className={cn(
-                  "px-5 py-2.5 rounded-full text-sm font-bold transition-all flex-shrink-0 cursor-pointer",
+                  "px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap",
                   selectedCategory === cat
-                    ? "bg-[#0B1F3A] text-white shadow-md shadow-[#0B1F3A]/10 scale-105"
-                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60"
+                    ? "bg-[#1a2332] text-white shadow-md scale-105"
+                    : "text-[#fe9800] hover:bg-orange-100/50"
                 )}
               >
                 {cat}
@@ -180,23 +196,11 @@ export function MutualFundsSection() {
             ))}
           </div>
 
-          {/* Search Input Box with Focus Pop-out Animation */}
-          <div className={cn(
-            "relative w-full md:max-w-xs h-12 flex-shrink-0 transition-all duration-300",
-            isSearchFocused ? "z-[100]" : "z-30"
-          )}>
-            {/* Inner Search Box */}
-            <div className={cn(
-              "transition-all duration-300 ease-out w-full flex items-center bg-[#F8FAFC] border border-slate-200 rounded-full",
-              isSearchFocused 
-                ? "fixed top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-xl z-[100] scale-105 shadow-2xl p-2.5 bg-white border-[#0B1F3A]/30 focus-within:border-[#0B1F3A]"
-                : "absolute inset-0 z-30 px-4"
-            )}>
+          {/* Search Input Box */}
+          <div className="relative md:absolute md:right-0 w-full md:max-w-xs h-12 flex-shrink-0 z-30">
+            <div className="w-full h-full flex items-center bg-[#F8FAFC] border border-slate-200 focus-within:border-[#0B1F3A] focus-within:bg-white rounded-full absolute inset-0 px-4 transition-colors">
               <svg
-                className={cn(
-                  "text-gray-400 flex-shrink-0 transition-all",
-                  isSearchFocused ? "w-5 h-5 ml-3 mr-1" : "w-4 h-4 mr-2"
-                )}
+                className="text-gray-400 flex-shrink-0 w-4 h-4 mr-2"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
@@ -208,20 +212,13 @@ export function MutualFundsSection() {
                 type="text"
                 placeholder="Search mutual funds..."
                 value={searchQuery}
-                onFocus={() => setIsSearchFocused(true)}
                 onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); }}
-                className={cn(
-                  "w-full bg-transparent outline-none font-semibold text-[#0B1F3A] placeholder:text-gray-400",
-                  isSearchFocused ? "text-lg py-3.5 px-3" : "text-sm py-2"
-                )}
+                className="w-full bg-transparent outline-none font-semibold text-[#0B1F3A] placeholder:text-gray-400 text-sm py-2"
               />
               {searchQuery && (
                 <button
                   onClick={() => { setSearchQuery(""); setActiveIndex(0); }}
-                  className={cn(
-                    "text-gray-400 hover:text-gray-600 flex-shrink-0 cursor-pointer",
-                    isSearchFocused ? "mr-3" : "mr-1"
-                  )}
+                  className="text-gray-400 hover:text-gray-600 flex-shrink-0 cursor-pointer mr-1"
                 >
                   <X className="size-4" />
                 </button>
@@ -231,30 +228,44 @@ export function MutualFundsSection() {
         </div>
 
         {isLoading ? (
-          <div className="w-full h-96 flex items-center justify-center mb-12">
-            <div className="w-10 h-10 border-4 border-[#0B1F3A] border-t-transparent rounded-full animate-spin"></div>
+          <div className="relative w-full px-2 md:px-16 flex items-center mb-6">
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white border border-[#EBEFF5] rounded-[32px] p-8 flex flex-col justify-between h-[380px] animate-pulse shadow-sm">
+                  <div>
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="h-7 bg-slate-100 rounded-md w-3/4"></div>
+                      <div className="h-6 bg-slate-100 rounded-full w-16"></div>
+                    </div>
+                    <div className="h-4 bg-slate-100 rounded-md w-1/3 mb-8"></div>
+                    <div className="flex items-center gap-2 mt-6">
+                      <div className="w-6 h-6 rounded-full bg-slate-100"></div>
+                      <div className="h-8 bg-slate-100 rounded-md w-24"></div>
+                      <div className="h-4 bg-slate-100 rounded-md w-16 ml-2"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="border-t border-[#F0F4FA] my-6" />
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="h-4 bg-slate-100 rounded-md w-1/3"></div>
+                      <div className="h-6 bg-slate-100 rounded-md w-1/4"></div>
+                    </div>
+                    <div className="w-full h-12 bg-slate-100 rounded-full"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : pagesData.length > 0 ? (
           <>
-            {/* Cards Grid wrapper with side navigation arrows */}
-            <div className="relative w-full px-2 md:px-16 flex items-center mb-6">
-              {/* Left Navigation Chevron */}
-              <button
-                onClick={() => setActiveIndex((activeIndex - 1 + pagesData.length) % pagesData.length)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 text-[#0B1F3A]/40 hover:text-[#0B1F3A] hover:scale-125 active:scale-95 transition-all p-2 focus:outline-none flex items-center justify-center cursor-pointer"
-                aria-label="Previous page"
-              >
-                <svg className="w-12 h-12 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-
+            {/* Cards Grid wrapper */}
+            <div className="relative w-full md:px-4 flex items-center mb-6">
               {/* 3x2 Grid of High-Fidelity Mutual Fund Cards */}
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[760px] mx-auto">
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
                 {pagesData[activeIndex]?.map((fund, index) => (
                   <div
                     key={`${activeIndex}-${index}`}
-                    className="bg-white border border-[#EBEFF5] rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.012)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.025)] transition-all duration-300 flex flex-col justify-between h-full animate-in fade-in slide-in-from-bottom-4 duration-300"
+                    className="bg-white border border-[#EBEFF5] rounded-[32px] p-8 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full animate-in fade-in slide-in-from-bottom-4 duration-300"
                   >
                     <div>
                       {/* Title & Risk Badge */}
@@ -323,23 +334,51 @@ export function MutualFundsSection() {
                 ))}
               </div>
 
-              {/* Right Navigation Chevron */}
-              <button
-                onClick={() => setActiveIndex((activeIndex + 1) % pagesData.length)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 text-[#0B1F3A]/40 hover:text-[#0B1F3A] hover:scale-125 active:scale-95 transition-all p-2 focus:outline-none flex items-center justify-center cursor-pointer"
-                aria-label="Next page"
-              >
-                <svg className="w-12 h-12 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
             </div>
 
-            {/* Pagination Page Indicator (Pill badge styled) */}
-            <div className="flex items-center justify-center mt-6">
-              <span className="text-sm font-extrabold text-[#0B1F3A] tracking-wider bg-slate-50 border border-slate-100/80 px-5 py-2 rounded-full shadow-sm">
-                {String(activeIndex + 1).padStart(2, '0')} / {String(pagesData.length).padStart(2, '0')}
-              </span>
+            {/* Unified Pagination List */}
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mt-8 px-4">
+              {/* Previous Button */}
+              <button
+                onClick={() => setActiveIndex((activeIndex - 1 + pagesData.length) % pagesData.length)}
+                className="flex items-center justify-center gap-1 h-10 px-3 text-slate-500 hover:text-[#0B1F3A] hover:bg-slate-50 rounded-md transition-colors cursor-pointer disabled:opacity-50"
+                aria-label="Previous page"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                <span className="hidden sm:inline font-semibold text-sm">Previous</span>
+              </button>
+
+              {/* Numbered Page List */}
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                {paginationItems.map((item, i) => (
+                  item === '...' ? (
+                    <span key={`ellipsis-${i}`} className="flex items-center justify-center w-8 h-8 text-slate-400">...</span>
+                  ) : (
+                    <button
+                      key={item as number}
+                      onClick={() => setActiveIndex(item as number)}
+                      className={cn(
+                        "flex items-center justify-center min-w-[32px] h-8 px-2 rounded-md text-sm font-semibold transition-all cursor-pointer",
+                        activeIndex === item
+                          ? "bg-[#fe9800] text-white shadow-sm"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-[#1a2332]"
+                      )}
+                    >
+                      {(item as number) + 1}
+                    </button>
+                  )
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => setActiveIndex((activeIndex + 1) % pagesData.length)}
+                className="flex items-center justify-center gap-1 h-10 px-3 text-slate-500 hover:text-[#0B1F3A] hover:bg-slate-50 rounded-md transition-colors cursor-pointer disabled:opacity-50"
+                aria-label="Next page"
+              >
+                <span className="hidden sm:inline font-semibold text-sm">Next</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              </button>
             </div>
           </>
         ) : (
@@ -436,13 +475,6 @@ export function MutualFundsSection() {
             </div>
           </div>
         </div>
-      )}
-      {/* Search Blur Backdrop Overlay */}
-      {isSearchFocused && (
-        <div 
-          className="fixed inset-0 z-[90] bg-[#0B1F3A]/25 backdrop-blur-md transition-all duration-300 animate-in fade-in cursor-pointer"
-          onClick={() => setIsSearchFocused(false)}
-        />
       )}
     </section>
   );

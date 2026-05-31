@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
+import { ChatbotFloat } from "@/components/ui/chatbot-float";
 import "@/styles/globals.css";
 
 const sora = Sora({
@@ -52,6 +53,7 @@ export default function RootLayout({
         <Navbar />
         <main className="pt-[72px]">{children}</main>
         <Footer />
+        <ChatbotFloat />
       </body>
     </html>
   );

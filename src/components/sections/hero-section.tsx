@@ -35,6 +35,7 @@ export function HeroSection() {
   const subContentRef = useRef<HTMLDivElement>(null);
   const scrollArrowRef = useRef<HTMLDivElement>(null);
   const moneyTextRef = useRef<HTMLSpanElement>(null);
+  const h1Ref = useRef<HTMLHeadingElement>(null);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -86,24 +87,44 @@ export function HeroSection() {
         }
       } else {
         // Desktop centering-to-split parallax transition
-        // In Phase 2 (Partial Phone Reveal): Text slides reactively upward (0vh -> -5vh) based on tReveal to naturally make visual room for the phone
-        // In Phase 3 (Hold State): Text remains locked and stable at -5vh vertical position
-        // In Phase 4 (Layout Transition): Text shifts left (30% -> 0%) and elevates to its rested top-column layout position (-5vh -> -4vh)
-        const txDesktop = (1 - tLayout) * 45;
+        // Calculate the exact pixel offset to perfectly center the text relative to the browser window.
+        const screenWidth = window.innerWidth;
+        const screenCenter = screenWidth / 2;
+        
+        // Match the layout parameters to calculate natural grid position
+        const containerPadding = screenWidth >= 1280 ? 72 : 60; // px-18 vs px-15
+        const gap = screenWidth >= 1280 ? 64 : 32;
+        const leftFr = screenWidth >= 1280 ? 1.15 : 1.2;
+        const rightFr = screenWidth >= 1280 ? 0.85 : 0.8;
+        
+        const maxContainer = 1800;
+        const availableWidth = Math.min(screenWidth, maxContainer);
+        const margin = Math.max(0, (screenWidth - maxContainer) / 2);
+        
+        const gridWidth = availableWidth - (containerPadding * 2);
+        const freeSpace = gridWidth - gap;
+        const leftColWidth = freeSpace * (leftFr / (leftFr + rightFr));
+        
+        const leftColCenter = margin + containerPadding + (leftColWidth / 2);
+        const shiftPx = screenCenter - leftColCenter;
+        
+        const txDesktop = (1 - tLayout) * shiftPx;
         const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4 + textYOffset * (1 - tLayout);
         const textScale = 0.96 + tLayout * 0.04;
-        textRef.current.style.transform = `translate3d(${txDesktop}%, ${tyDesktop}vh, 0) scale(${textScale})`;
+        textRef.current.style.transform = `translate3d(${txDesktop}px, ${tyDesktop}vh, 0) scale(${textScale})`;
 
         // Transition text alignment from center -> left as layout animation progresses
         if (tLayout > 0.5) {
           if (textRef.current.style.textAlign !== "left") {
             textRef.current.style.textAlign = "left";
             textRef.current.style.alignItems = "flex-start";
+            if (h1Ref.current) h1Ref.current.style.textAlign = "left";
           }
         } else {
           if (textRef.current.style.textAlign !== "center") {
             textRef.current.style.textAlign = "center";
             textRef.current.style.alignItems = "center";
+            if (h1Ref.current) h1Ref.current.style.textAlign = "center";
           }
         }
       }
@@ -310,8 +331,9 @@ export function HeroSection() {
             </div> */}
 
             <h1
+              ref={h1Ref}
               className={cn(
-                "animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]",
+                "w-full animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]",
                 "text-[40px] sm:text-5xl md:text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[100px] leading-[1.1] tracking-tight",
               )}
             >

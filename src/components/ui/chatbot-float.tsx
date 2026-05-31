@@ -1,0 +1,214 @@
+"use client";
+
+import Script from 'next/script';
+import { useState, useRef, useEffect } from 'react';
+import { X, Send, Loader2, Bot, User } from 'lucide-react';
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'bot';
+  content: string;
+  isTyping?: boolean;
+}
+
+
+export function ChatbotFloat() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      role: 'bot',
+      content: 'Hello! I am your Solid Wealth AI assistant. How can I help you with your financial goals today?'
+    }
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Helper to format basic markdown
+  const formatMessage = (text: string) => {
+    if (!text) return "";
+    let html = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[#1a2332] block sm:inline mt-1 sm:mt-0">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      .replace(/# (.*?)\n/g, '<h3 class="font-black text-lg text-[#1a2332] mt-3 mb-1 border-b border-gray-100 pb-1">$1</h3>\n')
+      .replace(/## (.*?)\n/g, '<h4 class="font-bold text-base text-[#1a2332] mt-2 mb-1">$1</h4>\n')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-[#fe9800] hover:underline">$1</a>');
+    
+    return html;
+  };
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    setInput("");
+    
+    // Add user message to UI
+    const newMessageId = Date.now().toString();
+    setMessages(prev => [...prev, { id: newMessageId, role: 'user', content: userMessage }]);
+    
+    // Add temporary loading bot message
+    setIsLoading(true);
+    setMessages(prev => [...prev, { id: 'temp-loading', role: 'bot', content: '', isTyping: true }]);
+
+    try {
+      const payload: any = { message: userMessage };
+      if (sessionId) {
+        payload.session_id = sessionId;
+      }
+
+      const response = await fetch("https://solidwealthindia.com/api/chatbot/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      
+      if (data.session_id) {
+        setSessionId(data.session_id);
+      }
+
+      // Remove loading message and add actual response
+      setMessages(prev => prev.filter(msg => msg.id !== 'temp-loading'));
+      
+      let botContent = data.answer || "I'm sorry, I couldn't process that request right now.";
+      if (data.follow_up_question) {
+        botContent += "\n\n" + data.follow_up_question;
+      }
+      
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'bot', content: botContent }]);
+      
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages(prev => prev.filter(msg => msg.id !== 'temp-loading'));
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'bot', content: "Sorry, I'm having trouble connecting to the server. Please try again later." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return (
+    <>
+      <Script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" strategy="lazyOnload" />
+
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-4 md:right-8 z-50 w-[90vw] md:w-[400px] h-[550px] max-h-[75vh] bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-fade-up origin-bottom-right">
+          {/* Header */}
+          <div className="bg-[#1a2332] text-white px-5 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
+                <Bot size={18} className="text-[#fe9800]" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm">Solid Wealth AI</h3>
+                <p className="text-xs text-gray-300">Online & ready to help</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsOpen(false)}
+              className="text-gray-300 hover:text-white transition-colors p-1"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#fafbfc]">
+            {messages.map((msg) => (
+              <div 
+                key={msg.id} 
+                className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.role === 'bot' && (
+                  <div className="w-6 h-6 rounded-full bg-[#1a2332] flex-shrink-0 flex items-center justify-center mr-2 mt-1">
+                    <Bot size={12} className="text-[#fe9800]" />
+                  </div>
+                )}
+                
+                <div 
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm whitespace-pre-wrap ${
+                    msg.role === 'user' 
+                      ? 'bg-[#fe9800] text-white rounded-tr-sm' 
+                      : 'bg-white border border-gray-100 text-[#1a2332] rounded-tl-sm'
+                  }`}
+                >
+                  {msg.isTyping ? (
+                    <div className="flex items-center gap-1 h-5 px-1">
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  ) : (
+                    msg.role === 'bot' ? (
+                      <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} className="markdown-content" />
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/</g, "&lt;").replace(/>/g, "&gt;") }} />
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 bg-white border-t border-gray-100">
+            <form onSubmit={handleSendMessage} className="relative flex items-center">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..."
+                className="w-full bg-[#fafbfc] border border-gray-200 rounded-full pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:border-[#fe9800] focus:ring-1 focus:ring-[#fe9800] transition-shadow text-[#1a2332]"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isLoading}
+                className="absolute right-1.5 w-10 h-10 flex items-center justify-center bg-[#fe9800] text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send size={16} className="ml-0.5" />
+              </button>
+            </form>
+            <div className="text-center mt-2">
+              <span className="text-[10px] text-gray-400">Solid Wealth AI can make mistakes. Consider verifying important information.</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 cursor-pointer hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] bg-white border border-[#EBEFF5] flex items-center justify-center group focus:outline-none overflow-hidden"
+        aria-label="Open Chatbot"
+      >
+        <div className={`transition-opacity duration-300 ${isOpen ? 'opacity-0 absolute' : 'opacity-100'}`}>
+          {/* @ts-expect-error Custom element from lottie-player script */}
+          <lottie-player
+            src="/chatbot.json"
+            background="transparent"
+            speed="1"
+            style={{ width: "64px", height: "64px" }}
+            loop
+            autoplay
+          />
+        </div>
+        
+        <div className={`transition-opacity duration-300 w-[64px] h-[64px] flex items-center justify-center bg-[#1a2332] text-white ${isOpen ? 'opacity-100' : 'opacity-0 absolute'}`}>
+          <X size={28} />
+        </div>
+      </button>
+    </>
+  );
+}

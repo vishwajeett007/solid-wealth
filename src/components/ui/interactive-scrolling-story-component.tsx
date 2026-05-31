@@ -102,7 +102,7 @@ export function ScrollingFeatureShowcase() {
                 </div>
   
                 {/* Right Image */}
-                <div className="flex-1 relative min-h-[250px] sm:min-h-[300px] md:min-h-full bg-gray-50 flex items-center justify-center p-4 sm:p-8">
+                <div className="hidden md:flex flex-1 relative min-h-full bg-gray-50 items-center justify-center p-8">
                   <div className="relative w-full h-[250px] sm:h-[300px] md:h-[500px]">
                     <Image
                       src={slide.image}

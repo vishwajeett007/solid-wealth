@@ -52,9 +52,9 @@ export function Footer() {
             </div>
 
             {/* Partner Button */}
-            <button className="bg-white text-[#0f172a] font-bold py-2.5 px-6 md:py-3.5 md:px-10 rounded-xl w-max mt-2 text-base md:text-xl hover:bg-gray-100 transition-colors shadow-md">
+            {/* <button className="bg-white text-[#0f172a] font-bold py-2.5 px-6 md:py-3.5 md:px-10 rounded-xl w-max mt-2 text-base md:text-xl hover:bg-gray-100 transition-colors shadow-md">
               The SAAS partner
-            </button>
+            </button> */}
           </div>
 
           {/* Right Column (Links) */}
