@@ -22,10 +22,10 @@ export function DownloadAppSection() {
       <div className="max-w-[1440px] mx-auto relative z-10 flex flex-col items-center">
         {/* Header Content */}
         <div className="flex flex-col items-center text-center px-4 mb-4 mt-2">
-          <h2 className="text-6xl md:text-[100px] font-black text-[#0f1a2c] leading-[1.1] tracking-tight mb-1">
+          <h2 className="text-5xl sm:text-6xl md:text-[100px] font-black text-[#0f1a2c] leading-[1.1] tracking-tight mb-1">
             Get started with
           </h2>
-          <h2 className="text-6xl md:text-[100px] font-black text-[#fe9800] leading-[1.1] tracking-tight mb-2">
+          <h2 className="text-5xl sm:text-6xl md:text-[100px] font-black text-[#fe9800] leading-[1.1] tracking-tight mb-2">
             Solid Wealth
           </h2>
           <p className="text-[#879bb8] font-medium text-2xl md:text-4xl mb-6">
@@ -55,28 +55,28 @@ export function DownloadAppSection() {
           {/* Top Left Icon (Red Square) */}
           <div className="absolute top-[5%] left-[2%] md:left-[10%] animate-float-a z-20">
             <div className="relative w-[75px] h-[75px] md:w-[110px] md:h-[110px] -rotate-[8deg] drop-shadow-xl">
-              <Image src="/footerfloating.png" alt="Floating icon" fill className="object-contain" />
+              <Image src="/footerfloating.png" alt="Floating icon" fill sizes="(max-width: 768px) 75px, 110px" className="object-contain" />
             </div>
           </div>
 
           {/* Top Right Icon (Orange Pot) */}
           <div className="absolute -top-[5%] right-[2%] md:right-[8%] animate-float-b z-20">
             <div className="relative w-[80px] h-[80px] md:w-[115px] md:h-[115px] drop-shadow-xl">
-              <Image src="/footerfloating1.png" alt="Floating icon" fill className="object-contain" />
+              <Image src="/footerfloating1.png" alt="Floating icon" fill sizes="(max-width: 768px) 80px, 115px" className="object-contain" />
             </div>
           </div>
 
           {/* Bottom Left Icon (Green Square) */}
           <div className="absolute bottom-[30%] left-[4%] md:left-[15%] animate-float-b z-20" style={{ animationDelay: '1s' }}>
             <div className="relative w-[75px] h-[75px] md:w-[105px] md:h-[105px] rotate-[12deg] drop-shadow-xl">
-              <Image src="/footerfloating2.png" alt="Floating icon" fill className="object-contain" />
+              <Image src="/footerfloating2.png" alt="Floating icon" fill sizes="(max-width: 768px) 75px, 105px" className="object-contain" />
             </div>
           </div>
 
           {/* Bottom Right Icon (IDFC) */}
           <div className="absolute bottom-[25%] right-[5%] md:right-[12%] animate-float-a z-20" style={{ animationDelay: '1.5s' }}>
             <div className="relative w-[75px] h-[75px] md:w-[105px] md:h-[105px] rotate-[10deg] drop-shadow-xl">
-              <Image src="/footerfloating3.png" alt="Floating icon" fill className="object-contain" />
+              <Image src="/footerfloating3.png" alt="Floating icon" fill sizes="(max-width: 768px) 75px, 105px" className="object-contain" />
             </div>
           </div>
 
@@ -86,6 +86,7 @@ export function DownloadAppSection() {
               src="/footerphone.png"
               alt="Solid Wealth Phone Mockup"
               fill
+              sizes="(max-width: 768px) 320px, 450px"
               className="object-contain object-top drop-shadow-2xl"
               priority
             />

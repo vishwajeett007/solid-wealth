@@ -42,8 +42,8 @@ const slidesData = [
 
 export function ScrollingFeatureShowcase() {
   return (
-    <div className="w-full bg-[#FFFDF4] py-20">
-      <div className="max-w-[1400px] mx-auto px-4 mb-16 text-center">
+    <div className="w-full bg-[#FFFDF4] pt-8 pb-0 md:pt-12 md:pb-0">
+      <div className="max-w-[1400px] mx-auto px-4 mb-6 md:mb-10 text-center">
         <span className="inline-flex items-center px-4 py-1.5 text-sm font-bold uppercase tracking-wider rounded-full bg-wealth-accent/10 text-wealth-accent mb-4">
           Features
         </span>
@@ -65,8 +65,8 @@ export function ScrollingFeatureShowcase() {
           <ScrollStackItem key={index}>
             <div className="flex flex-col md:flex-row h-full w-full bg-white rounded-[40px] shadow-2xl shadow-black/5 overflow-hidden border border-gray-100">
               {/* Left Content */}
-              <div className="flex-1 p-10 md:p-16 flex flex-col justify-center relative">
-                <h3 className="text-3xl md:text-5xl font-black text-[#0f1a2c] mb-6 leading-tight">
+              <div className="flex-1 p-6 sm:p-10 md:p-16 flex flex-col justify-center relative">
+                <h3 className="text-3xl md:text-5xl font-black text-[#0f1a2c] mb-4 md:mb-6 leading-tight">
                   {slide.title}
                 </h3>
                 <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-6">
@@ -90,12 +90,13 @@ export function ScrollingFeatureShowcase() {
               </div>
 
               {/* Right Image */}
-              <div className="flex-1 relative min-h-[300px] md:min-h-full bg-gray-50 flex items-center justify-center p-8">
-                <div className="relative w-full h-[400px] md:h-[500px]">
+              <div className="flex-1 relative min-h-[250px] sm:min-h-[300px] md:min-h-full bg-gray-50 flex items-center justify-center p-4 sm:p-8">
+                <div className="relative w-full h-[250px] sm:h-[300px] md:h-[500px]">
                   <Image
                     src={slide.image}
                     alt={slide.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-contain drop-shadow-xl"
                   />
                 </div>

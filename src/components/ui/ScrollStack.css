@@ -13,8 +13,13 @@
 }
 
 .scroll-stack-inner {
-  padding: 10vh 5rem 30rem;
-  min-height: 100vh;
+  padding: 0 1.5rem 0;
+  min-height: auto;
+}
+@media (min-width: 768px) {
+  .scroll-stack-inner {
+    padding: 0 5rem 0;
+  }
 }
 
 .scroll-stack-card-wrapper {
@@ -26,18 +31,18 @@
   will-change: transform, filter;
   backface-visibility: hidden;
   transform-style: preserve-3d;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-  min-height: 30rem;
   width: 100%;
-  margin: 30px 0;
-  padding: 3rem;
-  border-radius: 40px;
+  margin: 20px 0;
   box-sizing: border-box;
   /* Improve mobile performance */
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   position: relative;
-  background-color: white;
+}
+@media (min-width: 768px) {
+  .scroll-stack-card {
+    margin: 30px 0;
+  }
 }
 
 .scroll-stack-end {

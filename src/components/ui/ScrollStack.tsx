@@ -127,17 +127,7 @@ const ScrollStack = ({
         }
       }
 
-      let translateY = 0;
-      const isPinned = scrollTop >= pinStart && scrollTop <= pinEnd;
-
-      if (isPinned) {
-        translateY = scrollTop - cardTop + stackPositionPx + itemStackDistance * i;
-      } else if (scrollTop > pinEnd) {
-        translateY = pinEnd - cardTop + stackPositionPx + itemStackDistance * i;
-      }
-
       const newTransform = {
-        translateY: Math.round(translateY * 100) / 100,
         scale: Math.round(scale * 1000) / 1000,
         rotation: Math.round(rotation * 100) / 100,
         blur: Math.round(blur * 100) / 100
@@ -146,13 +136,12 @@ const ScrollStack = ({
       const lastTransform = lastTransformsRef.current.get(i);
       const hasChanged =
         !lastTransform ||
-        Math.abs(lastTransform.translateY - newTransform.translateY) > 0.1 ||
         Math.abs(lastTransform.scale - newTransform.scale) > 0.001 ||
         Math.abs(lastTransform.rotation - newTransform.rotation) > 0.1 ||
         Math.abs(lastTransform.blur - newTransform.blur) > 0.1;
 
       if (hasChanged) {
-        const transform = `translate3d(0, ${newTransform.translateY}px, 0) scale(${newTransform.scale}) rotate(${newTransform.rotation}deg)`;
+        const transform = `scale(${newTransform.scale}) rotate(${newTransform.rotation}deg)`;
         const filter = newTransform.blur > 0 ? `blur(${newTransform.blur}px)` : '';
 
         card.style.transform = transform;
@@ -228,15 +217,24 @@ const ScrollStack = ({
 
     const measureTops = () => {
       const activeCards = cardsRef.current;
-      const tops = activeCards.map((card, i) => {
+      const innerContainer = scrollerRef.current?.querySelector('.scroll-stack-inner') as HTMLElement;
+      const { containerHeight } = getScrollData();
+      const stackPositionPx = parsePercentage(stackPosition, containerHeight);
+
+      let innerOffsetTop = 0;
+      if (innerContainer) {
         if (useWindowScroll) {
-          const rect = card.getBoundingClientRect();
-          const currentTransform = lastTransformsRef.current.get(i);
-          const currentTranslateY = currentTransform ? currentTransform.translateY : 0;
-          return rect.top + window.scrollY - currentTranslateY;
+          innerOffsetTop = innerContainer.getBoundingClientRect().top + window.scrollY;
         } else {
-          return card.offsetTop;
+          innerOffsetTop = innerContainer.offsetTop;
         }
+      }
+
+      const tops = activeCards.map((card, i) => {
+        card.style.position = '-webkit-sticky';
+        card.style.position = 'sticky';
+        card.style.top = `${stackPositionPx + itemStackDistance * i}px`;
+        return innerOffsetTop + card.offsetTop;
       });
 
       cardTopsRef.current = tops;
@@ -310,7 +308,7 @@ const ScrollStack = ({
       ref={scrollerRef}
       style={useWindowScroll ? { overflowY: 'visible', height: 'auto', overscrollBehavior: 'auto' } : undefined}
     >
-      <div className="scroll-stack-inner">
+      <div className="scroll-stack-inner relative">
         {children}
         {/* Spacer so the last pin can release cleanly */}
         <div className="scroll-stack-end" />
