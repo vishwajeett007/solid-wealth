@@ -312,10 +312,10 @@ export function HeroSection() {
             <h1
               className={cn(
                 "animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]",
-                "text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[100px] leading-[1.1] tracking-tight",
+                "text-[40px] sm:text-5xl md:text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[100px] leading-[1.1] tracking-tight",
               )}
             >
-              <span className="block whitespace-nowrap">
+              <span className="block whitespace-normal sm:whitespace-nowrap">
                 Reimagine{" "}
                 <span
                   ref={moneyTextRef}
@@ -324,7 +324,7 @@ export function HeroSection() {
                   money,
                 </span>
               </span>
-              <span className="block whitespace-nowrap">Simple solutions</span>
+              <span className="block whitespace-normal sm:whitespace-nowrap">Simple solutions</span>
             </h1>
 
             {/* Sub-Content container: Hidden initially, fades and slides up at the end of the scroll */}

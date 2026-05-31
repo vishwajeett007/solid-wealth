@@ -53,6 +53,7 @@ const ScrollStack = ({
   const endSpacerTopRef = useRef<number>(0);
 
   const calculateProgress = useCallback((scrollTop: number, start: number, end: number) => {
+    if (start === end) return scrollTop >= end ? 1 : 0;
     if (scrollTop < start) return 0;
     if (scrollTop > end) return 1;
     return (scrollTop - start) / (end - start);
@@ -87,6 +88,7 @@ const ScrollStack = ({
     if (!cardsRef.current.length || isUpdatingRef.current) return;
 
     isUpdatingRef.current = true;
+    try {
 
     const { scrollTop, containerHeight } = getScrollData();
     const stackPositionPx = parsePercentage(stackPosition, containerHeight);
@@ -170,7 +172,9 @@ const ScrollStack = ({
       }
     });
 
-    isUpdatingRef.current = false;
+    } finally {
+      isUpdatingRef.current = false;
+    }
   }, [
     itemScale,
     itemStackDistance,
@@ -216,9 +220,7 @@ const ScrollStack = ({
     if (!scroller) return;
 
     const cards = Array.from(
-      useWindowScroll
-        ? document.querySelectorAll('.scroll-stack-card')
-        : scroller.querySelectorAll('.scroll-stack-card')
+      scroller.querySelectorAll('.scroll-stack-card')
     ) as HTMLElement[];
 
     cardsRef.current = cards;
@@ -226,26 +228,20 @@ const ScrollStack = ({
 
     const measureTops = () => {
       const activeCards = cardsRef.current;
-      // Temporarily clear transforms to measure true stable layout offsets
-      const originalTransforms = activeCards.map(c => c.style.transform);
-      activeCards.forEach(c => { c.style.transform = 'none'; });
-
-      const tops = activeCards.map(card => {
+      const tops = activeCards.map((card, i) => {
         if (useWindowScroll) {
           const rect = card.getBoundingClientRect();
-          return rect.top + window.scrollY;
+          const currentTransform = lastTransformsRef.current.get(i);
+          const currentTranslateY = currentTransform ? currentTransform.translateY : 0;
+          return rect.top + window.scrollY - currentTranslateY;
         } else {
           return card.offsetTop;
         }
       });
 
-      // Restore transforms
-      activeCards.forEach((c, idx) => { c.style.transform = originalTransforms[idx]; });
       cardTopsRef.current = tops;
 
-      const endElement = useWindowScroll
-        ? document.querySelector('.scroll-stack-end') as HTMLElement
-        : scrollerRef.current?.querySelector('.scroll-stack-end') as HTMLElement;
+      const endElement = scrollerRef.current?.querySelector('.scroll-stack-end') as HTMLElement;
 
       if (endElement) {
         if (useWindowScroll) {
@@ -309,7 +305,11 @@ const ScrollStack = ({
   ]);
 
   return (
-    <div className={`scroll-stack-scroller ${className}`.trim()} ref={scrollerRef}>
+    <div 
+      className={`scroll-stack-scroller ${className}`.trim()} 
+      ref={scrollerRef}
+      style={useWindowScroll ? { overflowY: 'visible', height: 'auto', overscrollBehavior: 'auto' } : undefined}
+    >
       <div className="scroll-stack-inner">
         {children}
         {/* Spacer so the last pin can release cleanly */}

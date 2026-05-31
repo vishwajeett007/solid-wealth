@@ -90,7 +90,7 @@ export function Navbar() {
               aria-label="Get started with Solid Wealth"
               variant="black"
               className={cn(
-                "hidden sm:inline-flex group relative overflow-hidden transition-all duration-500",
+                "hidden md:inline-flex group relative overflow-hidden transition-all duration-500",
                 isScrolled ? "h-9 px-4 text-sm" : "h-12 px-7 text-base"
               )}
               icon={
