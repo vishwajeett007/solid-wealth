@@ -86,23 +86,25 @@ export function Navbar() {
 
           {/*Mobile Burger Toggle */}
           <div className="flex items-center gap-3">
-            <Button
-              aria-label="Get started with Solid Wealth"
-              variant="black"
-              className={cn(
-                "hidden md:inline-flex group relative overflow-hidden transition-all duration-500",
-                isScrolled ? "h-9 px-4 text-sm" : "h-12 px-7 text-base"
-              )}
-              icon={
-                <ArrowRight
-                  aria-hidden="true"
-                  className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"
-                />
-              }
-            >
-              <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-44 pointer-events-none z-0" />
-              <span className="relative z-10">Get Started</span>
-            </Button>
+            <div className="hidden md:block">
+              <Button
+                aria-label="Get started with Solid Wealth"
+                variant="black"
+                className={cn(
+                  "group relative overflow-hidden transition-all duration-500 inline-flex",
+                  isScrolled ? "h-9 px-4 text-sm" : "h-12 px-7 text-base"
+                )}
+                icon={
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"
+                  />
+                }
+              >
+                <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-44 pointer-events-none z-0" />
+                <span className="relative z-10">Get Started</span>
+              </Button>
+            </div>
 
             {/* Mobile Hamburger Button */}
             <button
