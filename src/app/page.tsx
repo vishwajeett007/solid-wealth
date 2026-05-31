@@ -8,6 +8,7 @@ import { PremiumSection } from "@/components/sections/premium-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { MutualFundsSection } from "@/components/sections/mutual-funds-section";
 import { DownloadAppSection } from "@/components/sections/download-app-section";
+import { ContactUsSection } from "@/components/sections/contact-us-section";
 import { SectionDivider } from "@/components/ui/section-divider";
 
 export default function Home() {
@@ -22,6 +23,7 @@ export default function Home() {
       {/* <AnalyticsSection /> */}
       {/* <PremiumSection /> */}
       {/* <CTASection /> */}
+      <ContactUsSection />
       <DownloadAppSection />
     </>
   );
