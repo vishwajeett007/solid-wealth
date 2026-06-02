@@ -75,12 +75,36 @@ export function HeroSection() {
       ringRef.current.style.transform = `translate3d(-50%, ${ringTranslateY}%, 0) scale(${ringScale})`;
     }
 
+    // Calculate base Y translation (in vh) from the scroll animation
+    const tyBase = isMobileRef.current
+      ? (1 - progress) * -5 - 4 + textYOffset * (1 - tLayout)
+      : (1 - tLayout) * (tReveal * -5) + tLayout * -4 + textYOffset * (1 - tLayout);
+
+    // Dynamic shift calculation:
+    // Calculate if the heading overlaps the hemisphere, and if so, calculate correctionY to shift the text upwards.
+    let correctionY = 0;
+    if (h1Ref.current && containerRef.current) {
+      const h = window.innerHeight;
+      const naturalH1Bottom = h / 2 + (isMobile ? -20 : -10);
+      const tyBasePx = h * (tyBase / 100);
+      
+      const currentTranslateY = 70 - easeLayout * 48;
+      const currentScale = 1.15 + easeLayout * 4.5;
+      const translateYPx = 1350 * (currentTranslateY / 100);
+      const hemisphereTop = (h - 675 + translateYPx) - (675 * currentScale);
+      
+      const margin = 24; // safety margin in pixels
+      const requiredCorrection = Math.min(0, hemisphereTop - (naturalH1Bottom + tyBasePx) - margin);
+      // Fade the correction out completely by progress = 0.3 (before the left-shifting layout transition starts at 0.45)
+      const fadeFactor = Math.max(0, 1 - progress / 0.3);
+      correctionY = requiredCorrection * fadeFactor;
+    }
+
     // 2. Column 1: Main Text Container
     if (textRef.current) {
       if (isMobileRef.current) {
-        // Mobile layout centering - shifted slightly higher towards top
-        const tyMobile = (1 - progress) * -5 - 4 + textYOffset * (1 - tLayout);
-        textRef.current.style.transform = `translate3d(0, ${tyMobile}vh, 0)`;
+        // Mobile layout centering
+        textRef.current.style.transform = `translate3d(0, calc(${tyBase}vh + ${correctionY}px), 0)`;
         if (textRef.current.style.textAlign !== "center") {
           textRef.current.style.textAlign = "center";
           textRef.current.style.alignItems = "center";
@@ -90,31 +114,30 @@ export function HeroSection() {
         // Calculate the exact pixel offset to perfectly center the text relative to the browser window.
         const screenWidth = window.innerWidth;
         const screenCenter = screenWidth / 2;
-        
+
         // Match the layout parameters to calculate natural grid position
         const containerPadding = screenWidth >= 1280 ? 72 : 60; // px-18 vs px-15
         const gap = screenWidth >= 1280 ? 64 : 32;
         const leftFr = screenWidth >= 1280 ? 1.15 : 1.2;
         const rightFr = screenWidth >= 1280 ? 0.85 : 0.8;
-        
+
         const maxContainer = 1800;
         const availableWidth = Math.min(screenWidth, maxContainer);
         const margin = Math.max(0, (screenWidth - maxContainer) / 2);
-        
+
         const gridWidth = availableWidth - (containerPadding * 2);
         const freeSpace = gridWidth - gap;
         const leftColWidth = freeSpace * (leftFr / (leftFr + rightFr));
-        
+
         const leftColCenter = margin + containerPadding + (leftColWidth / 2);
         const shiftPx = screenCenter - leftColCenter;
-        
+
         const txDesktop = (1 - tLayout) * shiftPx;
-        const tyDesktop = (1 - tLayout) * (tReveal * -5) + tLayout * -4 + textYOffset * (1 - tLayout);
         const textScale = 0.96 + tLayout * 0.04;
-        textRef.current.style.transform = `translate3d(${txDesktop}px, ${tyDesktop}vh, 0) scale(${textScale})`;
+        textRef.current.style.transform = `translate3d(${txDesktop}px, calc(${tyBase}vh + ${correctionY}px), 0) scale(${textScale})`;
 
         // Transition text alignment from center -> left as layout animation progresses
-        if (tLayout > 0.5) {
+        if (tLayout > 0.95) {
           if (textRef.current.style.textAlign !== "left") {
             textRef.current.style.textAlign = "left";
             textRef.current.style.alignItems = "flex-start";
@@ -281,7 +304,7 @@ export function HeroSection() {
         {/* Cinematic Expanding bottom hemisphere */}
         <div
           ref={hemisphereRef}
-          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full bg-[#fe9800] pointer-events-none z-0"
+          className="absolute bottom-0 left-1/2 rounded-full bg-[#fe9800] pointer-events-none z-0"
           style={{
             width: "1350px",
             height: "1350px",
@@ -295,7 +318,7 @@ export function HeroSection() {
         {/* Cinematic Concentric Orbital Halo Ring */}
         <div
           ref={ringRef}
-          className="absolute bottom-0 left-1/2 -translate-y-[7%] md:-translate-y-[8%] lg:translate-y-[0%] rounded-full border-4 border-[#fe9800] bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(254,152,0,0.18),inset_0_0_50px_rgba(254,152,0,0.1)]"
+          className="absolute bottom-0 left-1/2 rounded-full border-4 border-[#fe9800] bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(254,152,0,0.18),inset_0_0_50px_rgba(254,152,0,0.1)]"
           style={{
             width: "1400px",
             height: "1400px",
@@ -334,7 +357,7 @@ export function HeroSection() {
               ref={h1Ref}
               className={cn(
                 "w-full animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]",
-                "text-[40px] sm:text-5xl md:text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[100px] leading-[1.1] tracking-tight",
+                "text-[40px] sm:text-5xl md:text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[90px] leading-[1.1] tracking-tight",
               )}
             >
               <span className="block whitespace-normal sm:whitespace-nowrap">

@@ -59,7 +59,7 @@ export function ScrollingFeatureShowcase() {
           Features
         </span>
         <h2 className="text-4xl md:text-6xl font-black text-[#0f1a2c] tracking-tight drop-shadow-sm">
-          Powerful Tools for Modern Investors
+          Powerful Tools for <span className="text-[#fe9800]">Modern</span> Investors
         </h2>
       </div>
 

@@ -22,10 +22,10 @@ export function DownloadAppSection() {
       <div className="max-w-[1440px] mx-auto relative z-10 flex flex-col items-center">
         {/* Header Content */}
         <div className="flex flex-col items-center text-center px-4 mb-4 mt-2">
-          <h2 className="text-5xl sm:text-6xl md:text-[100px] font-black text-[#0f1a2c] leading-[1.1] tracking-tight mb-1">
+          <h2 className="text-5xl sm:text-4xl md:text-[70px] font-black text-[#0f1a2c] leading-[1.1] tracking-tight mb-1">
             Get started with
           </h2>
-          <h2 className="text-5xl sm:text-6xl md:text-[100px] font-black text-[#fe9800] leading-[1.1] tracking-tight mb-2">
+          <h2 className="text-5xl sm:text-4xl md:text-[70px] font-black text-[#fe9800] leading-[1.1] tracking-tight mb-2">
             Solid Wealth
           </h2>
           <p className="text-[#879bb8] font-medium text-2xl md:text-4xl mb-6">

@@ -1,11 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
-  Bolt,
-  Gem,
-  Globe2,
   Shield,
-  TrendingUp,
   Zap,
 } from "lucide-react";
 
@@ -64,14 +60,6 @@ export const marketItems: MarketItem[] = [
   { name: "GOOGL", value: "168.40", change: "-0.22%", direction: "down" },
 ];
 
-export const featuredLogos = [
-  "FORBES",
-  "TECHCRUNCH",
-  "BLOOMBERG",
-  "REUTERS",
-  "WIRED",
-];
-
 export const featureItems: FeatureItem[] = [
   {
     title: "Military-Grade Security",
@@ -95,45 +83,3 @@ export const featureItems: FeatureItem[] = [
     icon: Zap,
   },
 ];
-
-export const wealthStats = [
-  { value: "500", suffix: "+", label: "Financial Partners" },
-  { value: "14", suffix: "M", label: "Active Users" },
-  { value: "15", suffix: "K", label: "Institutional Clients" },
-];
-
-export const premiumBenefits = [
-  {
-    lead: "Personalized advisory services",
-    detail: "with dedicated account managers available 24/7.",
-  },
-  {
-    lead: "Real-time tax optimization",
-    detail: "and automated reporting for high-net-worth portfolios.",
-  },
-  {
-    lead: "Exclusive private equity",
-    detail: "and venture capital opportunities reserved for members.",
-  },
-  {
-    lead: "Global concierge benefits",
-    detail: "and lifestyle perks seamlessly integrated into your wealth app.",
-  },
-];
-
-export const sectionIcons = {
-  bolt: Bolt,
-  globe: Globe2,
-  gem: Gem,
-  trending: TrendingUp,
-};
-
-export const statsImage = {
-  src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCFRxGoNLCAFG7icA9aMwFFLiR5eQakicwoFZqJwc2m3YD_jVCfWGJu0RA8CDKpWsGioHVWB1xFCUerEVMPIBof4V7O6H4AS-9ShkZLpNvtnJgiMzVS9dQTCNhyQW3dQ7mMv1lwcEaxdRsR80yuCuMe1O1XodOopprWrsVnTvLf0ev7s8g-VaTU-T-MXuOG1uKOe9POaeGKrV-AHCQ8l5gzQBye16jVvgRqASepNKIzP7cxJ3YFSZxcZl7xZbhGlZ3ScAdIv8lCAm8",
-  alt: "LuxeFinance dashboard analytics preview",
-};
-
-export const premiumImage = {
-  src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAJl66m-vEFhyMT1MuIroTKs0S-mzDvKIihJttqznNbvXCMpQZE5l5u1bCqh9ekUjS4qrmBrc3PjEDBMsqdsPwb1oQE391_Trl0MGNFcU3BOWCjKMPv01z0i2G2UHTx-AuVz2p9Eo_JYIGYHV8x9oszi1ZhRK3bo0z5hYfffaPZ-E92AIzx2eiczjOaff2DZo8Uj_VxSDCsGiZpvhuT50LdnBtU4f17miWOViTMVGgwWbbSOTKEyqiV-hHrz_EoyfWXpvFBY0oL8cQ",
-  alt: "LuxeFinance advisory team collaborating with clients",
-};
