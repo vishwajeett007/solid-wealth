@@ -194,8 +194,8 @@ export function HeroSection() {
       }
 
       if (isMobileRef.current) {
-        // Mobile slide-up (reduced initial vertical offset so phone is visible)
-        const phoneTyMobile = (1 - progress) * 20; // was 50
+        // Mobile slide-up: goes from +25vh (hidden at bottom) to -35vh (slides up into full view)
+        const phoneTyMobile = 25 - progress * 60;
         const phoneScaleMobile = 0.8 + progress * 0.2;
         phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobile}vh, 0) scale(${phoneScaleMobile})`;
       } else {
@@ -297,7 +297,7 @@ export function HeroSection() {
     <div
       ref={containerRef}
       className="relative w-full bg-white/80 z-10"
-      style={{ height: isMobile ? "150vh" : SCROLL_TRACK_HEIGHT }}
+      style={{ height: isMobile ? "110vh" : SCROLL_TRACK_HEIGHT }}
     >
       {/* Sticky Hero Container */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
@@ -375,12 +375,15 @@ export function HeroSection() {
             {/* Sub-Content container: Hidden initially, fades and slides up at the end of the scroll */}
             <div
               ref={subContentRef}
-              className="flex flex-col gap-6 w-full"
+              className={cn(
+                "flex flex-col gap-6 w-full",
+                isMobile ? "items-center text-center" : "items-start text-left"
+              )}
               style={{ opacity: 0, transform: "translate3d(0, 20px, 0)" }}
             >
               <SplitText
                 text="Experience next-generation wealth management. Transparent, secure, and designed for the modern investor who values clarity over complexity."
-                className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820]"
+                className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820] mx-auto lg:mx-0"
                 delay={20}
                 duration={0.6}
                 ease="power3.out"
@@ -421,7 +424,12 @@ export function HeroSection() {
                 </Button>
               </div>
 
-              <div className="flex animate-fade-up items-center gap-3.5 [animation-delay:450ms]">
+              <div
+                className={cn(
+                  "flex animate-fade-up items-center gap-3.5 [animation-delay:450ms]",
+                  isMobile && "justify-center",
+                )}
+              >
                 <div className="flex">
                   {avatarImages.map((avatar, index) => (
                     <Image

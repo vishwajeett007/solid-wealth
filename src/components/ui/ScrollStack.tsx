@@ -234,6 +234,7 @@ const ScrollStack = ({
         card.style.position = '-webkit-sticky';
         card.style.position = 'sticky';
         card.style.top = `${stackPositionPx + itemStackDistance * i}px`;
+        card.style.zIndex = `${i + 1}`;
         return innerOffsetTop + card.offsetTop;
       });
 
@@ -242,6 +243,9 @@ const ScrollStack = ({
       const endElement = scrollerRef.current?.querySelector('.scroll-stack-end') as HTMLElement;
 
       if (endElement) {
+        // Set dynamic height so the last card has enough scroll room to stick and stack
+        endElement.style.height = `${itemDistance + 100}px`;
+        
         if (useWindowScroll) {
           const rect = endElement.getBoundingClientRect();
           endSpacerTopRef.current = rect.top + window.scrollY;
