@@ -36,6 +36,11 @@ export function HeroSection() {
   const scrollArrowRef = useRef<HTMLDivElement>(null);
   const moneyTextRef = useRef<HTMLSpanElement>(null);
   const h1Ref = useRef<HTMLHeadingElement>(null);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
+  const headingWidthRef = useRef(0);
+  const line1WidthRef = useRef(0);
+  const line2WidthRef = useRef(0);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -54,6 +59,10 @@ export function HeroSection() {
     // 45% - 100%: Layout Transition + Full Reveal (phone shifts right, expands fully visible)
     const tReveal = Math.min(Math.max(progress / 0.3, 0), 1);
     const tLayout = Math.min(Math.max((progress - 0.45) / 0.55, 0), 1);
+
+    // Cache window dimensions to avoid layout recalculations
+    const wHeight = window.innerHeight;
+    const wWidth = window.innerWidth;
 
     // 1. Background dome and concentric orbital ring (Only expands in Phase 3 Layout Transition!)
     // Use a premium cubic ease-in-out curve to make the massive expansion feel incredibly smooth and organic
@@ -86,7 +95,7 @@ export function HeroSection() {
     // Calculate if the heading overlaps the hemisphere, and if so, calculate correctionY to shift the text upwards.
     let correctionY = 0;
     if (h1Ref.current && containerRef.current) {
-      const h = window.innerHeight;
+      const h = wHeight;
       const naturalH1Bottom = h / 2 + (isMobile ? -20 : -10);
       const tyBasePx = h * (tyBase / 100);
       
@@ -104,13 +113,18 @@ export function HeroSection() {
 
     // 2. Column 1: Main Text Container
     if (textRef.current) {
+      const tyBasePx = (tyBase * wHeight) / 100;
       if (isMobileRef.current) {
         // Mobile layout centering
-        textRef.current.style.transform = `translate3d(0, calc(${tyBase}vh + ${correctionY}px), 0)`;
+        textRef.current.style.transform = `translate3d(0, ${tyBasePx + correctionY}px, 0)`;
+        
+        // Reset span translations on mobile to keep them standard centered
+        if (line1Ref.current) line1Ref.current.style.transform = "none";
+        if (line2Ref.current) line2Ref.current.style.transform = "none";
       } else {
         // Desktop centering-to-split parallax transition
         // Calculate the exact pixel offset to perfectly center the text relative to the browser window.
-        const screenWidth = window.innerWidth;
+        const screenWidth = wWidth;
         const screenCenter = screenWidth / 2;
 
         // Match the layout parameters to calculate natural grid position
@@ -132,21 +146,30 @@ export function HeroSection() {
 
         const txDesktop = (1 - tLayout) * shiftPx;
         const textScale = 0.96 + tLayout * 0.04;
-        textRef.current.style.transform = `translate3d(${txDesktop}px, calc(${tyBase}vh + ${correctionY}px), 0) scale(${textScale})`;
+        textRef.current.style.transform = `translate3d(${txDesktop}px, ${tyBasePx + correctionY}px, 0) scale(${textScale})`;
+
+        // Smooth centering to left-aligned sliding translation
+        if (line1Ref.current && line2Ref.current && headingWidthRef.current > 0) {
+          const offset1 = (headingWidthRef.current - line1WidthRef.current) / 2;
+          const offset2 = (headingWidthRef.current - line2WidthRef.current) / 2;
+
+          line1Ref.current.style.transform = `translate3d(${offset1 * (1 - tLayout)}px, 0, 0)`;
+          line2Ref.current.style.transform = `translate3d(${offset2 * (1 - tLayout)}px, 0, 0)`;
+        }
       }
 
-      // Transition text alignment from center -> left as layout animation progresses
-      if (tLayout > 0.95) {
-        if (textRef.current.style.textAlign !== "left") {
-          textRef.current.style.textAlign = "left";
-          textRef.current.style.alignItems = "flex-start";
-          if (h1Ref.current) h1Ref.current.style.textAlign = "left";
-        }
-      } else {
+      // Statically align based on device/layout to prevent sudden snaps
+      if (isMobileRef.current) {
         if (textRef.current.style.textAlign !== "center") {
           textRef.current.style.textAlign = "center";
           textRef.current.style.alignItems = "center";
           if (h1Ref.current) h1Ref.current.style.textAlign = "center";
+        }
+      } else {
+        if (textRef.current.style.textAlign !== "left") {
+          textRef.current.style.textAlign = "left";
+          textRef.current.style.alignItems = "flex-start";
+          if (h1Ref.current) h1Ref.current.style.textAlign = "left";
         }
       }
     }
@@ -194,22 +217,19 @@ export function HeroSection() {
       if (isMobileRef.current) {
         // Mobile slide-up: goes from +25vh (hidden at bottom) to -35vh (slides up into full view)
         const phoneTyMobile = 25 - progress * 60;
+        const phoneTyMobilePx = (phoneTyMobile * wHeight) / 100;
         const phoneScaleMobile = 0.8 + progress * 0.2;
-        phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobile}vh, 0) scale(${phoneScaleMobile})`;
+        phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobilePx}px, 0) scale(${phoneScaleMobile})`;
       } else {
         // Desktop curve transition
-        // In Phase 2 (Partial Phone Reveal): phoneTxDesktop is locked centered at -55%, rises from bottom (ty: 86vh -> 26vh)
-        // In Phase 3 (Hold State): stays stable and locked: tx is -55%, ty is 26vh, scale is 0.95, rotate is -2deg
-        // In Phase 4 (Layout Transition + Full Reveal): phoneTxDesktop shifts to right (from -55% to 0%), ty rises up to layout position (from 26vh to 6vh)
         const phoneTxDesktop = (1 - tLayout) * -55;
         const phoneTyDesktop =
           (1 - tReveal) * 60 + (1 - tLayout) * 26 + tLayout * 6;
+        const phoneTyDesktopPx = (phoneTyDesktop * wHeight) / 100;
         const phoneScaleDesktop = 0.8 + tReveal * 0.15 + tLayout * 0.1;
         const phoneRotateDesktop = (1 - tReveal) * -3 + (1 - tLayout) * -2;
 
-        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktop}vh, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
-
-
+        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktopPx}px, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
       }
       phoneRef.current.style.opacity = `${phoneOpacity}`;
     }
@@ -231,7 +251,16 @@ export function HeroSection() {
   };
 
   useEffect(() => {
-    let animFrameId: number;
+    let animFrameId: number | null = null;
+    let isRunning = false;
+
+    const measureWidths = () => {
+      if (h1Ref.current && line1Ref.current && line2Ref.current) {
+        headingWidthRef.current = h1Ref.current.getBoundingClientRect().width;
+        line1WidthRef.current = line1Ref.current.getBoundingClientRect().width;
+        line2WidthRef.current = line2Ref.current.getBoundingClientRect().width;
+      }
+    };
 
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -247,14 +276,43 @@ export function HeroSection() {
         1,
       );
       targetProgress.current = progress;
+
+      // Start loop if not running
+      if (!isRunning) {
+        isRunning = true;
+        animFrameId = requestAnimationFrame(tick);
+      }
     };
 
     // 60FPS / 120FPS LERP inertia damping loop
     const tick = () => {
       const diff = targetProgress.current - currentProgress.current;
-      // 0.16 easing constant delivers a tighter, more responsive scroll track following
-      currentProgress.current += diff * 0.16;
 
+      // Stop requesting frames when the LERP has settled
+      if (Math.abs(diff) < 0.0001) {
+        currentProgress.current = targetProgress.current;
+        updateElements(currentProgress.current);
+
+        // Final state updates
+        const shouldReveal = currentProgress.current > 0.6;
+        if (shouldReveal !== isRevealedRef.current) {
+          isRevealedRef.current = shouldReveal;
+          setIsRevealed(shouldReveal);
+        }
+
+        const tLayoutVal = Math.min(Math.max((currentProgress.current - 0.45) / 0.55, 0), 1);
+        const shouldAlignLeft = tLayoutVal > 0.95;
+        if (shouldAlignLeft !== isAlignedLeftRef.current) {
+          isAlignedLeftRef.current = shouldAlignLeft;
+          setIsAlignedLeft(shouldAlignLeft);
+        }
+
+        isRunning = false;
+        animFrameId = null;
+        return;
+      }
+
+      currentProgress.current += diff * 0.16;
       updateElements(currentProgress.current);
 
       // Trigger or reset the subtitle split-text stagger based on 60% animation progress
@@ -275,10 +333,10 @@ export function HeroSection() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    
+    // Measure widths and start initial layout calculations
+    measureWidths();
     handleScroll();
-
-    // Start continuous paint loop
-    animFrameId = requestAnimationFrame(tick);
 
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024;
@@ -286,7 +344,13 @@ export function HeroSection() {
         isMobileRef.current = mobile;
         setIsMobile(mobile);
       }
-      updateElements(currentProgress.current);
+      // Measure widths on viewport size change
+      measureWidths();
+      // Force update and start loop to settle on new size dimensions
+      if (!isRunning) {
+        isRunning = true;
+        animFrameId = requestAnimationFrame(tick);
+      }
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -294,7 +358,7 @@ export function HeroSection() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", checkMobile);
-      cancelAnimationFrame(animFrameId);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
     };
   }, []);
 
@@ -346,6 +410,7 @@ export function HeroSection() {
             style={{
               textAlign: "center",
               alignItems: "center",
+              willChange: "transform",
             }}
           >
             {/* Section label badge: Hidden initially, slides down and fades in at the end of the scroll */}
@@ -366,15 +431,21 @@ export function HeroSection() {
               )}
             >
               <span className="block whitespace-normal sm:whitespace-nowrap">
-                Reimagine{" "}
-                <span
-                  ref={moneyTextRef}
-                  className="drop-shadow-md transition-colors duration-500 text-[#fe9800]"
-                >
-                  money,
+                <span ref={line1Ref} className="inline-block will-change-transform">
+                  Reimagine{" "}
+                  <span
+                    ref={moneyTextRef}
+                    className="drop-shadow-md transition-colors duration-500 text-[#fe9800]"
+                  >
+                    money,
+                  </span>
                 </span>
               </span>
-              <span className="block whitespace-normal sm:whitespace-nowrap">Simple solutions</span>
+              <span className="block whitespace-normal sm:whitespace-nowrap">
+                <span ref={line2Ref} className="inline-block will-change-transform">
+                  Simple solutions
+                </span>
+              </span>
             </h1>
 
             {/* Sub-Content container: Hidden initially, fades and slides up at the end of the scroll */}
@@ -459,7 +530,7 @@ export function HeroSection() {
 
           {/* Column 2: Mobile UI Mockup */}
           <div className="absolute lg:relative bottom-[-260px] xs:bottom-[-280px] md:bottom-[-320px] lg:bottom-auto left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 w-full max-w-[240px] xs:max-w-[280px] md:max-w-[340px] lg:max-w-none z-30 lg:z-10">
-            <div ref={phoneRef} style={{ opacity: 0 }}>
+            <div ref={phoneRef} style={{ opacity: 0, willChange: "transform, opacity" }}>
               <HeroPhone />
             </div>
           </div>
@@ -468,7 +539,7 @@ export function HeroSection() {
         {/* Cinematic Bouncing Scroll down Arrow */}
         <div
           ref={scrollArrowRef}
-          className="absolute bottom-8 left-[50%] -translate-x-1/2 top-[64%] sm:top-[80%] flex flex-col items-center gap-2 pointer-events-none transition-opacity duration-300 z-20"
+          className="absolute bottom-8 left-[50%] -translate-x-1/2 top-[64%] sm:top-[80%] flex flex-col items-center gap-2 pointer-events-none z-20"
         >
           <span className="text-[11px] pb-2 font-bold tracking-widest uppercase text-wealth-secondary/80 font-mono animate-pulse">
             Scroll to explore
