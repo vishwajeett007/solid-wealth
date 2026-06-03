@@ -89,7 +89,8 @@ export function MutualFundsSection() {
           }
         }
 
-        const response = await fetch("https://solidwealthindia.com/api/nav/company-summary/");
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://solidwealthindia.com";
+        const response = await fetch(`${baseUrl}/api/nav/company-summary/`);
         const data: ApiResponse = await response.json();
 
         const loadedFunds: Fund[] = [];

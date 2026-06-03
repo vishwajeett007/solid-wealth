@@ -18,7 +18,8 @@ export function MarketTicker() {
   useEffect(() => {
     const fetchMarketSnapshot = async () => {
       try {
-        const res = await fetch("https://solidwealthindia.com/api/market-snapshot/");
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://solidwealthindia.com";
+        const res = await fetch(`${baseUrl}/api/market-snapshot/`);
         if (!res.ok) throw new Error("Failed to fetch market snapshot");
         const data = await res.json();
 

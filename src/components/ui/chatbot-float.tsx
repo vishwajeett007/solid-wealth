@@ -163,7 +163,8 @@ export function ChatbotFloat() {
         payload.session_id = sessionId;
       }
 
-      const response = await fetch("https://solidwealthindia.com/api/chatbot/", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://solidwealthindia.com";
+      const response = await fetch(`${baseUrl}/api/chatbot/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
