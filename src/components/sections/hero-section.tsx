@@ -41,8 +41,10 @@ export function HeroSection() {
   const currentProgress = useRef(0);
   const isMobileRef = useRef(typeof window !== "undefined" ? window.innerWidth < 1024 : false);
   const isRevealedRef = useRef(false);
+  const isAlignedLeftRef = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [isAlignedLeft, setIsAlignedLeft] = useState(false);
 
   // Directly updates DOM nodes on every frame (bypasses React render loop for 120 FPS performance)
   const updateElements = (progress: number) => {
@@ -105,10 +107,6 @@ export function HeroSection() {
       if (isMobileRef.current) {
         // Mobile layout centering
         textRef.current.style.transform = `translate3d(0, calc(${tyBase}vh + ${correctionY}px), 0)`;
-        if (textRef.current.style.textAlign !== "center") {
-          textRef.current.style.textAlign = "center";
-          textRef.current.style.alignItems = "center";
-        }
       } else {
         // Desktop centering-to-split parallax transition
         // Calculate the exact pixel offset to perfectly center the text relative to the browser window.
@@ -135,20 +133,20 @@ export function HeroSection() {
         const txDesktop = (1 - tLayout) * shiftPx;
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}px, calc(${tyBase}vh + ${correctionY}px), 0) scale(${textScale})`;
+      }
 
-        // Transition text alignment from center -> left as layout animation progresses
-        if (tLayout > 0.95) {
-          if (textRef.current.style.textAlign !== "left") {
-            textRef.current.style.textAlign = "left";
-            textRef.current.style.alignItems = "flex-start";
-            if (h1Ref.current) h1Ref.current.style.textAlign = "left";
-          }
-        } else {
-          if (textRef.current.style.textAlign !== "center") {
-            textRef.current.style.textAlign = "center";
-            textRef.current.style.alignItems = "center";
-            if (h1Ref.current) h1Ref.current.style.textAlign = "center";
-          }
+      // Transition text alignment from center -> left as layout animation progresses
+      if (tLayout > 0.95) {
+        if (textRef.current.style.textAlign !== "left") {
+          textRef.current.style.textAlign = "left";
+          textRef.current.style.alignItems = "flex-start";
+          if (h1Ref.current) h1Ref.current.style.textAlign = "left";
+        }
+      } else {
+        if (textRef.current.style.textAlign !== "center") {
+          textRef.current.style.textAlign = "center";
+          textRef.current.style.alignItems = "center";
+          if (h1Ref.current) h1Ref.current.style.textAlign = "center";
         }
       }
     }
@@ -266,6 +264,13 @@ export function HeroSection() {
         setIsRevealed(shouldReveal);
       }
 
+      const tLayoutVal = Math.min(Math.max((currentProgress.current - 0.45) / 0.55, 0), 1);
+      const shouldAlignLeft = tLayoutVal > 0.95;
+      if (shouldAlignLeft !== isAlignedLeftRef.current) {
+        isAlignedLeftRef.current = shouldAlignLeft;
+        setIsAlignedLeft(shouldAlignLeft);
+      }
+
       animFrameId = requestAnimationFrame(tick);
     };
 
@@ -375,15 +380,12 @@ export function HeroSection() {
             {/* Sub-Content container: Hidden initially, fades and slides up at the end of the scroll */}
             <div
               ref={subContentRef}
-              className={cn(
-                "flex flex-col gap-6 w-full",
-                isMobile ? "items-center text-center" : "items-start text-left"
-              )}
+              className="flex flex-col gap-6 w-full"
               style={{ opacity: 0, transform: "translate3d(0, 20px, 0)" }}
             >
               <SplitText
                 text="Experience next-generation wealth management. Transparent, secure, and designed for the modern investor who values clarity over complexity."
-                className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820] mx-auto lg:mx-0"
+                className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820]"
                 delay={20}
                 duration={0.6}
                 ease="power3.out"
@@ -391,14 +393,15 @@ export function HeroSection() {
                 from={{ opacity: 0, y: 15 }}
                 to={{ opacity: 1, y: 0 }}
                 threshold={0.1}
-                textAlign={isMobile ? "center" : "left"}
+                textAlign={isMobile ? (isAlignedLeft ? "left" : "center") : "left"}
                 trigger={isRevealed}
               />
 
               <div
                 className={cn(
                   "flex animate-fade-up flex-wrap gap-3 [animation-delay:300ms]",
-                  isMobile && "justify-center",
+                  isMobile && !isAlignedLeft && "justify-center",
+                  isMobile && isAlignedLeft && "justify-start",
                 )}
               >
                 <Button
@@ -424,12 +427,11 @@ export function HeroSection() {
                 </Button>
               </div>
 
-              <div
-                className={cn(
-                  "flex animate-fade-up items-center gap-3.5 [animation-delay:450ms]",
-                  isMobile && "justify-center",
-                )}
-              >
+              <div className={cn(
+                "flex animate-fade-up items-center gap-3.5 [animation-delay:450ms]",
+                isMobile && !isAlignedLeft && "justify-center",
+                isMobile && isAlignedLeft && "justify-start",
+              )}>
                 <div className="flex">
                   {avatarImages.map((avatar, index) => (
                     <Image

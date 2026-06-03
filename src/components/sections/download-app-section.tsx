@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Play } from "lucide-react"; // Using Play as a fallback for play store, or we can use a custom SVG
-
+import playstore from "../../../public/404 notfound/playstore.png";
 export function DownloadAppSection() {
   return (
     <section className="relative w-full bg-[#FFFDF4] pt-16 overflow-hidden mb-8">
@@ -36,9 +35,7 @@ export function DownloadAppSection() {
             href="#"
             className="flex items-center gap-3 bg-[#1e1e1e] text-white px-8 py-4 rounded-[14px] hover:bg-black transition-transform hover:scale-105 shadow-xl shadow-black/10"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
-              <path d="M3 20.5v-17c0-.83.67-1.5 1.5-1.5.38 0 .74.15 1.01.42l12.92 12.92c.59.59.59 1.54 0 2.12l-12.92 12.92c-.27.27-.63.42-1.01.42-.83 0-1.5-.67-1.5-1.5zM5 5.5v13l9.8-9.8L5 5.5z" />
-            </svg>
+            <Image src={playstore} alt="Google Play" className="w-10 h-10" />
             <div className="flex flex-col items-start leading-none">
               <span className="text-xs text-gray-300 font-medium tracking-wide">
                 Download on the
