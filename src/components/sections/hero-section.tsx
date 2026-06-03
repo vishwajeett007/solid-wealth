@@ -41,6 +41,8 @@ export function HeroSection() {
   const headingWidthRef = useRef(0);
   const line1WidthRef = useRef(0);
   const line2WidthRef = useRef(0);
+  const shiftPxRef = useRef(0);
+  const phoneShiftPxRef = useRef(0);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -117,60 +119,28 @@ export function HeroSection() {
       if (isMobileRef.current) {
         // Mobile layout centering
         textRef.current.style.transform = `translate3d(0, ${tyBasePx + correctionY}px, 0)`;
-        
-        // Reset span translations on mobile to keep them standard centered
-        if (line1Ref.current) line1Ref.current.style.transform = "none";
-        if (line2Ref.current) line2Ref.current.style.transform = "none";
       } else {
         // Desktop centering-to-split parallax transition
-        // Calculate the exact pixel offset to perfectly center the text relative to the browser window.
-        const screenWidth = wWidth;
-        const screenCenter = screenWidth / 2;
-
-        // Match the layout parameters to calculate natural grid position
-        const containerPadding = screenWidth >= 1280 ? 72 : 60; // px-18 vs px-15
-        const gap = screenWidth >= 1280 ? 64 : 32;
-        const leftFr = screenWidth >= 1280 ? 1.15 : 1.2;
-        const rightFr = screenWidth >= 1280 ? 0.85 : 0.8;
-
-        const maxContainer = 1800;
-        const availableWidth = Math.min(screenWidth, maxContainer);
-        const margin = Math.max(0, (screenWidth - maxContainer) / 2);
-
-        const gridWidth = availableWidth - (containerPadding * 2);
-        const freeSpace = gridWidth - gap;
-        const leftColWidth = freeSpace * (leftFr / (leftFr + rightFr));
-
-        const leftColCenter = margin + containerPadding + (leftColWidth / 2);
-        const shiftPx = screenCenter - leftColCenter;
-
-        const txDesktop = (1 - tLayout) * shiftPx;
+        // Use the measured natural column center deviation to center perfectly
+        const txDesktop = (1 - tLayout) * shiftPxRef.current;
         const textScale = 0.96 + tLayout * 0.04;
         textRef.current.style.transform = `translate3d(${txDesktop}px, ${tyBasePx + correctionY}px, 0) scale(${textScale})`;
-
-        // Smooth centering to left-aligned sliding translation
-        if (line1Ref.current && line2Ref.current && headingWidthRef.current > 0) {
-          const offset1 = (headingWidthRef.current - line1WidthRef.current) / 2;
-          const offset2 = (headingWidthRef.current - line2WidthRef.current) / 2;
-
-          line1Ref.current.style.transform = `translate3d(${offset1 * (1 - tLayout)}px, 0, 0)`;
-          line2Ref.current.style.transform = `translate3d(${offset2 * (1 - tLayout)}px, 0, 0)`;
-        }
       }
 
-      // Statically align based on device/layout to prevent sudden snaps
-      if (isMobileRef.current) {
-        if (textRef.current.style.textAlign !== "center") {
-          textRef.current.style.textAlign = "center";
-          textRef.current.style.alignItems = "center";
-          if (h1Ref.current) h1Ref.current.style.textAlign = "center";
-        }
-      } else {
-        if (textRef.current.style.textAlign !== "left") {
-          textRef.current.style.textAlign = "left";
-          textRef.current.style.alignItems = "flex-start";
-          if (h1Ref.current) h1Ref.current.style.textAlign = "left";
-        }
+      // Smooth centering to left-aligned sliding translation on both desktop and mobile
+      if (line1Ref.current && line2Ref.current && headingWidthRef.current > 0) {
+        const offset1 = (headingWidthRef.current - line1WidthRef.current) / 2;
+        const offset2 = (headingWidthRef.current - line2WidthRef.current) / 2;
+
+        line1Ref.current.style.transform = `translate3d(${offset1 * (1 - tLayout)}px, 0, 0)`;
+        line2Ref.current.style.transform = `translate3d(${offset2 * (1 - tLayout)}px, 0, 0)`;
+      }
+
+      // Statically set to left alignment, using smooth inline translation for initial centering on both desktop and mobile
+      if (textRef.current.style.textAlign !== "left") {
+        textRef.current.style.textAlign = "left";
+        textRef.current.style.alignItems = "flex-start";
+        if (h1Ref.current) h1Ref.current.style.textAlign = "left";
       }
     }
 
@@ -222,14 +192,14 @@ export function HeroSection() {
         phoneRef.current.style.transform = `translate3d(0, ${phoneTyMobilePx}px, 0) scale(${phoneScaleMobile})`;
       } else {
         // Desktop curve transition
-        const phoneTxDesktop = (1 - tLayout) * -55;
+        const phoneTxDesktopPx = (1 - tLayout) * phoneShiftPxRef.current;
         const phoneTyDesktop =
           (1 - tReveal) * 60 + (1 - tLayout) * 26 + tLayout * 6;
         const phoneTyDesktopPx = (phoneTyDesktop * wHeight) / 100;
         const phoneScaleDesktop = 0.8 + tReveal * 0.15 + tLayout * 0.1;
         const phoneRotateDesktop = (1 - tReveal) * -3 + (1 - tLayout) * -2;
 
-        phoneRef.current.style.transform = `translate3d(${phoneTxDesktop}%, ${phoneTyDesktopPx}px, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
+        phoneRef.current.style.transform = `translate3d(${phoneTxDesktopPx}px, ${phoneTyDesktopPx}px, 0) scale(${phoneScaleDesktop}) rotate(${phoneRotateDesktop}deg)`;
       }
       phoneRef.current.style.opacity = `${phoneOpacity}`;
     }
@@ -255,10 +225,44 @@ export function HeroSection() {
     let isRunning = false;
 
     const measureWidths = () => {
-      if (h1Ref.current && line1Ref.current && line2Ref.current) {
-        headingWidthRef.current = h1Ref.current.getBoundingClientRect().width;
-        line1WidthRef.current = line1Ref.current.getBoundingClientRect().width;
-        line2WidthRef.current = line2Ref.current.getBoundingClientRect().width;
+      if (h1Ref.current && line1Ref.current && line2Ref.current && textRef.current && phoneRef.current) {
+        // Save current transforms
+        const originalTextTransform = textRef.current.style.transform;
+        const originalLine1Transform = line1Ref.current.style.transform;
+        const originalLine2Transform = line2Ref.current.style.transform;
+        const originalPhoneTransform = phoneRef.current.style.transform;
+
+        // Reset transforms to measure natural layouts
+        textRef.current.style.transform = "none";
+        line1Ref.current.style.transform = "none";
+        line2Ref.current.style.transform = "none";
+        phoneRef.current.style.transform = "none";
+
+        // Measure actual natural positions
+        const textRect = textRef.current.getBoundingClientRect();
+        const h1Rect = h1Ref.current.getBoundingClientRect();
+        const line1Rect = line1Ref.current.getBoundingClientRect();
+        const line2Rect = line2Ref.current.getBoundingClientRect();
+        const phoneRect = phoneRef.current.getBoundingClientRect();
+
+        headingWidthRef.current = h1Rect.width;
+        line1WidthRef.current = line1Rect.width;
+        line2WidthRef.current = line2Rect.width;
+
+        // Calculate natural centers
+        const screenCenter = window.innerWidth / 2;
+
+        const textCenter = textRect.left + textRect.width / 2;
+        shiftPxRef.current = screenCenter - textCenter;
+
+        const phoneCenter = phoneRect.left + phoneRect.width / 2;
+        phoneShiftPxRef.current = screenCenter - phoneCenter;
+
+        // Restore transforms
+        textRef.current.style.transform = originalTextTransform;
+        line1Ref.current.style.transform = originalLine1Transform;
+        line2Ref.current.style.transform = originalLine2Transform;
+        phoneRef.current.style.transform = originalPhoneTransform;
       }
     };
 
@@ -464,17 +468,11 @@ export function HeroSection() {
                 from={{ opacity: 0, y: 15 }}
                 to={{ opacity: 1, y: 0 }}
                 threshold={0.1}
-                textAlign={isMobile ? (isAlignedLeft ? "left" : "center") : "left"}
+                textAlign="left"
                 trigger={isRevealed}
               />
 
-              <div
-                className={cn(
-                  "flex animate-fade-up flex-wrap gap-3 [animation-delay:300ms]",
-                  isMobile && !isAlignedLeft && "justify-center",
-                  isMobile && isAlignedLeft && "justify-start",
-                )}
-              >
+              <div className="flex animate-fade-up flex-wrap gap-3 [animation-delay:300ms] justify-start">
                 <Button
                   variant="black"
                   className="group relative overflow-hidden"
@@ -498,11 +496,7 @@ export function HeroSection() {
                 </Button>
               </div>
 
-              <div className={cn(
-                "flex animate-fade-up items-center gap-3.5 [animation-delay:450ms]",
-                isMobile && !isAlignedLeft && "justify-center",
-                isMobile && isAlignedLeft && "justify-start",
-              )}>
+              <div className="flex animate-fade-up items-center gap-3.5 [animation-delay:450ms] justify-start">
                 <div className="flex">
                   {avatarImages.map((avatar, index) => (
                     <Image

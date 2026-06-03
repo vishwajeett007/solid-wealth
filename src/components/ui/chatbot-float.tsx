@@ -25,16 +25,49 @@ export function ChatbotFloat() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [katexLoaded, setKatexLoaded] = useState(false);
 
-  // Helper to format basic markdown
+  // Helper to format basic markdown while preserving LaTeX math blocks
   const formatMessage = (text: string) => {
     if (!text) return "";
-    let html = text
+
+    // 1. Extract LaTeX blocks to prevent markdown parsing inside them
+    const latexBlocks: string[] = [];
+    let processedText = text;
+
+    const patterns = [
+      /\$\$([\s\S]*?)\$\$/g, // $$display$$
+      /\\\[([\s\S]*?)\\\]/g, // \[display\]
+      /\\\(([\s\S]*?)\\\)/g, // \(inline\)
+    ];
+
+    let placeholderCount = 0;
+    
+    patterns.forEach((pattern) => {
+      processedText = processedText.replace(pattern, (match) => {
+        const placeholder = `___LATEX_BLOCK_PLACEHOLDER_${placeholderCount}___`;
+        // Strip markdown bold / italic formatting symbols inside LaTeX blocks
+        let cleanMatch = match;
+        cleanMatch = cleanMatch.replace(/\*\*/g, "").replace(/\*/g, "");
+        latexBlocks.push(cleanMatch);
+        placeholderCount++;
+        return placeholder;
+      });
+    });
+
+    // 2. Format basic markdown
+    let html = processedText
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[#1a2332] block sm:inline mt-1 sm:mt-0">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       .replace(/# (.*?)\n/g, '<h3 class="font-black text-lg text-[#1a2332] mt-3 mb-1 border-b border-gray-100 pb-1">$1</h3>\n')
       .replace(/## (.*?)\n/g, '<h4 class="font-bold text-base text-[#1a2332] mt-2 mb-1">$1</h4>\n')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-[#fe9800] hover:underline">$1</a>');
+
+    // 3. Restore LaTeX blocks
+    for (let i = 0; i < placeholderCount; i++) {
+      html = html.replace(`___LATEX_BLOCK_PLACEHOLDER_${i}___`, () => latexBlocks[i]);
+    }
     
     return html;
   };
@@ -43,6 +76,71 @@ export function ChatbotFloat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Load KaTeX CSS and JS dynamically when chat window is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Load KaTeX stylesheet
+    if (!document.getElementById('katex-css')) {
+      const link = document.createElement('link');
+      link.id = 'katex-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css';
+      document.head.appendChild(link);
+    }
+
+    // Load KaTeX scripts
+    const loadKatex = async () => {
+      if ((window as any).katex && (window as any).renderMathInElement) {
+        setKatexLoaded(true);
+        return;
+      }
+
+      const loadScript = (src: string) => {
+        return new Promise<void>((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = () => resolve();
+          script.onerror = () => reject();
+          document.body.appendChild(script);
+        });
+      };
+
+      try {
+        if (!(window as any).katex) {
+          await loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js');
+        }
+        if (!(window as any).renderMathInElement) {
+          await loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js');
+        }
+        setKatexLoaded(true);
+      } catch (err) {
+        console.error('Failed to load KaTeX:', err);
+      }
+    };
+
+    loadKatex();
+  }, [isOpen]);
+
+  // Render LaTeX math inside the chat container when messages or katex load status change
+  useEffect(() => {
+    if (katexLoaded && chatContainerRef.current && (window as any).renderMathInElement) {
+      try {
+        (window as any).renderMathInElement(chatContainerRef.current, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true },
+          ],
+          throwOnError: false,
+        });
+      } catch (err) {
+        console.error('Error rendering math:', err);
+      }
+    }
+  }, [messages, katexLoaded]);
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -124,7 +222,7 @@ export function ChatbotFloat() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#fafbfc]">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#fafbfc]">
             {messages.map((msg) => (
               <div 
                 key={msg.id} 
