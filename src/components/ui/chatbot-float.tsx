@@ -27,6 +27,70 @@ export function ChatbotFloat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [katexLoaded, setKatexLoaded] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 400, height: 550 });
+  const [isResizing, setIsResizing] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const resizeRef = useRef<{ active: boolean; direction: 'n' | 'w' | 'nw'; startX: number; startY: number; startW: number; startH: number } | null>(null);
+
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 768);
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleResizeStart = (e: React.PointerEvent, direction: 'n' | 'w' | 'nw') => {
+    e.preventDefault();
+    setIsResizing(true);
+    resizeRef.current = {
+      active: true,
+      direction,
+      startX: e.clientX,
+      startY: e.clientY,
+      startW: dimensions.width,
+      startH: dimensions.height,
+    };
+  };
+
+  useEffect(() => {
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!resizeRef.current || !resizeRef.current.active) return;
+      const { direction, startX, startY, startW, startH } = resizeRef.current;
+      
+      let newWidth = startW;
+      let newHeight = startH;
+
+      if (direction === 'w' || direction === 'nw') {
+        const deltaX = startX - e.clientX;
+        newWidth = Math.max(320, Math.min(800, startW + deltaX));
+      }
+      if (direction === 'n' || direction === 'nw') {
+        const deltaY = startY - e.clientY;
+        newHeight = Math.max(400, Math.min(window.innerHeight - 120, startH + deltaY));
+      }
+
+      setDimensions({ width: newWidth, height: newHeight });
+    };
+
+    const handlePointerUp = () => {
+      if (resizeRef.current) {
+        resizeRef.current.active = false;
+      }
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
+    }
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [isResizing]);
 
   // Helper to format basic markdown while preserving LaTeX math blocks
   const formatMessage = (text: string) => {
@@ -43,10 +107,10 @@ export function ChatbotFloat() {
     ];
 
     let placeholderCount = 0;
-    
+
     patterns.forEach((pattern) => {
       processedText = processedText.replace(pattern, (match) => {
-        const placeholder = `___LATEX_BLOCK_PLACEHOLDER_${placeholderCount}___`;
+        const placeholder = `LATEXBLOCKPLACEHOLDER${placeholderCount}`;
         // Strip markdown bold / italic formatting symbols inside LaTeX blocks
         let cleanMatch = match;
         cleanMatch = cleanMatch.replace(/\*\*/g, "").replace(/\*/g, "");
@@ -56,19 +120,119 @@ export function ChatbotFloat() {
       });
     });
 
+    // 1.5. Parse Markdown Tables
+    const parseTables = (text: string) => {
+      const lines = text.split('\n');
+      let inTable = false;
+      let tableRows: string[][] = [];
+      let hasSeparator = false;
+      const outputLines: string[] = [];
+
+      const renderHtmlTable = (rows: string[][], hasSep: boolean) => {
+        if (rows.length === 0) return '';
+        
+        let tableHtml = '<div class="overflow-x-auto my-4 rounded-xl border border-gray-200 shadow-sm"><table class="w-full text-xs text-left text-gray-700 border-collapse">';
+        
+        let headerRow: string[] | null = null;
+        let dataRows: string[][] = rows;
+
+        if (hasSep && rows.length > 0) {
+          headerRow = rows[0];
+          dataRows = rows.slice(1);
+        }
+
+        if (headerRow) {
+          tableHtml += '<thead class="text-xs uppercase bg-[#1a2332] text-white font-bold">';
+          tableHtml += '<tr>';
+          headerRow.forEach(cell => {
+            tableHtml += `<th scope="col" class="px-4 py-3 font-semibold text-white whitespace-nowrap">${cell}</th>`;
+          });
+          tableHtml += '</tr></thead>';
+        }
+
+        tableHtml += '<tbody class="divide-y divide-gray-100 bg-white">';
+        dataRows.forEach((row, idx) => {
+          tableHtml += `<tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-[#fafbfc]'} hover:bg-gray-50 transition-colors">`;
+          row.forEach(cell => {
+            tableHtml += `<td class="px-4 py-3 text-[#1a2332] font-medium border-t border-gray-100">${cell}</td>`;
+          });
+          tableHtml += '</tr>';
+        });
+        tableHtml += '</tbody></table></div>';
+        
+        return tableHtml;
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const isTableRow = /^\s*\|.*\|\s*$/.test(line);
+
+        if (isTableRow) {
+          if (!inTable) {
+            inTable = true;
+            tableRows = [];
+            hasSeparator = false;
+          }
+
+          const isSeparator = /^\s*\|[\s\-\|:]*\|\s*$/.test(line);
+          if (isSeparator) {
+            hasSeparator = true;
+          } else {
+            const cells = line
+              .trim()
+              .replace(/^\|/, '')
+              .replace(/\|$/, '')
+              .split('|')
+              .map(c => c.trim());
+            tableRows.push(cells);
+          }
+        } else {
+          if (inTable) {
+            const tableHtml = renderHtmlTable(tableRows, hasSeparator);
+            outputLines.push(tableHtml);
+            inTable = false;
+          }
+          outputLines.push(line);
+        }
+      }
+
+      if (inTable) {
+        const tableHtml = renderHtmlTable(tableRows, hasSeparator);
+        outputLines.push(tableHtml);
+      }
+
+      return outputLines.join('\n');
+    };
+
+    processedText = parseTables(processedText);
+
     // 2. Format basic markdown
-    let html = processedText
+    let html = processedText;
+
+    // Strip empty header markers like ## or # on a line by itself
+    html = html.replace(/^\s*#+\s*$/gm, '');
+
+    // Headers (multiline start-of-line matches, more specific first)
+    html = html
+      .replace(/^###\s+(.*?)$/gm, '<h5 class="font-extrabold text-sm text-[#1a2332] mt-2.5 mb-1">$1</h5>')
+      .replace(/^##\s+(.*?)$/gm, '<h4 class="font-bold text-base text-[#1a2332] mt-2 mb-1">$1</h4>')
+      .replace(/^#\s+(.*?)$/gm, '<h3 class="font-black text-lg text-[#1a2332] mt-3.5 mb-1 border-b border-gray-100 pb-1">$1</h3>');
+
+    // Bullet points / lists (lines starting with - or *)
+    html = html.replace(/^\s*[-*]\s+(.*?)$/gm, '<div class="flex items-start gap-2 my-1.5 ml-2"><span class="text-[#fe9800] mt-1.5 font-bold select-none">•</span><span class="flex-1 text-gray-700">$1</span></div>');
+
+    // Bold, Italic, Underscore italic, and Links
+    html = html
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[#1a2332] block sm:inline mt-1 sm:mt-0">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-      .replace(/# (.*?)\n/g, '<h3 class="font-black text-lg text-[#1a2332] mt-3 mb-1 border-b border-gray-100 pb-1">$1</h3>\n')
-      .replace(/## (.*?)\n/g, '<h4 class="font-bold text-base text-[#1a2332] mt-2 mb-1">$1</h4>\n')
+      .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-[#fe9800] hover:underline">$1</a>');
 
     // 3. Restore LaTeX blocks
     for (let i = 0; i < placeholderCount; i++) {
-      html = html.replace(`___LATEX_BLOCK_PLACEHOLDER_${i}___`, () => latexBlocks[i]);
+      html = html.replace(`LATEXBLOCKPLACEHOLDER${i}`, () => latexBlocks[i]);
     }
-    
+
     return html;
   };
 
@@ -123,24 +287,27 @@ export function ChatbotFloat() {
     loadKatex();
   }, [isOpen]);
 
-  // Render LaTeX math inside the chat container when messages or katex load status change
+  // Render LaTeX math inside the chat container when messages, katex load status, or chat window visibility changes
   useEffect(() => {
     if (katexLoaded && chatContainerRef.current && (window as any).renderMathInElement) {
-      try {
-        (window as any).renderMathInElement(chatContainerRef.current, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false },
-            { left: '\\(', right: '\\)', display: false },
-            { left: '\\[', right: '\\]', display: true },
-          ],
-          throwOnError: false,
-        });
-      } catch (err) {
-        console.error('Error rendering math:', err);
-      }
+      const timer = setTimeout(() => {
+        try {
+          (window as any).renderMathInElement(chatContainerRef.current, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true },
+            ],
+            throwOnError: false,
+          });
+        } catch (err) {
+          console.error('Error rendering math:', err);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [messages, katexLoaded]);
+  }, [messages, katexLoaded, isOpen]);
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -148,11 +315,11 @@ export function ChatbotFloat() {
 
     const userMessage = input.trim();
     setInput("");
-    
+
     // Add user message to UI
     const newMessageId = Date.now().toString();
     setMessages(prev => [...prev, { id: newMessageId, role: 'user', content: userMessage }]);
-    
+
     // Add temporary loading bot message
     setIsLoading(true);
     setMessages(prev => [...prev, { id: 'temp-loading', role: 'bot', content: '', isTyping: true }]);
@@ -173,21 +340,25 @@ export function ChatbotFloat() {
       });
 
       const data = await response.json();
-      
+
       if (data.session_id) {
         setSessionId(data.session_id);
       }
 
       // Remove loading message and add actual response
       setMessages(prev => prev.filter(msg => msg.id !== 'temp-loading'));
-      
+
       let botContent = data.answer || "I'm sorry, I couldn't process that request right now.";
+      
+      // Remove hardcoded "Answer:" or "**Answer:**" prefix from the reply
+      botContent = botContent.replace(/^(\*\*Answer\s*:\*\*|Answer\s*:)\s*/i, "");
+
       if (data.follow_up_question) {
         botContent += "\n\n" + data.follow_up_question;
       }
-      
+
       setMessages(prev => [...prev, { id: Date.now().toString(), role: 'bot', content: botContent }]);
-      
+
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => prev.filter(msg => msg.id !== 'temp-loading'));
@@ -202,7 +373,33 @@ export function ChatbotFloat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-4 md:right-8 z-50 w-[90vw] md:w-[400px] h-[550px] max-h-[75vh] bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-fade-up origin-bottom-right">
+        <div
+          className={`fixed bottom-24 right-4 md:right-8 z-50 w-[90vw] md:w-[400px] h-[550px] max-h-[75vh] bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-fade-up origin-bottom-right ${isResizing ? 'select-none' : ''}`}
+          style={isDesktop ? { width: `${dimensions.width}px`, height: `${dimensions.height}px`, maxHeight: '90vh' } : {}}
+        >
+          {isDesktop && (
+            <>
+              {/* Resize Handles */}
+              {/* Top Edge Handle */}
+              <div
+                className="absolute top-0 left-4 right-4 h-1.5 cursor-ns-resize z-50 select-none hover:bg-[#fe9800]/30 transition-colors duration-150"
+                onPointerDown={(e) => handleResizeStart(e, 'n')}
+              />
+              {/* Left Edge Handle */}
+              <div
+                className="absolute top-4 bottom-4 left-0 w-1.5 cursor-ew-resize z-50 select-none hover:bg-[#fe9800]/30 transition-colors duration-150"
+                onPointerDown={(e) => handleResizeStart(e, 'w')}
+              />
+              {/* Top-Left Corner Handle */}
+              <div
+                className="absolute top-0 left-0 w-5 h-5 cursor-nwse-resize z-50 select-none hover:bg-[#fe9800]/40 rounded-tl-3xl transition-colors duration-150 flex items-center justify-center group"
+                onPointerDown={(e) => handleResizeStart(e, 'nw')}
+              >
+                <div className="absolute top-1.5 left-1.5 w-1 h-1 bg-white/40 rounded-full group-hover:bg-white/80 transition-colors" />
+                <div className="absolute top-2.5 left-2.5 w-1 h-1 bg-white/40 rounded-full group-hover:bg-white/80 transition-colors" />
+              </div>
+            </>
+          )}
           {/* Header */}
           <div className="bg-[#1a2332] text-white px-5 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -214,7 +411,7 @@ export function ChatbotFloat() {
                 <p className="text-xs text-gray-300">Online & ready to help</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
               className="text-gray-300 hover:text-white transition-colors p-1"
             >
@@ -225,8 +422,8 @@ export function ChatbotFloat() {
           {/* Messages Area */}
           <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#fafbfc]">
             {messages.map((msg) => (
-              <div 
-                key={msg.id} 
+              <div
+                key={msg.id}
                 className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'bot' && (
@@ -234,13 +431,12 @@ export function ChatbotFloat() {
                     <Bot size={12} className="text-[#fe9800]" />
                   </div>
                 )}
-                
-                <div 
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm whitespace-pre-wrap ${
-                    msg.role === 'user' 
-                      ? 'bg-[#fe9800] text-white rounded-tr-sm' 
+
+                <div
+                  className={`${msg.role === 'user' ? 'max-w-[80%]' : 'max-w-[90%]'} rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm whitespace-pre-wrap ${msg.role === 'user'
+                      ? 'bg-[#fe9800] text-white rounded-tr-sm'
                       : 'bg-white border border-gray-100 text-[#1a2332] rounded-tl-sm'
-                  }`}
+                    }`}
                 >
                   {msg.isTyping ? (
                     <div className="flex items-center gap-1 h-5 px-1">
@@ -303,7 +499,7 @@ export function ChatbotFloat() {
             autoplay
           />
         </div>
-        
+
         <div className={`transition-opacity duration-300 w-[64px] h-[64px] flex items-center justify-center bg-[#1a2332] text-white ${isOpen ? 'opacity-100' : 'opacity-0 absolute'}`}>
           <X size={28} />
         </div>
