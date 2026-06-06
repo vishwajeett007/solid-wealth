@@ -314,7 +314,7 @@ export default function BlogDetailPage() {
       return { x, y };
     });
 
-    if (points.length === 0) return { line: "", area: "" };
+    if (points.length === 0) return { line: "", area: "", points: [] };
 
     const line = points.map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
     const area = `${line} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`;
