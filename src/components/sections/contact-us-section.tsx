@@ -1,16 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+const countries = [
+  { code: "+91", flag: "🇮🇳", name: "India" },
+  { code: "+1", flag: "🇺🇸", name: "United States" },
+  { code: "+44", flag: "🇬🇧", name: "United Kingdom" },
+  { code: "+971", flag: "🇦🇪", name: "United Arab Emirates" },
+  { code: "+65", flag: "🇸🇬", name: "Singapore" },
+  { code: "+61", flag: "🇦🇺", name: "Australia" },
+];
 
 export function ContactUsSection() {
   const [name, setName] = useState("");
   const [phonePrefix, setPhonePrefix] = useState("+91");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [interests, setInterests] = useState<string[]>([]);
+  const [knownSource, setKnownSource] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close country selector dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Lock body scroll when success modal is open
   useEffect(() => {
@@ -34,7 +60,9 @@ export function ContactUsSection() {
       
       const requestBody: any = {
         name: name.trim(),
-        email: email.trim()
+        email: email.trim(),
+        source: knownSource,
+        interests: knownSource ? [knownSource] : []
       };
 
       if (phone.trim()) {
@@ -69,8 +97,9 @@ export function ContactUsSection() {
     setName("");
     setPhone("");
     setPhonePrefix("+91");
+    setSelectedCountry(countries[0]);
     setEmail("");
-    setInterests([]);
+    setKnownSource("");
   };
 
   return (
@@ -109,77 +138,139 @@ export function ContactUsSection() {
           {/* Right Side Form */}
           <div className="flex-1 w-full max-w-2xl lg:max-w-none h-full lg:min-h-full py-4">
             <div className="bg-white rounded-[32px] p-8 sm:p-12 shadow-[0_0_60px_rgba(254,152,0,0.25)] relative transition-shadow hover:shadow-[0_0_80px_rgba(254,152,0,0.35)] h-full flex flex-col justify-center min-h-[720px]">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-8">
                 {/* Full Name */}
-                <div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-[#0f1a2c] tracking-wide">
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     placeholder="Full Name"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border-b border-gray-300 pb-3 text-lg md:text-xl focus:outline-none focus:border-[#fe9800] transition-colors placeholder:text-gray-400 placeholder:italic font-medium text-gray-800 bg-transparent"
+                    className="w-full border-b border-gray-300 pb-2 text-lg md:text-xl focus:outline-none focus:border-[#fe9800] transition-colors placeholder:text-gray-400 placeholder:italic font-medium text-gray-800 bg-transparent"
                   />
                 </div>
 
                 {/* Phone */}
-                <div className="flex gap-6">
-                  <input
-                    type="text"
-                    value={phonePrefix}
-                    onChange={(e) => setPhonePrefix(e.target.value)}
-                    className="w-20 border-b border-gray-300 pb-3 text-lg md:text-xl focus:outline-none focus:border-[#fe9800] transition-colors font-medium text-gray-800 bg-transparent text-center"
-                    placeholder="+91"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="99XXXXXXXXXX"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="flex-1 border-b border-gray-300 pb-3 text-lg md:text-xl focus:outline-none focus:border-[#fe9800] transition-colors placeholder:text-gray-400 placeholder:italic font-medium text-gray-800 bg-transparent"
-                  />
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-[#0f1a2c] tracking-wide">
+                    Phone Number
+                  </label>
+                  <div className="flex items-center gap-4 border-b border-gray-300 pb-2 relative">
+                    {/* Country code dropdown */}
+                    <div className="relative" ref={dropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center gap-1.5 text-lg font-medium text-gray-800 focus:outline-none cursor-pointer select-none hover:text-[#fe9800] transition-colors"
+                      >
+                        <span className="text-xl">{selectedCountry.flag}</span>
+                        <span>{selectedCountry.code}</span>
+                        <svg
+                          className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${
+                            isDropdownOpen ? "rotate-180" : ""
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      {/* Dropdown Options */}
+                      {isDropdownOpen && (
+                        <div className="absolute left-0 top-full mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl z-20 py-2 animate-modal-zoom">
+                          {countries.map((c) => (
+                            <button
+                              key={c.code}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCountry(c);
+                                setPhonePrefix(c.code);
+                                setIsDropdownOpen(false);
+                              }}
+                              className="w-full text-left px-4 py-2.5 hover:bg-orange-50 flex items-center gap-3 transition-colors text-sm font-medium text-gray-700 hover:text-gray-900"
+                            >
+                              <span className="text-lg">{c.flag}</span>
+                              <span className="text-gray-500 w-10">{c.code}</span>
+                              <span className="truncate">{c.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Vertical Divider */}
+                    <div className="h-6 w-[1px] bg-gray-300"></div>
+
+                    {/* Input field */}
+                    <input
+                      type="tel"
+                      placeholder="XXXXXXXXXX"
+                      value={phone}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setPhone(val);
+                      }}
+                      className="flex-1 text-lg md:text-xl focus:outline-none placeholder:text-gray-400 placeholder:italic font-medium text-gray-800 bg-transparent border-none p-0 focus:ring-0"
+                    />
+                  </div>
                 </div>
 
                 {/* Email */}
-                <div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-[#0f1a2c] tracking-wide">
+                    Email ID
+                  </label>
                   <input
                     type="email"
                     placeholder="name@domain.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border-b border-gray-300 pb-3 text-lg md:text-xl focus:outline-none focus:border-[#fe9800] transition-colors placeholder:text-gray-400 placeholder:italic font-medium text-gray-800 bg-transparent"
+                    className="w-full border-b border-gray-300 pb-2 text-lg md:text-xl focus:outline-none focus:border-[#fe9800] transition-colors placeholder:text-gray-400 placeholder:italic font-medium text-gray-800 bg-transparent"
                   />
                 </div>
 
-                {/* Interest Tags */}
-                <div className="flex flex-wrap gap-3 mt-4">
-                  {["Mutual Funds", "Retirement", "Tax Planning", "Stocks", "Wealth Management", "Insurance", "Other"].map((tag) => (
-                    <label key={tag} className="cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="peer sr-only"
-                        checked={interests.includes(tag)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setInterests([...interests, tag]);
-                          } else {
-                            setInterests(interests.filter((i) => i !== tag));
-                          }
+                {/* Known Us From */}
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-bold text-[#0f1a2c] tracking-wide">
+                    Known Us From
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    {["Instagram", "Facebook", "Meta Ads", "Google Ads", "Website", "Other"].map((source) => (
+                      <button
+                        key={source}
+                        type="button"
+                        onClick={() => {
+                          setKnownSource(knownSource === source ? "" : source);
                         }}
-                      />
-                      <div className="px-4 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm font-medium text-gray-500 hover:border-[#fe9800]/50 hover:bg-orange-50 peer-checked:bg-[#fe9800] peer-checked:text-white peer-checked:border-[#fe9800] transition-all">
-                        {tag}
-                      </div>
-                    </label>
-                  ))}
+                        className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all border cursor-pointer select-none ${
+                          knownSource === source
+                            ? "bg-[#132644] text-white border-[#132644] shadow-md"
+                            : "bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        {source}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="mt-6 bg-[#fe9800] hover:bg-[#e58900] disabled:bg-gray-400 text-white font-bold text-lg h-14 rounded-full w-full max-w-[220px] transition-all shadow-[0_8px_20px_rgba(254,152,0,0.3)] hover:shadow-[0_8px_25px_rgba(254,152,0,0.45)] flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                  className="mt-6 bg-[#132644] hover:bg-[#0d1b32] disabled:bg-gray-400 text-white font-bold text-lg h-14 rounded-full w-full max-w-[220px] transition-all shadow-[0_8px_20px_rgba(19,38,68,0.2)] hover:shadow-[0_8px_25px_rgba(19,38,68,0.35)] flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed group"
                 >
                   {isLoading ? (
                     <>
@@ -190,7 +281,18 @@ export function ContactUsSection() {
                       Sending...
                     </>
                   ) : (
-                    "Get Started"
+                    <>
+                      Get Started
+                      <svg
+                        className="w-5 h-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                      </svg>
+                    </>
                   )}
                 </button>
               </form>
@@ -220,7 +322,7 @@ export function ContactUsSection() {
             }
           `}} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-modal-fade">
-            <div className="bg-[#FFFDF4] rounded-[32px] w-full max-w-[480px] p-8 md:p-10 shadow-2xl flex flex-col items-center text-center animate-modal-zoom relative border border-gray-100">
+            <div className="bg-white rounded-[32px] w-full max-w-[480px] p-8 md:p-10 shadow-2xl flex flex-col items-center text-center animate-modal-zoom relative border border-gray-100">
               {/* Image Illustration */}
               <div className="relative w-full h-[220px] mb-6">
                 <Image
