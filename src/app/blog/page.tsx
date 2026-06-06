@@ -525,6 +525,30 @@ const INITIAL_BLOGS: Blog[] = [
   }
 ];
 
+const getSeededBlogDateOffset = (id: string): number => {
+  const match = id.match(/-(\d+)$/);
+  if (!match) return 0;
+  const num = parseInt(match[1], 10);
+  
+  if (id.startsWith("news-")) {
+    if (num === 1) return 2;  // 2 hours ago
+    return num * 24;          // num days ago
+  }
+  if (id.startsWith("fund-")) {
+    if (num === 1) return 3;  // 3 hours ago
+    return num * 24;
+  }
+  if (id.startsWith("commodities-")) {
+    if (num === 1) return 4;  // 4 hours ago
+    return num * 24;
+  }
+  if (id.startsWith("nri-")) {
+    if (num === 1) return 5;  // 5 hours ago
+    return num * 24;
+  }
+  return 0;
+};
+
 export default function BlogPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -598,6 +622,24 @@ export default function BlogPage() {
               blog.image = "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?q=80&w=1200&auto=format&fit=crop";
               wasPatched = true;
             }
+
+            // Daily auto-update: recalculate creation date for seeded blogs so they are relative to "today"
+            const isSeeded = blog.id.startsWith("news-") || 
+                             blog.id.startsWith("fund-") || 
+                             blog.id.startsWith("commodities-") || 
+                             blog.id.startsWith("nri-");
+            if (isSeeded) {
+              const offsetHours = getSeededBlogDateOffset(blog.id);
+              const calculatedDate = new Date(Date.now() - offsetHours * 60 * 60 * 1000).toISOString();
+              
+              const cachedHour = blog.createdAt.substring(0, 13);
+              const calculatedHour = calculatedDate.substring(0, 13);
+              if (cachedHour !== calculatedHour) {
+                blog.createdAt = calculatedDate;
+                wasPatched = true;
+              }
+            }
+
             return blog;
           });
 
