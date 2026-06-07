@@ -17,27 +17,27 @@ interface Review {
 const reviewsData: Review[] = [
   {
     id: 1,
-    title: "Fantastic Platform",
+    title: "Outstanding Wealth Planning",
     text: "Solid Wealth provided clear, strategic financial guidance that helped me make confident investment decisions. Their professionalism and personalized approach truly set them apart.",
     author: "Rajesh Mehta",
     role: "Business Owner",
-    avatarColor: "bg-[#ff0000]", // Solid red avatar from the mockup
+    avatarColor: "bg-[#E03A3E]", // Crimson red
   },
   {
     id: 2,
-    title: "Fantastic Platform",
-    text: "Solid Wealth provided clear, strategic financial guidance that helped me make confident investment decisions. Their professionalism and personalized approach truly set them apart.",
-    author: "Rajesh Mehta",
-    role: "Business Owner",
-    avatarColor: "bg-[#ff0000]",
+    title: "Game-Changing Platform",
+    text: "The automated portfolio balancing and mutual fund tracking have made managing my investments effortless. I've seen consistent growth since moving my portfolio here.",
+    author: "Priya Sharma",
+    role: "Software Engineer",
+    avatarColor: "bg-[#00B2A9]", // Teal
   },
   {
     id: 3,
-    title: "Fantastic Platform",
-    text: "Solid Wealth provided clear, strategic financial guidance that helped me make confident investment decisions. Their professionalism and personalized approach truly set them apart.",
-    author: "Rajesh Mehta",
-    role: "Business Owner",
-    avatarColor: "bg-[#ff0000]",
+    title: "Secure and Trustworthy",
+    text: "As a retiree, capital preservation is key. The transparency, robust security measures, and exceptional support team at Solid Wealth give me absolute peace of mind.",
+    author: "Vikram Malhotra",
+    role: "Retired Consultant",
+    avatarColor: "bg-[#F48C06]", // Amber orange
   },
 ];
 
@@ -158,10 +158,15 @@ export function ReviewsSection() {
               <div className="flex items-center gap-3.5 mt-6 border-t border-[#F0F4FA] pt-5">
                 <div
                   className={cn(
-                    "w-11 h-11 rounded-full flex-shrink-0 shadow-sm border border-black/5",
+                    "w-11 h-11 rounded-full flex-shrink-0 shadow-sm border border-black/5 flex items-center justify-center text-white font-bold text-sm",
                     review.avatarColor
                   )}
-                />
+                >
+                  {review.author
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </div>
                 <div className="flex flex-col">
                   <span className="text-[15px] font-bold text-[#0f1a2c] leading-tight">
                     {review.author}
