@@ -100,12 +100,12 @@ export function HeroSection() {
       const h = wHeight;
       const naturalH1Bottom = h / 2 + (isMobile ? -20 : -10);
       const tyBasePx = h * (tyBase / 100);
-      
+
       const currentTranslateY = 70 - easeLayout * 48;
       const currentScale = 1.15 + easeLayout * 4.5;
       const translateYPx = 1350 * (currentTranslateY / 100);
       const hemisphereTop = (h - 675 + translateYPx) - (675 * currentScale);
-      
+
       const margin = 24; // safety margin in pixels
       const requiredCorrection = Math.min(0, hemisphereTop - (naturalH1Bottom + tyBasePx) - margin);
       // Fade the correction out completely by progress = 0.3 (before the left-shifting layout transition starts at 0.45)
@@ -337,7 +337,7 @@ export function HeroSection() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    
+
     // Measure widths and start initial layout calculations
     measureWidths();
     handleScroll();
@@ -512,12 +512,12 @@ export function HeroSection() {
                     />
                   ))}
                 </div>
-                <p className="hidden sm:block text-[13px] font-medium text-wealth-secondary">
+                {/* <p className="hidden sm:block text-[13px] font-medium text-wealth-secondary">
                   <strong className="font-bold text-wealth-primary">
                     50,000+
                   </strong>{" "}
                   active investors
-                </p>
+                </p> */}
               </div>
             </div>
           </div>

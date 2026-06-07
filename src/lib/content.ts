@@ -27,7 +27,7 @@ export type NavLinkItem = {
 
 export const navLinks: NavLinkItem[] = [
   { label: "Features", href: "/#features" },
-  { label: "About Us", href: "/#about" },
+  { label: "Review", href: "/#reviews" },
   { label: "Mutual Funds", href: "/#mutual-funds" },
   { label: "Calculators", href: "/calculators" },
   { label: "Blog", href: "/blog" },

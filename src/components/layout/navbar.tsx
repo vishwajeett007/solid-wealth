@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { ArrowRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,10 @@ import { navLinks } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +32,63 @@ export function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection("");
+      }
+    };
+
+    const sections = ["features", "about", "mutual-funds", "contact"];
+    const observerOptions = {
+      root: null,
+      rootMargin: "-45% 0px -45% 0px",
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [pathname]);
+
+  const isLinkActive = (href: string) => {
+    if (href.startsWith("/#")) {
+      const hash = href.substring(2);
+      return pathname === "/" && activeSection === hash;
+    }
+    if (href.startsWith("/")) {
+      const baseHref = href.split("?")[0].split("#")[0];
+      if (baseHref === "/") {
+        return pathname === "/";
+      }
+      return pathname.startsWith(baseHref);
+    }
+    return false;
+  };
 
   return (
     <header
@@ -73,7 +133,7 @@ export function Navbar() {
               <Link
                 className={cn(
                   "relative mx-3 font-semibold text-wealth-secondary transition-all duration-500 hover:text-wealth-accent nav-link-underline",
-                  link.active && "text-wealth-accent active",
+                  isLinkActive(link.href) && "text-wealth-accent active",
                   isScrolled ? "text-[15px] py-1" : "text-[18px] py-2"
                 )}
                 href={link.href}
@@ -138,8 +198,8 @@ export function Navbar() {
                 <Link
                   className={cn(
                     "flex w-full items-center px-4 py-3 rounded-xl text-base font-semibold text-wealth-secondary transition-all duration-200 hover:text-wealth-accent hover:bg-wealth-accent/5",
-                    link.active &&
-                    "text-wealth-accent bg-wealth-accent-light/50",
+                    isLinkActive(link.href) &&
+                    "text-wealth-accent bg-wealth-accent-light/50 active",
                   )}
                   href={link.href}
                   key={link.label}
