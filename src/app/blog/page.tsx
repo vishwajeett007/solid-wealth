@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Layers,
   Anchor,
-  Activity
+  Activity,
+  PenSquare
 } from "lucide-react";
 
 interface FinanceData {
@@ -529,7 +530,7 @@ const getSeededBlogDateOffset = (id: string): number => {
   const match = id.match(/-(\d+)$/);
   if (!match) return 0;
   const num = parseInt(match[1], 10);
-  
+
   if (id.startsWith("news-")) {
     if (num === 1) return 2;  // 2 hours ago
     return num * 24;          // num days ago
@@ -554,10 +555,11 @@ export default function BlogPage() {
   const [mounted, setMounted] = useState(false);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [isWriting, setIsWriting] = useState(false);
+
   // Navigation tabs state
   const [activeTab, setActiveTab] = useState<Blog["category"]>("news");
-  
+
   // Live chart details view
   const [viewingAssetChart, setViewingAssetChart] = useState<string | null>(null);
   const [chartTimeframe, setChartTimeframe] = useState<"1H" | "1D" | "1W" | "1M">("1H");
@@ -568,32 +570,6 @@ export default function BlogPage() {
 
   // Modals state
   const [activeBlogDetail, setActiveBlogDetail] = useState<Blog | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  
-  // Generation state
-  const [selectedAsset, setSelectedAsset] = useState("AAPL");
-  const [customSymbol, setCustomSymbol] = useState("");
-  const [isFetchingData, setIsFetchingData] = useState(false);
-  const [fetchedData, setFetchedData] = useState<FinanceData | null>(null);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  
-  const [tone, setTone] = useState<Blog["tone"]>("bullish");
-  const [persona, setPersona] = useState("Marcus Thorne (Senior Strategist)");
-  const [length, setLength] = useState("Detailed Report");
-  const [generatorCategory, setGeneratorCategory] = useState<Blog["category"]>("news");
-  const [generatorTag, setGeneratorTag] = useState("AI REPORT");
-  
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState(0);
-  const [generationError, setGenerationError] = useState<string | null>(null);
-  
-  // Review before publishing
-  const [generatedPostReview, setGeneratedPostReview] = useState<{
-    title: string;
-    summary: string;
-    content: string;
-  } | null>(null);
-  const [isEditingReview, setIsEditingReview] = useState(false);
 
   // Initialize and load from localstorage (with version validation to avoid empty categories for returning users)
   useEffect(() => {
@@ -604,10 +580,10 @@ export default function BlogPage() {
         try {
           const parsed = JSON.parse(stored) as Blog[];
           const categories = new Set(parsed.map(b => b.category));
-          const hasAllCategories = 
-            categories.has("news") && 
-            categories.has("funds") && 
-            categories.has("commodities") && 
+          const hasAllCategories =
+            categories.has("news") &&
+            categories.has("funds") &&
+            categories.has("commodities") &&
             categories.has("nri_naval");
 
           let wasPatched = false;
@@ -624,14 +600,14 @@ export default function BlogPage() {
             }
 
             // Daily auto-update: recalculate creation date for seeded blogs so they are relative to "today"
-            const isSeeded = blog.id.startsWith("news-") || 
-                             blog.id.startsWith("fund-") || 
-                             blog.id.startsWith("commodities-") || 
-                             blog.id.startsWith("nri-");
+            const isSeeded = blog.id.startsWith("news-") ||
+              blog.id.startsWith("fund-") ||
+              blog.id.startsWith("commodities-") ||
+              blog.id.startsWith("nri-");
             if (isSeeded) {
               const offsetHours = getSeededBlogDateOffset(blog.id);
               const calculatedDate = new Date(Date.now() - offsetHours * 60 * 60 * 1000).toISOString();
-              
+
               const cachedHour = blog.createdAt.substring(0, 13);
               const calculatedHour = calculatedDate.substring(0, 13);
               if (cachedHour !== calculatedHour) {
@@ -660,7 +636,7 @@ export default function BlogPage() {
         setBlogs(INITIAL_BLOGS);
       }
     }, 0);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -765,147 +741,7 @@ export default function BlogPage() {
     localStorage.setItem("solid_wealth_ai_blogs", JSON.stringify(updated));
   };
 
-  const handleFetchMarketData = async () => {
-    const symbolToFetch = selectedAsset === "custom" ? customSymbol.trim().toUpperCase() : selectedAsset;
-    if (!symbolToFetch) {
-      setFetchError("Please specify a stock ticker symbol.");
-      return;
-    }
 
-    setIsFetchingData(true);
-    setFetchError(null);
-    setFetchedData(null);
-
-    try {
-      const res = await fetch(`/api/finance?symbol=${encodeURIComponent(symbolToFetch)}`);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to fetch market data");
-      }
-      const data = await res.json();
-      setFetchedData(data);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unable to connect to the financial quote API.";
-      setFetchError(msg);
-    } finally {
-      setIsFetchingData(false);
-    }
-  };
-
-  const handleGenerateBlog = async () => {
-    if (!fetchedData) return;
-
-    setIsGenerating(true);
-    setGenerationError(null);
-    setGenerationStep(0);
-
-    const steps = [
-      "Securing connection with Solid Wealth AI Model...",
-      "Analyzing real-time market metrics and price actions...",
-      "Structuring professional outline and technical indicators...",
-      "Drafting deep editorial analysis and meta-descriptions...",
-      "Polishing language readability and SEO metadata..."
-    ];
-
-    const interval = setInterval(() => {
-      setGenerationStep((prev) => {
-        if (prev < steps.length - 1) return prev + 1;
-        return prev;
-      });
-    }, 1600);
-
-    try {
-      const response = await fetch("/api/generate-blog", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          symbol: fetchedData.symbol,
-          name: fetchedData.name,
-          price: fetchedData.price,
-          changePercent: fetchedData.changePercent,
-          currency: fetchedData.currency,
-          tone,
-          persona,
-          length,
-        }),
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json();
-        throw new Error(errJson.error || "Failed to generate blog content.");
-      }
-
-      const generated = await response.json();
-      clearInterval(interval);
-      setGenerationStep(steps.length); // Complete
-      
-      setGeneratedPostReview({
-        title: generated.title,
-        summary: generated.summary,
-        content: generated.content,
-      });
-    } catch (err) {
-      clearInterval(interval);
-      const msg = err instanceof Error ? err.message : "An unexpected error occurred during AI generation.";
-      setGenerationError(msg);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handlePublish = () => {
-    if (!generatedPostReview || !fetchedData) return;
-
-    const authorAvatarMap: Record<string, string> = {
-      "Marcus Thorne (Senior Strategist)": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop",
-      "Elena Vance (Chief Editor)": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
-      "Solid Wealth AI (AI Analyst)": "/confirm.svg"
-    };
-
-    const cleanAuthorName = persona.split(" (")[0];
-
-    // Determine default tags & images based on generator settings
-    const defaultImages: Record<string, string> = {
-      news: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1200&auto=format&fit=crop",
-      funds: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1200&auto=format&fit=crop",
-      commodities: "https://images.unsplash.com/photo-1610374792793-f016b77ca51a?q=80&w=1200&auto=format&fit=crop",
-      nri_naval: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop"
-    };
-
-    const newBlog: Blog = {
-      id: `blog-${Date.now()}`,
-      title: generatedPostReview.title,
-      summary: generatedPostReview.summary,
-      content: generatedPostReview.content,
-      symbol: fetchedData.symbol,
-      name: fetchedData.name,
-      price: fetchedData.price,
-      changePercent: fetchedData.changePercent,
-      currency: fetchedData.currency,
-      tone,
-      persona: cleanAuthorName,
-      length: length.includes("~") ? length : (length === "Quick Summary" ? "3 min read" : "6 min read"),
-      createdAt: new Date().toISOString(),
-      author: {
-        name: cleanAuthorName,
-        avatar: authorAvatarMap[persona] || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
-      },
-      category: generatorCategory,
-      tag: generatorTag.toUpperCase().trim() || "REPORT",
-      image: defaultImages[generatorCategory]
-    };
-
-    const updated = [newBlog, ...blogs];
-    saveBlogs(updated);
-    
-    // Close modal & reset states
-    setIsCreateModalOpen(false);
-    setFetchedData(null);
-    setGeneratedPostReview(null);
-    setActiveTab(generatorCategory); // Automatically navigate to the target tab
-  };
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -957,7 +793,7 @@ export default function BlogPage() {
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = max - min || 1;
-    
+
     const points = data.map((val, idx) => {
       const x = idx * (width / (data.length - 1));
       const y = height - ((val - min) / range) * (height - 40) - 20;
@@ -968,7 +804,7 @@ export default function BlogPage() {
 
     const line = points.map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
     const area = `${line} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`;
-    
+
     return { line, area };
   };
 
@@ -977,12 +813,12 @@ export default function BlogPage() {
   // Filtered blogs for current active tab
   const filteredBlogs = blogs.filter(blog => {
     const matchesCategory = blog.category === activeTab;
-    const matchesSearch = 
+    const matchesSearch =
       blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.tag.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
     return matchesCategory && matchesSearch;
   });
 
@@ -999,7 +835,7 @@ export default function BlogPage() {
 
   return (
     <div className="w-full bg-wealth-bg font-sans text-wealth-primary min-h-screen pb-20">
-      
+
       {/* Detail Page: Gold Price MCX Sub-view */}
       {viewingAssetChart === "gold" ? (
         <div className="max-w-6xl mx-auto px-4 pt-8 animate-fade-up">
@@ -1031,7 +867,7 @@ export default function BlogPage() {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-baseline gap-3 pt-4">
                   <span className="text-4xl md:text-5xl font-black font-display text-wealth-primary tracking-tight">
                     ₹{liveGoldPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -1047,7 +883,7 @@ export default function BlogPage() {
                   <span className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-ping" />
                   Live
                 </span>
-                
+
                 {/* Stats metrics */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-2 border-t border-wealth-border pt-4 md:border-t-0 md:pt-0">
                   <div>
@@ -1077,17 +913,16 @@ export default function BlogPage() {
               <h3 className="text-sm font-extrabold uppercase tracking-wider text-wealth-primary flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-wealth-accent" /> Real-Time Price Chart
               </h3>
-              
+
               <div className="flex items-center gap-1 bg-wealth-surface-dim p-0.5 rounded-xl border border-wealth-border">
                 {(["1H", "1D", "1W", "1M"] as const).map(time => (
                   <button
                     key={time}
                     onClick={() => setChartTimeframe(time)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
-                      chartTimeframe === time
-                        ? "bg-[#fe9800] text-white shadow-sm"
-                        : "text-wealth-secondary hover:text-wealth-primary"
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${chartTimeframe === time
+                      ? "bg-[#fe9800] text-white shadow-sm"
+                      : "text-wealth-secondary hover:text-wealth-primary"
+                      }`}
                   >
                     {time}
                   </button>
@@ -1138,7 +973,7 @@ export default function BlogPage() {
                   />
                 )}
               </svg>
-              
+
               {/* Bottom timestamps */}
               <div className="flex justify-between text-[9px] font-bold text-wealth-muted tracking-wide uppercase pt-4 border-t border-slate-100">
                 <span>{chartTimeframe === "1H" ? "01:41 AM" : (chartTimeframe === "1D" ? "Yesterday" : (chartTimeframe === "1W" ? "7 Days Ago" : "30 Days Ago"))}</span>
@@ -1158,7 +993,7 @@ export default function BlogPage() {
                 Gold prices continue to show immense technical strength and price momentum amid ongoing global macroeconomic uncertainties. Central bank buying remains structurally robust, with emerging market central banking desks aggressively adding physical reserves to hedge sovereignty exposure. Solid local domestic demand across India has picked up significantly ahead of the peak festive and wedding seasons, providing a reliable bottom-cushion for local spot benchmarks.
               </p>
             </div>
-            
+
             <div className="bg-white border border-wealth-border p-6 rounded-3xl shadow-wealth-md space-y-3">
               <h4 className="text-sm font-extrabold uppercase tracking-wider text-wealth-primary border-b border-wealth-border pb-2">
                 Key Factors
@@ -1186,7 +1021,7 @@ export default function BlogPage() {
         </div>
       ) : (
         <div className="max-w-6xl mx-auto px-4 pt-10">
-          
+
           {/* Title Header */}
           <div className="text-center space-y-1.5 mb-10">
             <h1 className="text-5xl font-black font-display tracking-tight text-wealth-primary">Discover</h1>
@@ -1196,44 +1031,40 @@ export default function BlogPage() {
           <div className="flex justify-center gap-2.5 mb-12 flex-wrap">
             <button
               onClick={() => setActiveTab("news")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${
-                activeTab === "news"
-                  ? "bg-[#fe9800] text-white border-[#fe9800]"
-                  : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${activeTab === "news"
+                ? "bg-[#fe9800] text-white border-[#fe9800]"
+                : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
+                }`}
             >
               <FileText className="w-4 h-4" /> News
             </button>
 
             <button
               onClick={() => setActiveTab("funds")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${
-                activeTab === "funds"
-                  ? "bg-[#fe9800] text-white border-[#fe9800]"
-                  : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${activeTab === "funds"
+                ? "bg-[#fe9800] text-white border-[#fe9800]"
+                : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
+                }`}
             >
               <Layers className="w-4 h-4" /> Mutual Funds
             </button>
 
             <button
               onClick={() => setActiveTab("commodities")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${
-                activeTab === "commodities"
-                  ? "bg-[#fe9800] text-white border-[#fe9800]"
-                  : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${activeTab === "commodities"
+                ? "bg-[#fe9800] text-white border-[#fe9800]"
+                : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
+                }`}
             >
               <TrendingUp className="w-4 h-4" /> Commodities
             </button>
 
             <button
               onClick={() => setActiveTab("nri_naval")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${
-                activeTab === "nri_naval"
-                  ? "bg-[#fe9800] text-white border-[#fe9800]"
-                  : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold tracking-wide border cursor-pointer transition-all duration-300 shadow-wealth-sm ${activeTab === "nri_naval"
+                ? "bg-[#fe9800] text-white border-[#fe9800]"
+                : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
+                }`}
             >
               <Anchor className="w-4 h-4" /> NRI and NAVAL fairmen
             </button>
@@ -1264,7 +1095,7 @@ export default function BlogPage() {
                       {liveGoldChange >= 0 ? "+" : ""}{liveGoldChange.toFixed(2)}%
                     </span>
                   </div>
-                  
+
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="text-3xl font-black font-display text-wealth-primary">
                       ₹{liveGoldPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -1296,7 +1127,7 @@ export default function BlogPage() {
                       {liveSilverChange >= 0 ? "+" : ""}{liveSilverChange.toFixed(2)}%
                     </span>
                   </div>
-                  
+
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="text-3xl font-black font-display text-wealth-primary">
                       ₹{liveSilverPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -1317,7 +1148,7 @@ export default function BlogPage() {
             </div>
           )}
 
-          {/* Action Row: Search & AI Generate */}
+          {/* Action Row: Search */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div className="relative w-full max-w-xs">
               <Search className="w-4 h-4 text-wealth-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1329,12 +1160,12 @@ export default function BlogPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-wealth-border rounded-xl text-xs outline-none focus:border-wealth-accent transition-all text-wealth-primary font-medium shadow-wealth-sm"
               />
             </div>
-            
+
             <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-[#fe9800] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-orange-600 transition-all shadow-md cursor-pointer self-start md:self-auto"
+              onClick={() => setIsWriting(true)}
+              className="px-5 py-2.5 bg-[#fe9800] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-orange-600 transition-all cursor-pointer flex items-center gap-1.5 shadow-md self-start md:self-auto"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Generate AI Report
+              <PenSquare className="w-4 h-4" /> Write a Story
             </button>
           </div>
 
@@ -1375,7 +1206,7 @@ export default function BlogPage() {
                       {featuredBlog.tag}
                     </div>
                   </div>
-                  
+
                   <div className="lg:w-1/2 p-6 md:p-8 flex flex-col justify-between space-y-6">
                     <div className="space-y-4">
                       {/* Meta info */}
@@ -1387,11 +1218,11 @@ export default function BlogPage() {
                         <span>•</span>
                         <span>{new Date(featuredBlog.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       </div>
-                      
+
                       <h2 className="text-2xl md:text-3.5xl font-black font-display text-wealth-primary leading-tight tracking-tight group-hover:text-[#fe9800] transition-colors">
                         {featuredBlog.title}
                       </h2>
-                      
+
                       <p className="text-xs md:text-sm text-wealth-secondary leading-relaxed line-clamp-3">
                         {featuredBlog.summary}
                       </p>
@@ -1401,7 +1232,7 @@ export default function BlogPage() {
                       <span className="inline-flex items-center gap-1 px-5 py-2.5 bg-[#fe9800] hover:bg-orange-600 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-xl transition-all shadow-sm">
                         Read Full Story <ChevronRight className="w-3.5 h-3.5" />
                       </span>
-                      
+
                       {/* Delete option for non-default entries */}
                       {!featuredBlog.id.startsWith("news-") && !featuredBlog.id.startsWith("fund-") && !featuredBlog.id.startsWith("commodities-") && !featuredBlog.id.startsWith("nri-") && (
                         <button
@@ -1437,7 +1268,7 @@ export default function BlogPage() {
                           {blog.tag}
                         </div>
                       </div>
-                      
+
                       <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                         <div className="space-y-2.5">
                           <div className="flex items-center gap-1 text-[9px] font-bold text-wealth-muted uppercase tracking-wider">
@@ -1448,11 +1279,11 @@ export default function BlogPage() {
                             <span>•</span>
                             <span>{new Date(blog.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
-                          
+
                           <h3 className="text-base font-bold font-display text-wealth-primary leading-snug group-hover:text-[#fe9800] transition-colors line-clamp-2">
                             {blog.title}
                           </h3>
-                          
+
                           <p className="text-xs text-wealth-secondary leading-relaxed line-clamp-2">
                             {blog.summary}
                           </p>
@@ -1483,417 +1314,11 @@ export default function BlogPage() {
         </div>
       )}
 
-      {/* 3. MODAL: Generate AI Blog */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080f1a]/70 backdrop-blur-md overflow-y-auto">
-          <div className="bg-wealth-surface border border-wealth-border w-full max-w-3xl rounded-3xl shadow-wealth-xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-up">
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-5 bg-[#080f1a] text-white border-b border-wealth-dark-border">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-wealth-accent animate-pulse" />
-                <h3 className="text-base font-bold font-display uppercase tracking-wider">AI Report Generator</h3>
-              </div>
-              <button
-                onClick={() => {
-                  setIsCreateModalOpen(false);
-                  setFetchedData(null);
-                  setGeneratedPostReview(null);
-                }}
-                className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 relative">
-              {!generatedPostReview ? (
-                <>
-                  {/* Step 1: Stock Ticker Selection */}
-                  <div className="space-y-3">
-                    <label className="block text-xs font-extrabold uppercase tracking-wider text-wealth-primary">
-                      1. Target Financial Asset
-                    </label>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {PREDEFINED_ASSETS.map((asset) => (
-                        <button
-                          key={asset.symbol}
-                          type="button"
-                          onClick={() => {
-                            setSelectedAsset(asset.symbol);
-                            setFetchedData(null);
-                            setFetchError(null);
-                          }}
-                          className={`px-3 py-2.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer h-16 ${
-                            selectedAsset === asset.symbol
-                              ? "bg-[#0f1a2c] text-white border-[#0f1a2c] shadow-md"
-                              : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
-                          }`}
-                        >
-                          <span className="font-mono text-xs font-bold block leading-none">{asset.symbol}</span>
-                          <span className="text-[9px] opacity-75 truncate block leading-none">{asset.name}</span>
-                        </button>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedAsset("custom");
-                          setFetchedData(null);
-                          setFetchError(null);
-                        }}
-                        className={`px-3 py-2.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer h-16 ${
-                          selectedAsset === "custom"
-                            ? "bg-[#0f1a2c] text-white border-[#0f1a2c] shadow-md"
-                            : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
-                        }`}
-                      >
-                        <span className="font-mono text-xs font-bold block leading-none">CUSTOM</span>
-                        <span className="text-[9px] opacity-75 truncate block leading-none">Enter ticker...</span>
-                      </button>
-                    </div>
-
-                    {selectedAsset === "custom" && (
-                      <div className="flex gap-2 max-w-sm mt-3 animate-fade-up">
-                        <input
-                          type="text"
-                          placeholder="e.g. RELIANCE.NS, AMZN, ETH-USD"
-                          value={customSymbol}
-                          onChange={(e) => setCustomSymbol(e.target.value)}
-                          className="flex-1 px-4 py-2.5 bg-white border border-wealth-border rounded-xl text-sm uppercase font-mono outline-none focus:border-wealth-accent focus:ring-1 focus:ring-wealth-accent transition-all text-wealth-primary"
-                        />
-                      </div>
-                    )}
-
-                    <div className="pt-2">
-                      <button
-                        type="button"
-                        onClick={handleFetchMarketData}
-                        disabled={isFetchingData}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-wealth-primary text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-all cursor-pointer"
-                      >
-                        {isFetchingData ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fetching...
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5" /> Fetch Live Market Quote
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {fetchError && (
-                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2.5 text-xs text-red-600 animate-fade-up">
-                        <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                        <span>{fetchError}</span>
-                      </div>
-                    )}
-
-                    {fetchedData && (
-                      <div className="p-4 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-wealth-dark-border rounded-2xl text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-up">
-                        <div>
-                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-1">
-                            Live Feed Secured
-                          </span>
-                          <h4 className="text-lg font-bold font-display">{fetchedData.name} ({fetchedData.symbol})</h4>
-                          <span className="text-xs text-gray-400">Source: Yahoo Finance API</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 sm:text-right sm:self-center">
-                          <div className="font-mono">
-                            <span className="text-xl font-bold block">
-                              {fetchedData.currency === "USD" ? "$" : "₹"}
-                              {fetchedData.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </span>
-                            <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${fetchedData.changePercent >= 0 ? "text-[#0ca678]" : "text-[#fa5252]"}`}>
-                              {fetchedData.changePercent >= 0 ? "+" : ""}{fetchedData.changePercent.toFixed(2)}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Step 2: Custom Parameters */}
-                  {fetchedData && (
-                    <div className="space-y-4 pt-4 border-t border-wealth-border animate-fade-up">
-                      <label className="block text-xs font-extrabold uppercase tracking-wider text-wealth-primary">
-                        2. Editor Specifications
-                      </label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Target category */}
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-wealth-secondary">Target Discover Tab</label>
-                          <select
-                            value={generatorCategory}
-                            onChange={(e) => {
-                              const cat = e.target.value as Blog["category"];
-                              setGeneratorCategory(cat);
-                              // Auto tag set
-                              const defaultTags: Record<string, string> = {
-                                news: "MARKET UPDATE",
-                                funds: "MUTUAL FUNDS",
-                                commodities: "COMMODITIES",
-                                nri_naval: "NRI REPORT"
-                              };
-                              setGeneratorTag(defaultTags[cat]);
-                            }}
-                            className="w-full px-3 py-2.5 bg-white border border-wealth-border rounded-xl text-xs outline-none focus:border-wealth-accent transition-all text-wealth-primary"
-                          >
-                            <option value="news">News</option>
-                            <option value="funds">Mutual Funds</option>
-                            <option value="commodities">Commodities</option>
-                            <option value="nri_naval">NRI and NAVAL fairmen</option>
-                          </select>
-                        </div>
-
-                        {/* Article Tag */}
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-wealth-secondary">Category Label Tag (e.g. POLICY, GOLD)</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. TAX, GLOBAL, MID CAP"
-                            value={generatorTag}
-                            onChange={(e) => setGeneratorTag(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-white border border-wealth-border rounded-xl text-xs outline-none focus:border-wealth-accent transition-all text-wealth-primary uppercase"
-                          />
-                        </div>
-
-                        {/* Tone */}
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-wealth-secondary">Editorial Tone</label>
-                          <select
-                            value={tone}
-                            onChange={(e) => setTone(e.target.value as Blog["tone"])}
-                            className="w-full px-3 py-2.5 bg-white border border-wealth-border rounded-xl text-xs outline-none focus:border-wealth-accent transition-all text-wealth-primary"
-                          >
-                            <option value="bullish">Bullish / Growth Catalysts</option>
-                            <option value="bearish">Bearish / Market Risks</option>
-                            <option value="neutral">Neutral / Balanced Assessment</option>
-                            <option value="educational">Educational / Portfolio Role</option>
-                            <option value="breaking">Breaking News / Market Alert</option>
-                          </select>
-                        </div>
-
-                        {/* Author persona */}
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-wealth-secondary">Author Persona</label>
-                          <select
-                            value={persona}
-                            onChange={(e) => setPersona(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-white border border-wealth-border rounded-xl text-xs outline-none focus:border-wealth-accent transition-all text-wealth-primary"
-                          >
-                            <option value="Marcus Thorne (Senior Strategist)">Marcus Thorne (Strategist)</option>
-                            <option value="Elena Vance (Chief Editor)">Elena Vance (Chief Editor)</option>
-                            <option value="Solid Wealth AI (AI Analyst)">Solid Wealth AI (AI Bot)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                /* Step 3: Review generated post */
-                <div className="space-y-5 animate-fade-up">
-                  <div className="flex items-center justify-between border-b border-wealth-border pb-4">
-                    <div>
-                      <span className="text-[10px] text-wealth-accent font-extrabold uppercase tracking-widest block mb-0.5">
-                        AI Draft Completed
-                      </span>
-                      <h4 className="text-lg font-extrabold font-display">Review & Edit Draft</h4>
-                    </div>
-                    
-                    <button
-                      onClick={() => setIsEditingReview(!isEditingReview)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 border border-wealth-border rounded-xl text-xs font-bold hover:bg-wealth-surface-dim transition-all text-wealth-secondary cursor-pointer shadow-wealth-sm"
-                    >
-                      {isEditingReview ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-green-600" /> Finished Editing
-                        </>
-                      ) : (
-                        <>
-                          <Edit2 className="w-3.5 h-3.5 text-wealth-accent" /> Edit Text
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {isEditingReview ? (
-                    <div className="space-y-4">
-                      {/* Title edit */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-wealth-secondary">Title</label>
-                        <input
-                          type="text"
-                          value={generatedPostReview.title}
-                          onChange={(e) =>
-                            setGeneratedPostReview({
-                              ...generatedPostReview,
-                              title: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2.5 bg-white border border-wealth-border rounded-xl text-sm font-bold outline-none focus:border-wealth-accent transition-all text-wealth-primary"
-                        />
-                      </div>
-
-                      {/* Summary edit */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-wealth-secondary">Summary / SEO Description</label>
-                        <textarea
-                          rows={2}
-                          value={generatedPostReview.summary}
-                          onChange={(e) =>
-                            setGeneratedPostReview({
-                              ...generatedPostReview,
-                              summary: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2.5 bg-white border border-wealth-border rounded-xl text-xs leading-relaxed outline-none focus:border-wealth-accent transition-all text-wealth-primary resize-none"
-                        />
-                      </div>
-
-                      {/* Content edit */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold uppercase tracking-wider text-wealth-secondary">Body Content (Supports Markdown)</label>
-                        <textarea
-                          rows={10}
-                          value={generatedPostReview.content}
-                          onChange={(e) =>
-                            setGeneratedPostReview({
-                              ...generatedPostReview,
-                              content: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2.5 bg-white border border-wealth-border rounded-xl text-xs leading-relaxed font-mono outline-none focus:border-wealth-accent transition-all text-wealth-primary"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    /* Markdown Render Preview */
-                    <div className="space-y-4">
-                      <div className="bg-wealth-surface-dim p-4 rounded-xl border border-wealth-border">
-                        <span className="text-[10px] text-wealth-muted font-bold block mb-1 uppercase">Draft Title</span>
-                        <h2 className="text-xl font-extrabold font-display leading-tight">{generatedPostReview.title}</h2>
-                      </div>
-                      
-                      <div className="bg-wealth-surface-dim p-4 rounded-xl border border-wealth-border">
-                        <span className="text-[10px] text-wealth-muted font-bold block mb-1 uppercase">SEO Summary</span>
-                        <p className="text-xs text-wealth-secondary leading-relaxed italic">{generatedPostReview.summary}</p>
-                      </div>
-
-                      <div className="border border-wealth-border rounded-2xl p-6 bg-white overflow-y-auto max-h-[350px]">
-                        <span className="text-[10px] text-wealth-muted font-bold block mb-3 uppercase border-b border-wealth-border pb-1">Report Body Preview</span>
-                        <div
-                          className="text-xs leading-relaxed text-wealth-secondary prose max-w-none"
-                          dangerouslySetInnerHTML={{ __html: formatMarkdown(generatedPostReview.content) }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Loader overlay during generation */}
-              {isGenerating && (
-                <div className="absolute inset-0 bg-[#080f1a]/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
-                  <div className="relative w-20 h-20 mb-6">
-                    <Loader2 className="w-20 h-20 text-[#fe9800] animate-spin" />
-                    <Sparkles className="w-7 h-7 text-[#fe9800] absolute inset-0 m-auto animate-pulse" />
-                  </div>
-                  <h4 className="text-white text-lg font-bold mb-2 font-display">Generating AI Insight</h4>
-                  <p className="text-gray-400 text-xs max-w-xs mb-6 h-8 animate-pulse">
-                    {["Securing connection with Solid Wealth AI Model...",
-                      "Analyzing real-time market metrics and price actions...",
-                      "Structuring professional outline and technical indicators...",
-                      "Drafting deep editorial analysis and meta-descriptions...",
-                      "Polishing language readability and SEO metadata..."][generationStep] || "Processing..."}
-                  </p>
-                  
-                  {/* Progress Indicators */}
-                  <div className="flex gap-1.5">
-                    {[0, 1, 2, 3, 4].map((idx) => (
-                      <div
-                        key={idx}
-                        className={`w-8 h-1 rounded-full transition-all duration-300 ${
-                          idx <= generationStep ? "bg-[#fe9800]" : "bg-white/20"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Generation Error */}
-              {generationError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-center space-y-3">
-                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-600">
-                    <AlertTriangle className="w-5 h-5" />
-                  </div>
-                  <h5 className="text-sm font-bold text-red-700">Generation Failed</h5>
-                  <p className="text-xs text-red-600 leading-relaxed max-w-md mx-auto">{generationError}</p>
-                  <button
-                    onClick={handleGenerateBlog}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md"
-                  >
-                    Retry Generation
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-wealth-border bg-wealth-surface-dim flex justify-between gap-4">
-              {!generatedPostReview ? (
-                <>
-                  <button
-                    onClick={() => {
-                      setIsCreateModalOpen(false);
-                      setFetchedData(null);
-                    }}
-                    className="px-5 py-3 border border-wealth-border rounded-xl text-xs font-bold hover:bg-white transition-all text-wealth-secondary cursor-pointer shadow-wealth-sm"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    onClick={handleGenerateBlog}
-                    disabled={!fetchedData}
-                    className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#fe9800] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-md"
-                  >
-                    <Sparkles className="w-4 h-4" /> Generate Report Draft
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setGeneratedPostReview(null)}
-                    className="inline-flex items-center gap-1 px-5 py-3 border border-wealth-border rounded-xl text-xs font-bold hover:bg-white transition-all text-wealth-secondary cursor-pointer shadow-wealth-sm"
-                  >
-                    <ArrowLeft className="w-4 h-4" /> Back to Parameters
-                  </button>
-
-                  <button
-                    onClick={handlePublish}
-                    disabled={isEditingReview}
-                    className="inline-flex items-center gap-1.5 px-6 py-3 bg-[#fe9800] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-md"
-                  >
-                    <Check className="w-4 h-4" /> Publish to Hub
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 4. MODAL: Blog Report Detail View */}
       {activeBlogDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080f1a]/70 backdrop-blur-md overflow-y-auto">
           <div className="bg-wealth-surface border border-wealth-border w-full max-w-3xl rounded-3xl shadow-wealth-xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-up">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-5 bg-[#080f1a] text-white border-b border-wealth-dark-border font-display">
               <div className="flex items-center gap-2">
@@ -1920,7 +1345,7 @@ export default function BlogPage() {
                     <h4 className="text-lg font-bold font-display">{activeBlogDetail.name} ({activeBlogDetail.symbol})</h4>
                     <span className="text-xs text-gray-400">Captured at generation</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 sm:text-right">
                     <div className="font-mono">
                       <span className="text-xl font-bold block">
@@ -1947,7 +1372,7 @@ export default function BlogPage() {
                     {activeBlogDetail.tag}
                   </span>
                 </div>
-                
+
                 <h1 className="text-2xl md:text-3.5xl font-black text-wealth-primary font-display leading-tight tracking-tight">
                   {activeBlogDetail.title}
                 </h1>
