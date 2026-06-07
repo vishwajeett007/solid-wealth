@@ -1160,13 +1160,6 @@ export default function BlogPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-wealth-border rounded-xl text-xs outline-none focus:border-wealth-accent transition-all text-wealth-primary font-medium shadow-wealth-sm"
               />
             </div>
-
-            <button
-              onClick={() => setIsWriting(true)}
-              className="px-5 py-2.5 bg-[#fe9800] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-orange-600 transition-all cursor-pointer flex items-center gap-1.5 shadow-md self-start md:self-auto"
-            >
-              <PenSquare className="w-4 h-4" /> Write a Story
-            </button>
           </div>
 
           {/* Empty state check */}
