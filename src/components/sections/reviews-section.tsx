@@ -182,7 +182,7 @@ export function ReviewsSection() {
             scrollTrigger: {
               trigger: containerRef.current,
               start: "top top",
-              end: "+=150%",
+              end: "+=100%",
               pin: true,
               scrub: 1.2,
               invalidateOnRefresh: true,
@@ -346,7 +346,7 @@ export function ReviewsSection() {
     <section
       ref={containerRef}
       id="reviews"
-      className="relative w-full bg-[#FFFDF4] min-h-screen py-20 overflow-hidden flex flex-col items-center justify-between"
+      className="relative w-full bg-[#FFFDF4] h-[85vh] min-h-[680px] max-h-[850px] overflow-hidden flex flex-col items-center justify-between pt-10 pb-0"
     >
       {/* Radial Glow behind the envelope */}
       <div className="absolute bottom-[-400px] left-1/2 -translate-x-1/2 w-[1400px] h-[1400px] bg-[#fe9800]/10 rounded-full blur-[160px] pointer-events-none z-0" />
@@ -364,22 +364,22 @@ export function ReviewsSection() {
       />
 
       {/* Section Header */}
-      <div className="relative z-10 flex flex-col items-center text-center px-4 mb-8 max-w-[800px]">
-        <SectionLabel className="mb-4 shadow-sm bg-[#FCE7C4] text-[#C99026] hover:scale-105 transition-transform duration-300">
+      <div className="relative z-10 flex flex-col items-center text-center px-4 mb-2 max-w-[800px]">
+        <SectionLabel className="mb-3 shadow-sm bg-[#FCE7C4] text-[#C99026] hover:scale-105 transition-transform duration-300">
           Review Section
         </SectionLabel>
-        <h2 className="text-4xl md:text-[54px] font-black tracking-tight text-[#0f1a2c] leading-[1.15]">
+        <h2 className="text-3xl md:text-[48px] font-black tracking-tight text-[#0f1a2c] leading-[1.15]">
           What the <span className="text-[#fe9800]">Clients</span> Say
         </h2>
       </div>
 
       {/* Interactive Animation Container */}
-      <div className="relative w-full max-w-[1200px] flex-1 flex flex-col items-center justify-center px-4 md:px-8 mt-4 mb-10">
+      <div className="relative w-full max-w-[1200px] flex-1 flex flex-col items-center justify-between px-4 md:px-8 mt-2 mb-0">
         
         {/* Testimonials Cards Grid */}
         <div
           ref={gridRef}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8 w-full max-w-[1100px] mx-auto z-20 pb-12 md:pb-40"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full max-w-[1100px] mx-auto z-20"
         >
           {reviewsData.map((review, idx) => {
             const isMiddle = idx === 1;
@@ -416,7 +416,7 @@ export function ReviewsSection() {
         {/* Envelope Back (Layer 1, z-10) */}
         <div
           ref={envelopeRef}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-10"
+          className="absolute bottom-[-40px] md:bottom-[-60px] left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-10"
         >
           <div
             className="absolute inset-0 w-full h-full"
@@ -430,7 +430,7 @@ export function ReviewsSection() {
 
         {/* Envelope Front (Layer 3, z-30) */}
         <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-30"
+          className="absolute bottom-[-40px] md:bottom-[-60px] left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-30"
         >
           {/* White solid mask below the V-shape pocket lip to hide cards inside */}
           <svg
