@@ -296,7 +296,7 @@ export function Navbar() {
           aria-hidden={!isResearchOpen}
           aria-label="Research curriculum"
           className={cn(
-            "absolute left-1/2 top-[calc(100%+0.5rem)] hidden max-h-[calc(100svh-8rem)] w-[calc(100vw-3rem)] max-w-[1180px] -translate-x-1/2 overscroll-contain overflow-y-auto rounded-[24px] border border-wealth-border/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(15,26,44,0.18)] transition-[opacity,transform,visibility] duration-200 xl:block",
+            "absolute left-1/2 top-[calc(100%+0.5rem)] hidden max-h-[calc(100svh-8rem)] w-[calc(100vw-3rem)] max-w-[1180px] -translate-x-1/2 overscroll-contain overflow-y-auto rounded-2xl border border-white/80 bg-white/75 backdrop-blur-3xl shadow-[0_30px_90px_rgba(15,26,44,0.16),0_4px_16px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.9)] transition-[opacity,transform,visibility] duration-300 xl:block",
             isResearchOpen
               ? "visible translate-y-0 opacity-100"
               : "pointer-events-none invisible -translate-y-2 opacity-0",
@@ -307,84 +307,110 @@ export function Navbar() {
           onMouseLeave={closeResearchMenu}
           role="region"
         >
-          <div className="flex items-start justify-between gap-8 border-b border-wealth-border/70 bg-white/60 px-8 py-6">
+          {/* Frosted Header Bar */}
+          <div className="flex items-start justify-between gap-8 border-b border-white/60 bg-gradient-to-r from-amber-500/10 via-white/40 to-orange-500/10 backdrop-blur-md px-8 py-6 rounded-t-2xl">
             <div>
               <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-wealth-accent">
                 Solid Wealth Research
               </p>
-              <h2 className="font-display text-2xl font-bold tracking-tight text-wealth-primary">
+              <h2 className="font-display text-2xl font-black tracking-tight text-wealth-primary">
                 Mutual Fund Investment Mastery
               </h2>
-              <p className="mt-1 max-w-2xl text-sm text-wealth-secondary">
+              <p className="mt-1 max-w-2xl text-xs sm:text-sm font-medium text-wealth-secondary/90">
                 A complete learning path from investing fundamentals to
                 building and reviewing real-world portfolios.
               </p>
             </div>
-            <span className="mt-1 shrink-0 rounded-full border border-wealth-border bg-white px-3 py-1.5 text-xs font-bold text-wealth-secondary">
+            <span className="mt-1 shrink-0 rounded-full border border-white/80 bg-white/70 backdrop-blur-md px-4 py-1.5 text-xs font-extrabold text-wealth-primary shadow-sm">
               {courseCurriculum.length} modules
             </span>
           </div>
 
-          <div className="grid grid-cols-4 divide-x divide-wealth-border/70 px-3 py-5">
-            {researchTracks.map((track) => {
+          {/* Frosted Cards Track Grid */}
+          <div className="grid grid-cols-4 gap-4 px-6 py-6">
+            {researchTracks.map((track, trackIdx) => {
               const modules = courseCurriculum.filter(
                 (module) => module.level === track.level,
               );
 
+              // Indicator dot colors matching Craft design
+              const dotColors = [
+                "bg-amber-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]",
+                "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]",
+                "bg-emerald-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]",
+                "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]",
+              ];
+
+              const textColors = [
+                "text-[#d97706]",
+                "text-[#2563eb]",
+                "text-[#059669]",
+                "text-[#ea580c]",
+              ];
+
               return (
-                <section className="px-5" key={track.level}>
-                  <div className="mb-4 min-h-24">
-                    <span
-                      className={cn(
-                        "inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em]",
-                        track.accentClass,
-                      )}
-                    >
-                      {track.level}
-                    </span>
-                    <h3 className="mt-2 text-base font-bold text-wealth-primary">
-                      {track.label}
-                    </h3>
-                    <p className="mt-1 text-xs leading-5 text-wealth-muted">
-                      {track.description}
-                    </p>
+                <section
+                  className="bg-white/50 backdrop-blur-xl border border-white/80 rounded-lg p-4 shadow-[0_4px_24px_rgba(0,0,0,0.02)] transition-all duration-300 hover:bg-white/80 hover:shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:border-white flex flex-col justify-between"
+                  key={track.level}
+                >
+                  <div>
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className={cn("size-2 rounded-full shrink-0", dotColors[trackIdx % dotColors.length])} />
+                        <span
+                          className={cn(
+                            "text-[10px] font-black uppercase tracking-[0.14em]",
+                            textColors[trackIdx % textColors.length],
+                          )}
+                        >
+                          {track.level}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-extrabold text-wealth-primary tracking-tight">
+                        {track.label}
+                      </h3>
+                      <p className="mt-1 text-[11px] leading-relaxed text-wealth-secondary/80">
+                        {track.description}
+                      </p>
+                    </div>
+
+                    <ol className="space-y-1">
+                      {modules.map((module) => {
+                        const courseLevel = getCourseLevelForModule(
+                          module.moduleNumber,
+                        );
+
+                        return (
+                          <li key={module.id}>
+                            <Link
+                              className="group flex items-center gap-2 rounded-md px-2 py-1.5 transition-all duration-200 hover:bg-white/90 hover:shadow-sm hover:translate-x-0.5 focus-visible:bg-white/90 focus-visible:outline-none"
+                              href={`/research/${courseLevel?.id ?? "foundation"}#${module.id}`}
+                              onClick={() => setIsResearchOpen(false)}
+                            >
+                              <span className="flex size-5 shrink-0 items-center justify-center rounded bg-white/80 border border-black/5 text-[10px] font-bold tabular-nums text-wealth-primary shadow-2xs transition-colors group-hover:bg-wealth-accent group-hover:text-white group-hover:border-wealth-accent">
+                                {module.moduleNumber}
+                              </span>
+                              <span className="text-[12px] font-semibold leading-4 text-wealth-secondary transition-colors group-hover:text-wealth-primary">
+                                {module.title}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ol>
                   </div>
-
-                  <ol className="space-y-0.5">
-                    {modules.map((module) => {
-                      const courseLevel = getCourseLevelForModule(
-                        module.moduleNumber,
-                      );
-
-                      return (
-                        <li key={module.id}>
-                          <Link
-                            className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-wealth-accent-light/60 focus-visible:bg-wealth-accent-light/60 focus-visible:outline-none"
-                            href={`/research/${courseLevel?.id ?? "foundation"}#${module.id}`}
-                            onClick={() => setIsResearchOpen(false)}
-                          >
-                            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-wealth-surface-dim text-[10px] font-bold tabular-nums text-wealth-muted transition-colors group-hover:bg-wealth-accent group-hover:text-white">
-                              {module.moduleNumber}
-                            </span>
-                            <span className="text-[13px] font-medium leading-5 text-wealth-secondary transition-colors group-hover:text-wealth-primary">
-                              {module.title}
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ol>
                 </section>
               );
             })}
           </div>
 
-          <div className="flex items-center justify-between border-t border-wealth-border/70 bg-wealth-surface-dim/45 px-8 py-3.5 text-xs">
-            <p className="text-wealth-muted">
+          {/* Frosted Footer Bar */}
+          <div className="flex items-center justify-between border-t border-white/60 bg-white/40 backdrop-blur-md px-8 py-4 text-xs rounded-b-2xl">
+            <p className="text-wealth-secondary/80 font-medium">
               Theory, analysis, strategy, taxation, and portfolio management
               in one structured curriculum.
             </p>
-            <p className="font-bold text-wealth-secondary">
+            <p className="font-extrabold text-wealth-primary tracking-wide">
               Beginner to practical mastery
             </p>
           </div>
