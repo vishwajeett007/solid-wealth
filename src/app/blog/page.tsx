@@ -838,7 +838,7 @@ export default function BlogPage() {
 
       {/* Detail Page: Gold Price MCX Sub-view */}
       {viewingAssetChart === "gold" ? (
-        <div className="max-w-6xl mx-auto px-4 pt-8 animate-fade-up">
+        <div className="max-w-6xl mx-auto px-4 pt-24 sm:pt-28 animate-fade-up">
           {/* Header Row */}
           <div className="flex items-center justify-between mb-8">
             <button
@@ -1020,7 +1020,7 @@ export default function BlogPage() {
           </div>
         </div>
       ) : (
-        <div className="max-w-6xl mx-auto px-4 pt-10">
+        <div className="max-w-6xl mx-auto px-4 pt-24 sm:pt-28">
 
           {/* Title Header */}
           <div className="text-center space-y-1.5 mb-10">
@@ -1066,7 +1066,7 @@ export default function BlogPage() {
                 : "bg-white text-wealth-secondary border-wealth-border hover:bg-wealth-surface-dim hover:text-wealth-primary"
                 }`}
             >
-              <Anchor className="w-4 h-4" /> NRI and NAVAL fairmen
+              <Anchor className="w-4 h-4" /> NRI and Seafarers
             </button>
           </div>
 

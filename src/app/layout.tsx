@@ -51,7 +51,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen overflow-x-hidden bg-wealth-bg font-sans text-wealth-primary antialiased">
         <Navbar />
-        <main className="pt-[72px]">{children}</main>
+        <main>{children}</main>
         <Footer />
         <ChatbotFloat />
       </body>

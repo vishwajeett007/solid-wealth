@@ -686,7 +686,7 @@ export default function CalculatorsPage() {
   const ActiveComponent = activeCalc.Component;
 
   return (
-    <div className="min-h-screen bg-[#FFFDF4] pt-28 pb-20 print:pt-0 print:pb-0 print:bg-white">
+    <div className="min-h-screen bg-[#FFFDF4] pt-24 sm:pt-28 pb-20 print:pt-0 print:pb-0 print:bg-white">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 print:hidden">
         <h1 className="text-2xl font-bold text-[#1a2332] mb-8">
           Financial Calculators
