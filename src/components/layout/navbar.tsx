@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
@@ -201,7 +202,7 @@ export function Navbar() {
           "w-full transition-all duration-500 ease-out flex flex-col justify-center relative",
           isScrolled
             ? "max-w-[1000px] lg:max-w-[1200px] rounded-[15px] shadow-lg py-3 px-6 lg:px-8 bg-white/95 backdrop-blur-xl border border-gray-200"
-            : "max-w-full rounded-none py-4 px-4 sm:px-8 lg:px-16 shadow-none bg-white border-b border-[#eeeeee]",
+            : "max-w-full rounded-none py-3 px-4 sm:px-8 lg:px-16 shadow-none bg-white border-b border-[#eeeeee]",
         )}
       >
         <nav
@@ -211,22 +212,19 @@ export function Navbar() {
           {/* Logo */}
           <Link
             className={cn(
-              "font-display font-extrabold tracking-normal text-[#ff8500] hover:opacity-90 transition-all duration-500 flex items-center gap-[9px] no-underline",
+              "font-display font-extrabold tracking-normal text-[#ff8500] hover:opacity-90 transition-all duration-500 flex items-center gap-2 no-underline",
               isScrolled ? "text-xl" : "text-[24px]"
             )}
             style={{ fontFamily: "var(--font-righteous)" }}
             href="/"
           >
-            <svg
-              className={cn("shrink-0 transition-all duration-500", isScrolled ? "w-6 h-6" : "w-[31px] h-[31px]")}
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M5 11L20 3L35 11L20 19L5 11Z" fill="#FF8A00" />
-              <path d="M5 17L20 25L35 17V24L20 32L5 24V17Z" fill="#FF8A00" />
-              <path d="M5 28L20 36L35 28" stroke="#FF8A00" strokeWidth="5" strokeLinejoin="round" />
-            </svg>
+            <Image
+              src="/logo1.png"
+              alt="Solid Wealth Logo"
+              width={32}
+              height={32}
+              className={cn("inline-flex shrink-0 transition-all duration-500 object-contain", isScrolled ? "w-6 h-6" : "w-8 h-8")}
+            />
             Solid Wealth
           </Link>
 
@@ -234,7 +232,6 @@ export function Navbar() {
           <ul className="hidden items-center gap-[34px] xl:flex list-none m-0 p-0">
             {navLinks.map((link) => {
               const isResearchLink = link.label === "Research";
-              const isDarkHeroPage = pathname.startsWith("/research/") && pathname !== "/research";
 
               if (isResearchLink) {
                 return (
@@ -246,15 +243,13 @@ export function Navbar() {
                     onMouseLeave={closeResearchMenu}
                   >
                     <button
-                      aria-controls="megaMenu"
+                      aria-controls="research-mega-menu"
                       aria-expanded={isResearchOpen}
                       aria-haspopup="true"
                       className={cn(
-                        "nav-link flex items-center gap-[7px] bg-none border-0 cursor-pointer font-semibold transition-colors duration-200 text-[15px]",
-                        isDarkHeroPage && !isScrolled
-                          ? "text-white hover:text-[#ff8500]"
-                          : isResearchOpen
-                          ? "text-[#ff8500]"
+                        "nav-link nav-link-underline flex items-center gap-[7px] bg-none border-0 cursor-pointer font-semibold transition-colors duration-200 text-[15px] py-1",
+                        isResearchOpen || isLinkActive(link.href)
+                          ? "active text-[#ff8500]"
                           : "text-[#475467] hover:text-[#ff8500]",
                       )}
                       onClick={(e) => {
@@ -278,14 +273,12 @@ export function Navbar() {
               }
 
               return (
-                <li key={link.label}>
+                <li key={link.label} className="nav-item">
                   <Link
                     className={cn(
-                      "nav-link flex items-center gap-[7px] font-semibold transition-colors duration-200 text-[15px] no-underline",
-                      isDarkHeroPage && !isScrolled
-                        ? "text-white hover:text-[#ff8500]"
-                        : isLinkActive(link.href)
-                        ? "text-[#ff8500]"
+                      "nav-link nav-link-underline flex items-center gap-[7px] font-semibold transition-colors duration-200 text-[15px] no-underline py-1",
+                      isLinkActive(link.href)
+                        ? "active text-[#ff8500]"
                         : "text-[#475467] hover:text-[#ff8500]",
                     )}
                     href={link.href}
@@ -300,16 +293,23 @@ export function Navbar() {
           {/* Desktop CTA / Mobile Toggle */}
           <div className="flex items-center gap-3">
             <div className="hidden xl:block">
-              <Button
-                aria-label="Get started with Solid Wealth"
-                variant={pathname.startsWith("/research/") && pathname !== "/research" && !isScrolled ? "light-orange" : "black"}
-                className={cn(
-                  "get-started rounded-full bg-[#050505] text-white font-semibold cursor-pointer border-0 transition-all duration-300 inline-flex items-center justify-center gap-2",
-                  isScrolled ? "h-10 px-5 text-sm" : "py-[13px] px-[24px] text-[14px]"
-                )}
+              <a
+                href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="no-underline"
               >
-                <span>Get Started →</span>
-              </Button>
+                <Button
+                  aria-label="Get started with Solid Wealth"
+                  variant="black"
+                  className={cn(
+                    "get-started rounded-full bg-[#050505] text-white font-semibold cursor-pointer border-0 transition-all duration-300 inline-flex items-center justify-center gap-2",
+                    isScrolled ? "h-10 px-5 text-sm" : "py-[13px] px-[24px] text-[14px]"
+                  )}
+                >
+                  <span>Get Started →</span>
+                </Button>
+              </a>
             </div>
 
             {/* Mobile Hamburger Button */}
@@ -318,9 +318,7 @@ export function Navbar() {
               aria-label="Toggle main menu"
               className={cn(
                 "inline-flex size-10 items-center justify-center rounded-full border transition hover:border-[#ff8500] hover:text-[#ff8500] focus-visible:outline-none xl:hidden",
-                pathname.startsWith("/research/") && pathname !== "/research" && !isScrolled
-                  ? "border-white/30 bg-white/10 text-white"
-                  : "border-gray-200 bg-white/80 text-[#101828]",
+                "border-gray-200 bg-white/80 text-[#101828]",
               )}
               onClick={() => {
                 setIsMobileMenuOpen((isOpen) => {
@@ -341,9 +339,11 @@ export function Navbar() {
 
         {/* MEGA DROPDOWN (DESKTOP) */}
         <div
-          id="megaMenu"
+          aria-hidden={!isResearchOpen}
+          aria-label="Investment research"
+          id="research-mega-menu"
           className={cn(
-            "mega-menu absolute left-0 w-full bg-white border-t border-[#eeeeee] border-b border-[#e6e6e6] shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-all duration-200 ease-in-out z-50",
+            "mega-menu absolute left-0 z-50 hidden w-full border-y border-[#e8e8e8] bg-white shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-[opacity,transform,visibility] duration-200 ease-in-out xl:block",
             isScrolled ? "top-[calc(100%+0.5rem)] rounded-2xl" : "top-full",
             isResearchOpen
               ? "opacity-100 visible translate-y-0 pointer-events-auto"
@@ -352,6 +352,7 @@ export function Navbar() {
           onMouseEnter={openResearchMenu}
           onMouseLeave={closeResearchMenu}
           onClick={(e) => e.stopPropagation()}
+          role="region"
         >
           <div className="mega-inner w-[min(1100px,calc(100%-60px))] mx-auto grid grid-cols-1 md:grid-cols-[330px_1px_1fr_1px_1fr] gap-[28px] py-[30px]">
             {/* LEFT FEATURE */}
@@ -406,7 +407,7 @@ export function Navbar() {
                 onClick={() => setIsResearchOpen(false)}
               >
                 Explore Investment Research
-                <span>→</span>
+                <span aria-hidden="true">→</span>
               </Link>
 
               <p className="feature-description text-[#667085] text-[13px] leading-[1.6] m-0">
@@ -591,17 +592,24 @@ export function Navbar() {
             </div>
 
             <div className="h-px bg-[#eeeeee] w-full my-1" />
-            <Button
-              aria-label="Get started with Solid Wealth"
-              variant="black"
-              className="w-full justify-center py-3 text-base rounded-full bg-[#050505] text-white font-semibold"
+            <a
+              href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full no-underline"
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 setIsMobileResearchOpen(false);
               }}
             >
-              Get Started →
-            </Button>
+              <Button
+                aria-label="Get started with Solid Wealth"
+                variant="black"
+                className="w-full justify-center py-3 text-base rounded-full bg-[#050505] text-white font-semibold"
+              >
+                Get Started →
+              </Button>
+            </a>
           </div>
         )}
       </div>

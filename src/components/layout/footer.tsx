@@ -34,15 +34,17 @@ export function Footer() {
             {/* Social Icons */}
             <div className="flex gap-2.5 md:gap-3 mt-1">
               {[
-                { icon: FaPlay, label: "Play" },
-                { icon: FaLinkedinIn, label: "LinkedIn" },
-                { icon: FaFacebookF, label: "Facebook" },
-                { icon: FaInstagram, label: "Instagram" },
-                { icon: FaEnvelope, label: "Email" }
+                { icon: FaPlay, label: "Google Play Store", href: "https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share" },
+                { icon: FaLinkedinIn, label: "LinkedIn", href: "#" },
+                { icon: FaFacebookF, label: "Facebook", href: "#" },
+                { icon: FaInstagram, label: "Instagram", href: "#" },
+                { icon: FaEnvelope, label: "Email", href: "mailto:support@solidwealth.in" }
               ].map((Social, idx) => (
                 <a
                   key={idx}
-                  href="#"
+                  href={Social.href}
+                  target={Social.href.startsWith("http") ? "_blank" : undefined}
+                  rel={Social.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   aria-label={Social.label}
                   className="w-10 h-10 md:w-12 md:h-12 bg-[#fe9800] rounded-lg md:rounded-xl flex items-center justify-center text-[#0f172a] hover:bg-orange-400 hover:scale-105 transition-all"
                 >
