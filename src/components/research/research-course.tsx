@@ -77,7 +77,9 @@ const totalLessons = courseCurriculum.reduce(
 export function ResearchCourse() {
   const [query, setQuery] = useState("");
   const [activeLevel, setActiveLevel] = useState<number | "all">("all");
-  const [openModules, setOpenModules] = useState<number[]>([1]);
+  const [openModules, setOpenModules] = useState<number[]>(
+    courseCurriculum.map((m) => m.moduleNumber),
+  );
 
   const normalizedQuery = query.trim().toLowerCase();
   const visibleLevels = courseLevels

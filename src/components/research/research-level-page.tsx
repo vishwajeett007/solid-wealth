@@ -169,12 +169,12 @@ export function ResearchLevelPage({
             </div>
 
             <div className="space-y-5">
-              {modules.map((courseModule, moduleIndex) => (
+              {modules.map((courseModule) => (
                 <details
                   className="group scroll-mt-28 overflow-hidden rounded-3xl border border-wealth-border/80 bg-white shadow-wealth-sm open:border-wealth-accent/35 open:shadow-wealth-md"
                   id={courseModule.id}
                   key={courseModule.id}
-                  open={moduleIndex === 0}
+                  open={true}
                 >
                   <summary className="flex cursor-pointer list-none items-start gap-3 p-5 marker:hidden sm:items-center sm:gap-5 sm:p-7 [&::-webkit-details-marker]:hidden">
                     <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-wealth-accent text-sm font-extrabold tabular-nums text-white sm:size-13">

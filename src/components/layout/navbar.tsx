@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/lib/content";
@@ -29,6 +29,7 @@ const column2Links = researchLevelLinks.slice(4);
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileResearchOpen, setIsMobileResearchOpen] = useState(false);
@@ -36,6 +37,12 @@ export function Navbar() {
   const [isResearchOpen, setIsResearchOpen] = useState(false);
   const researchCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const researchItemRef = useRef<HTMLLIElement>(null);
+
+  const handleLevelClick = () => {
+    setIsResearchOpen(false);
+    setIsMobileMenuOpen(false);
+    setIsMobileResearchOpen(false);
+  };
 
   const cancelResearchClose = () => {
     if (researchCloseTimer.current) {
@@ -214,21 +221,18 @@ export function Navbar() {
                     onMouseEnter={openResearchMenu}
                     onMouseLeave={closeResearchMenu}
                   >
-                    <button
+                    <Link
                       aria-controls="research-mega-menu"
                       aria-expanded={isResearchOpen}
                       aria-haspopup="true"
                       className={cn(
-                        "nav-link nav-link-underline flex items-center gap-[7px] bg-none border-0 cursor-pointer font-semibold transition-colors duration-200 text-[15px] py-1",
+                        "nav-link nav-link-underline flex items-center gap-[7px] font-semibold transition-colors duration-200 text-[15px] py-1 no-underline",
                         isResearchOpen || isLinkActive(link.href)
                           ? "active text-[#ff8500]"
                           : "text-[#475467] hover:text-[#ff8500]",
                       )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleResearchMenu();
-                      }}
-                      type="button"
+                      href="/research"
+                      onClick={() => setIsResearchOpen(false)}
                     >
                       <span>Research</span>
                       <span
@@ -239,7 +243,130 @@ export function Navbar() {
                             : "rotate-45 -mt-[4px]",
                         )}
                       />
-                    </button>
+                    </Link>
+
+                    {/* MEGA DROPDOWN (DESKTOP) */}
+                    <div
+                      aria-hidden={!isResearchOpen}
+                      aria-label="Investment research"
+                      id="research-mega-menu"
+                      className={cn(
+                        "mega-menu fixed left-0 right-0 z-50 hidden w-full border-y border-[#e8e8e8] bg-white shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-[opacity,transform,visibility] duration-200 ease-in-out xl:block",
+                        isScrolled ? "top-[72px]" : "top-[82px]",
+                        isResearchOpen
+                          ? "opacity-100 visible translate-y-0 pointer-events-auto"
+                          : "opacity-0 invisible -translate-y-2 pointer-events-none",
+                      )}
+                      onMouseEnter={openResearchMenu}
+                      onMouseLeave={closeResearchMenu}
+                      role="region"
+                    >
+                      <div className="mega-inner w-[min(1100px,calc(100%-60px))] mx-auto grid grid-cols-1 md:grid-cols-[330px_1px_1fr_1px_1fr] gap-[28px] py-[30px]">
+                        {/* LEFT FEATURE */}
+                        <div className="feature-panel pr-0 md:pr-[10px] pb-6 md:pb-0 border-b md:border-b-0 border-[#eeeeee]">
+                          <svg
+                            className="illustration w-[180px] h-[150px] mx-auto mb-[18px] block"
+                            viewBox="0 0 220 180"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                          >
+                            {/* ground */}
+                            <ellipse cx="110" cy="151" rx="78" ry="18" fill="#FFF1DE" />
+
+                            {/* left building */}
+                            <rect x="44" y="76" width="52" height="67" rx="4" fill="#FFE3BD" stroke="#FF9B24" strokeWidth="2" />
+                            <rect x="52" y="86" width="9" height="10" fill="#ffffff" />
+                            <rect x="66" y="86" width="9" height="10" fill="#ffffff" />
+                            <rect x="80" y="86" width="9" height="10" fill="#ffffff" />
+                            <rect x="52" y="103" width="9" height="10" fill="#ffffff" />
+                            <rect x="66" y="103" width="9" height="10" fill="#ffffff" />
+                            <rect x="80" y="103" width="9" height="10" fill="#ffffff" />
+                            <rect x="64" y="121" width="13" height="22" fill="#FF9B24" />
+
+                            {/* right building */}
+                            <rect x="112" y="91" width="62" height="52" rx="4" fill="#FFF5E8" stroke="#FF9B24" strokeWidth="2" />
+                            <rect x="121" y="102" width="12" height="11" fill="#FFD08B" />
+                            <rect x="140" y="102" width="12" height="11" fill="#FFD08B" />
+                            <rect x="159" y="102" width="8" height="11" fill="#FFD08B" />
+                            <rect x="135" y="122" width="17" height="21" fill="#FF9B24" />
+
+                            {/* research tower */}
+                            <rect x="88" y="36" width="34" height="74" rx="12" fill="#FFF8EE" stroke="#FF8A00" strokeWidth="2" />
+                            <ellipse cx="105" cy="38" rx="18" ry="6" fill="#FFD28F" stroke="#FF8A00" strokeWidth="2" />
+                            <rect x="93" y="47" width="24" height="25" rx="5" fill="#FFB64D" />
+                            <line x1="97" y1="79" x2="113" y2="79" stroke="#FF8A00" strokeWidth="2" />
+                            <line x1="97" y1="86" x2="113" y2="86" stroke="#FF8A00" strokeWidth="2" />
+
+                            {/* antenna */}
+                            <line x1="105" y1="31" x2="105" y2="16" stroke="#FF8A00" strokeWidth="2" />
+                            <circle cx="105" cy="12" r="5" fill="#FF8A00" />
+
+                            {/* decorative chart */}
+                            <path d="M28 124L37 114L46 118" stroke="#FF8A00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M172 72L183 61L193 67L205 50" stroke="#FF8A00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx="183" cy="61" r="3" fill="#FF8A00" />
+                            <circle cx="205" cy="50" r="3" fill="#FF8A00" />
+                          </svg>
+
+                          <Link
+                            href="/research"
+                            className="feature-link inline-flex items-center gap-[8px] mb-[8px] text-[#101828] text-[14px] font-bold no-underline hover:text-[#ff8500] transition-colors duration-200"
+                            onClick={() => setIsResearchOpen(false)}
+                          >
+                            Explore Investment Research
+                            <span aria-hidden="true">→</span>
+                          </Link>
+
+                          <p className="feature-description text-[#667085] text-[13px] leading-[1.6] m-0">
+                            Follow all 8 learning levels, from investment foundations to a complete portfolio-planning capstone.
+                          </p>
+                        </div>
+
+                        {/* DIVIDER 1 */}
+                        <div className="divider hidden md:block w-[1px] bg-[#e8e8e8]" />
+
+                        {/* COLUMN 1 */}
+                        <div className="menu-column flex flex-col gap-[24px]">
+                          {column1Links.map((item) => (
+                            <Link
+                              key={item.title}
+                              href={item.href}
+                              className="menu-link group block no-underline"
+                              onClick={() => setIsResearchOpen(false)}
+                            >
+                              <h3 className="mb-[6px] text-[#182230] text-[14px] font-[650] transition-colors duration-200 group-hover:text-[#ff8500] m-0">
+                                {item.title}
+                              </h3>
+                              <p className="text-[#98a2b3] text-[12.5px] leading-[1.5] m-0">
+                                {item.description}
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* DIVIDER 2 */}
+                        <div className="divider hidden md:block w-[1px] bg-[#e8e8e8]" />
+
+                        {/* COLUMN 2 */}
+                        <div className="menu-column flex flex-col gap-[24px]">
+                          {column2Links.map((item) => (
+                            <Link
+                              key={item.title}
+                              href={item.href}
+                              className="menu-link group block no-underline"
+                              onClick={() => setIsResearchOpen(false)}
+                            >
+                              <h3 className="mb-[6px] text-[#182230] text-[14px] font-[650] transition-colors duration-200 group-hover:text-[#ff8500] m-0">
+                                {item.title}
+                              </h3>
+                              <p className="text-[#98a2b3] text-[12.5px] leading-[1.5] m-0">
+                                {item.description}
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </li>
                 );
               }
@@ -308,130 +435,6 @@ export function Navbar() {
             </button>
           </div>
         </nav>
-
-        {/* MEGA DROPDOWN (DESKTOP) */}
-        <div
-          aria-hidden={!isResearchOpen}
-          aria-label="Investment research"
-          id="research-mega-menu"
-          className={cn(
-            "mega-menu absolute left-0 z-50 hidden w-full border-y border-[#e8e8e8] bg-white shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-[opacity,transform,visibility] duration-200 ease-in-out xl:block",
-            isScrolled ? "top-[calc(100%+0.5rem)] rounded-2xl" : "top-full",
-            isResearchOpen
-              ? "opacity-100 visible translate-y-0 pointer-events-auto"
-              : "opacity-0 invisible -translate-y-2 pointer-events-none",
-          )}
-          onMouseEnter={openResearchMenu}
-          onMouseLeave={closeResearchMenu}
-          onClick={(e) => e.stopPropagation()}
-          role="region"
-        >
-          <div className="mega-inner w-[min(1100px,calc(100%-60px))] mx-auto grid grid-cols-1 md:grid-cols-[330px_1px_1fr_1px_1fr] gap-[28px] py-[30px]">
-            {/* LEFT FEATURE */}
-            <div className="feature-panel pr-0 md:pr-[10px] pb-6 md:pb-0 border-b md:border-b-0 border-[#eeeeee]">
-              <svg
-                className="illustration w-[180px] h-[150px] mx-auto mb-[18px] block"
-                viewBox="0 0 220 180"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-              >
-                {/* ground */}
-                <ellipse cx="110" cy="151" rx="78" ry="18" fill="#FFF1DE" />
-
-                {/* left building */}
-                <rect x="44" y="76" width="52" height="67" rx="4" fill="#FFE3BD" stroke="#FF9B24" strokeWidth="2" />
-                <rect x="52" y="86" width="9" height="10" fill="#ffffff" />
-                <rect x="66" y="86" width="9" height="10" fill="#ffffff" />
-                <rect x="80" y="86" width="9" height="10" fill="#ffffff" />
-                <rect x="52" y="103" width="9" height="10" fill="#ffffff" />
-                <rect x="66" y="103" width="9" height="10" fill="#ffffff" />
-                <rect x="80" y="103" width="9" height="10" fill="#ffffff" />
-                <rect x="64" y="121" width="13" height="22" fill="#FF9B24" />
-
-                {/* right building */}
-                <rect x="112" y="91" width="62" height="52" rx="4" fill="#FFF5E8" stroke="#FF9B24" strokeWidth="2" />
-                <rect x="121" y="102" width="12" height="11" fill="#FFD08B" />
-                <rect x="140" y="102" width="12" height="11" fill="#FFD08B" />
-                <rect x="159" y="102" width="8" height="11" fill="#FFD08B" />
-                <rect x="135" y="122" width="17" height="21" fill="#FF9B24" />
-
-                {/* research tower */}
-                <rect x="88" y="36" width="34" height="74" rx="12" fill="#FFF8EE" stroke="#FF8A00" strokeWidth="2" />
-                <ellipse cx="105" cy="38" rx="18" ry="6" fill="#FFD28F" stroke="#FF8A00" strokeWidth="2" />
-                <rect x="93" y="47" width="24" height="25" rx="5" fill="#FFB64D" />
-                <line x1="97" y1="79" x2="113" y2="79" stroke="#FF8A00" strokeWidth="2" />
-                <line x1="97" y1="86" x2="113" y2="86" stroke="#FF8A00" strokeWidth="2" />
-
-                {/* antenna */}
-                <line x1="105" y1="31" x2="105" y2="16" stroke="#FF8A00" strokeWidth="2" />
-                <circle cx="105" cy="12" r="5" fill="#FF8A00" />
-
-                {/* decorative chart */}
-                <path d="M28 124L37 114L46 118" stroke="#FF8A00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M172 72L183 61L193 67L205 50" stroke="#FF8A00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="183" cy="61" r="3" fill="#FF8A00" />
-                <circle cx="205" cy="50" r="3" fill="#FF8A00" />
-              </svg>
-
-              <Link
-                href="/research"
-                className="feature-link inline-flex items-center gap-[8px] mb-[8px] text-[#101828] text-[14px] font-bold no-underline hover:text-[#ff8500] transition-colors duration-200"
-                onClick={() => setIsResearchOpen(false)}
-              >
-                Explore Investment Research
-                <span aria-hidden="true">→</span>
-              </Link>
-
-              <p className="feature-description text-[#667085] text-[13px] leading-[1.6] m-0">
-                Follow all 8 learning levels, from investment foundations to a complete portfolio-planning capstone.
-              </p>
-            </div>
-
-            {/* DIVIDER 1 */}
-            <div className="divider hidden md:block w-[1px] bg-[#e8e8e8]" />
-
-            {/* COLUMN 1 */}
-            <div className="menu-column flex flex-col gap-[24px]">
-              {column1Links.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="menu-link group block no-underline"
-                  onClick={() => setIsResearchOpen(false)}
-                >
-                  <h3 className="mb-[6px] text-[#182230] text-[14px] font-[650] transition-colors duration-200 group-hover:text-[#ff8500] m-0">
-                    {item.title}
-                  </h3>
-                  <p className="text-[#98a2b3] text-[12.5px] leading-[1.5] m-0">
-                    {item.description}
-                  </p>
-                </Link>
-              ))}
-            </div>
-
-            {/* DIVIDER 2 */}
-            <div className="divider hidden md:block w-[1px] bg-[#e8e8e8]" />
-
-            {/* COLUMN 2 */}
-            <div className="menu-column flex flex-col gap-[24px]">
-              {column2Links.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="menu-link group block no-underline"
-                  onClick={() => setIsResearchOpen(false)}
-                >
-                  <h3 className="mb-[6px] text-[#182230] text-[14px] font-[650] transition-colors duration-200 group-hover:text-[#ff8500] m-0">
-                    {item.title}
-                  </h3>
-                  <p className="text-[#98a2b3] text-[12.5px] leading-[1.5] m-0">
-                    {item.description}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* MOBILE DROPDOWN PANEL */}
         {isMobileMenuOpen && (

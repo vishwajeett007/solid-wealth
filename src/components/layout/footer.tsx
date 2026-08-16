@@ -58,13 +58,19 @@ export function Footer() {
           <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-3 md:gap-4">
             <h3 className="text-[#fe9800] font-bold text-xl md:text-3xl mb-1">Links</h3>
             <div className="flex flex-col gap-2 md:gap-3 text-base md:text-xl">
-              {["Home", "Research", "Calculators", "Mutual Funds", "Blogs"].map((link) => (
+              {[
+                { label: "Home", href: "/" },
+                { label: "Research", href: "/research" },
+                { label: "Calculators", href: "/calculators" },
+                { label: "Mutual Funds", href: "/#mutual-funds" },
+                { label: "Blogs", href: "/blog" },
+              ].map((link) => (
                 <Link
-                  key={link}
-                  href="#"
+                  key={link.label}
+                  href={link.href}
                   className="text-gray-300 hover:text-white font-medium transition-colors"
                 >
-                  {link}
+                  {link.label}
                 </Link>
               ))}
             </div>
