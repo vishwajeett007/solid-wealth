@@ -1,25 +1,17 @@
 "use client";
-
 import Link from "next/link";
 import Script from "next/script";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const LottiePlayer = "lottie-player" as any;
+
 export default function NotFound() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-72px)] px-4 text-center bg-white pb-20 pt-10">
-      <Script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" strategy="lazyOnload" />
+    return (<div className="flex flex-col items-center justify-center min-h-[calc(100vh-72px)] px-4 text-center bg-white pb-20 pt-10">
+      <Script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" strategy="lazyOnload"/>
 
       <div className="w-full max-w-[500px] mx-auto relative z-10 -mb-10">
-        {/* @ts-expect-error Custom element from lottie-player script */}
-        <lottie-player
-          src="/404%20notfound/animations/12345.json"
-          background="transparent"
-          speed="1"
-          style={{ width: "100%", height: "350px", maxWidth: "100%" }}
-          loop
-          autoplay
-        />
+        <LottiePlayer src="/404%20notfound/animations/12345.json" background="transparent" speed="1" style={{ width: "100%", height: "350px", maxWidth: "100%" }} loop autoplay/>
       </div>
 
       <div className="relative z-20 flex flex-col items-center">
@@ -36,6 +28,5 @@ export default function NotFound() {
           </Button>
         </Link>
       </div>
-    </div>
-  );
+    </div>);
 }
