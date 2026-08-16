@@ -7,53 +7,25 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/lib/content";
+import { courseLevels } from "@/lib/course-curriculum";
 import { cn } from "@/lib/utils";
 
-const column1Links = [
-  {
-    title: "Mutual Fund Research",
-    description: "Understand fund categories, performance and selection.",
-    href: "/research/product-knowledge#module-5",
-  },
-  {
-    title: "Fund Screener",
-    description: "Compare mutual funds using returns, risk and ratios.",
-    href: "/research/investment-selection#module-10",
-  },
-  {
-    title: "Investment Strategies",
-    description: "SIP, lump sum, asset allocation and portfolio strategies.",
-    href: "/research/investment-selection#module-12",
-  },
-  {
-    title: "Market Research",
-    description: "Learn how markets, sectors and economic cycles work.",
-    href: "/research/foundation#module-2",
-  },
-];
+const researchLevelLinks = courseLevels.map((level) => {
+  const [firstModule, lastModule] = level.moduleRange;
+  const moduleLabel =
+    firstModule === lastModule
+      ? `Module ${firstModule}`
+      : `Modules ${firstModule}–${lastModule}`;
 
-const column2Links = [
-  {
-    title: "Portfolio Analysis",
-    description: "Review allocation, diversification and portfolio risk.",
-    href: "/research/investment-selection#module-11",
-  },
-  {
-    title: "Risk & Returns",
-    description: "Learn volatility, alpha, beta and risk-adjusted returns.",
-    href: "/research/product-knowledge#module-7",
-  },
-  {
-    title: "Tax & Retirement",
-    description: "Taxation, retirement planning and long-term financial goals.",
-    href: "/research/portfolio-management#module-15",
-  },
-  {
-    title: "Research Library",
-    description: "Read guides, case studies and investing resources.",
-    href: "/research/practical-application#module-23",
-  },
-];
+  return {
+    title: `Level ${level.levelNumber}: ${level.title}`,
+    description: `${moduleLabel} · ${level.focus}`,
+    href: `/research/${level.id}`,
+  };
+});
+
+const column1Links = researchLevelLinks.slice(0, 4);
+const column2Links = researchLevelLinks.slice(4);
 
 export function Navbar() {
   const pathname = usePathname();
@@ -411,7 +383,7 @@ export function Navbar() {
               </Link>
 
               <p className="feature-description text-[#667085] text-[13px] leading-[1.6] m-0">
-                Learn mutual funds, markets, portfolio construction, risk and long-term investing with structured research.
+                Follow all 8 learning levels, from investment foundations to a complete portfolio-planning capstone.
               </p>
             </div>
 
@@ -513,14 +485,14 @@ export function Navbar() {
                               Explore Investment Research →
                             </Link>
                             <p className="mt-1 text-xs text-[#667085] leading-relaxed m-0">
-                              Learn mutual funds, markets, portfolio construction, risk and long-term investing with structured research.
+                              Follow all 8 learning levels, from investment foundations to a complete portfolio-planning capstone.
                             </p>
                           </div>
 
                           {/* Column 1 */}
                           <div className="flex flex-col gap-3">
                             <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff8500] m-0">
-                              Research Categories
+                              Levels 1–4
                             </p>
                             {column1Links.map((item) => (
                               <Link
@@ -545,7 +517,7 @@ export function Navbar() {
                           {/* Column 2 */}
                           <div className="flex flex-col gap-3 pt-2 border-t border-[#eeeeee]">
                             <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff8500] m-0">
-                              Analysis & Strategy
+                              Levels 5–8
                             </p>
                             {column2Links.map((item) => (
                               <Link
