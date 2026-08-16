@@ -3,46 +3,54 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
-import Image from "next/image";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/lib/content";
 import { cn } from "@/lib/utils";
-import {
-  courseCurriculum,
-  getCourseLevelForModule,
-  type CourseModule,
-} from "@/lib/course-curriculum";
 
-const researchTracks: Array<{
-  level: CourseModule["level"];
-  label: string;
-  description: string;
-  accentClass: string;
-}> = [
+const column1Links = [
   {
-    level: "Beginner",
-    label: "Build your foundation",
-    description: "Markets, mutual funds, and the language of investing.",
-    accentClass: "bg-amber-100 text-amber-700",
+    title: "Mutual Fund Research",
+    description: "Understand fund categories, performance and selection.",
+    href: "/research/product-knowledge#module-5",
   },
   {
-    level: "Intermediate",
-    label: "Analyse with confidence",
-    description: "Risk, returns, selection, and investing strategies.",
-    accentClass: "bg-sky-100 text-sky-700",
+    title: "Fund Screener",
+    description: "Compare mutual funds using returns, risk and ratios.",
+    href: "/research/investment-selection#module-10",
   },
   {
-    level: "Advanced",
-    label: "Plan for real goals",
-    description: "Tax, retirement, behaviour, and advanced strategies.",
-    accentClass: "bg-violet-100 text-violet-700",
+    title: "Investment Strategies",
+    description: "SIP, lump sum, asset allocation and portfolio strategies.",
+    href: "/research/investment-selection#module-12",
   },
   {
-    level: "Mastery & Practical",
-    label: "Put it into practice",
-    description: "Hands-on analysis, portfolios, cases, and tools.",
-    accentClass: "bg-emerald-100 text-emerald-700",
+    title: "Market Research",
+    description: "Learn how markets, sectors and economic cycles work.",
+    href: "/research/foundation#module-2",
+  },
+];
+
+const column2Links = [
+  {
+    title: "Portfolio Analysis",
+    description: "Review allocation, diversification and portfolio risk.",
+    href: "/research/investment-selection#module-11",
+  },
+  {
+    title: "Risk & Returns",
+    description: "Learn volatility, alpha, beta and risk-adjusted returns.",
+    href: "/research/product-knowledge#module-7",
+  },
+  {
+    title: "Tax & Retirement",
+    description: "Taxation, retirement planning and long-term financial goals.",
+    href: "/research/portfolio-management#module-15",
+  },
+  {
+    title: "Research Library",
+    description: "Read guides, case studies and investing resources.",
+    href: "/research/practical-application#module-23",
   },
 ];
 
@@ -54,6 +62,7 @@ export function Navbar() {
   const [activeSection, setActiveSection] = useState("");
   const [isResearchOpen, setIsResearchOpen] = useState(false);
   const researchCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const researchItemRef = useRef<HTMLLIElement>(null);
 
   const cancelResearchClose = () => {
     if (researchCloseTimer.current) {
@@ -71,7 +80,12 @@ export function Navbar() {
     cancelResearchClose();
     researchCloseTimer.current = setTimeout(() => {
       setIsResearchOpen(false);
-    }, 140);
+    }, 180);
+  };
+
+  const toggleResearchMenu = () => {
+    cancelResearchClose();
+    setIsResearchOpen((prev) => !prev);
   };
 
   useEffect(() => {
@@ -84,11 +98,34 @@ export function Navbar() {
     };
 
     window.addEventListener("scroll", handleScroll);
-    // Run immediate check
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        researchItemRef.current &&
+        !researchItemRef.current.contains(event.target as Node)
+      ) {
+        setIsResearchOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsResearchOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -155,112 +192,123 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-out ",
+        "fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-out",
         isScrolled ? "top-4 px-4 sm:px-6" : "top-0 px-0 bg-transparent",
       )}
     >
       <div
         className={cn(
-          "w-full transition-all duration-500 ease-out flex flex-col justify-center",
+          "w-full transition-all duration-500 ease-out flex flex-col justify-center relative",
           isScrolled
-            ? "max-w-[1000px] lg:max-w-[1200px] rounded-[15px] shadow-lg py-3 px-6 lg:px-8 bg-white/90 backdrop-blur-xl border border-gray-200"
-            : "max-w-full rounded-none py-6 px-4 sm:px-8 lg:px-16 shadow-none bg-transparent border-transparent",
+            ? "max-w-[1000px] lg:max-w-[1200px] rounded-[15px] shadow-lg py-3 px-6 lg:px-8 bg-white/95 backdrop-blur-xl border border-gray-200"
+            : "max-w-full rounded-none py-4 px-4 sm:px-8 lg:px-16 shadow-none bg-white border-b border-[#eeeeee]",
         )}
       >
         <nav
           aria-label="Main navigation"
-          className="flex w-full items-center justify-between"
+          className="flex w-full items-center justify-between h-[50px] sm:h-[58px]"
         >
           {/* Logo */}
           <Link
             className={cn(
-              "bg-[#fe9800] bg-clip-text font-display font-extrabold tracking-normal text-transparent hover:opacity-90 transition-all duration-500 flex items-center",
-              isScrolled ? "text-xl" : "text-[28px]"
+              "font-display font-extrabold tracking-normal text-[#ff8500] hover:opacity-90 transition-all duration-500 flex items-center gap-[9px] no-underline",
+              isScrolled ? "text-xl" : "text-[24px]"
             )}
             style={{ fontFamily: "var(--font-righteous)" }}
             href="/"
           >
-            <Image
-              src="/logo1.png"
-              alt="Logo"
-              width={32}
-              height={32}
-              className={cn("inline-flex mr-2 transition-all duration-500", isScrolled ? "w-6 h-6" : "w-8 h-8")}
-            />
+            <svg
+              className={cn("shrink-0 transition-all duration-500", isScrolled ? "w-6 h-6" : "w-[31px] h-[31px]")}
+              viewBox="0 0 40 40"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M5 11L20 3L35 11L20 19L5 11Z" fill="#FF8A00" />
+              <path d="M5 17L20 25L35 17V24L20 32L5 24V17Z" fill="#FF8A00" />
+              <path d="M5 28L20 36L35 28" stroke="#FF8A00" strokeWidth="5" strokeLinejoin="round" />
+            </svg>
             Solid Wealth
           </Link>
+
           {/* Desktop Navigation Links */}
-          <div className="hidden items-center gap-2 xl:flex">
+          <ul className="hidden items-center gap-[34px] xl:flex list-none m-0 p-0">
             {navLinks.map((link) => {
               const isResearchLink = link.label === "Research";
               const isDarkHeroPage = pathname.startsWith("/research/") && pathname !== "/research";
 
-              return (
-                <div
-                  className="py-2"
-                  key={link.label}
-                  onBlur={isResearchLink ? closeResearchMenu : undefined}
-                  onFocus={isResearchLink ? openResearchMenu : undefined}
-                  onMouseEnter={isResearchLink ? openResearchMenu : undefined}
-                  onMouseLeave={isResearchLink ? closeResearchMenu : undefined}
-                >
-                  <Link
-                    aria-controls={isResearchLink ? "research-mega-menu" : undefined}
-                    aria-expanded={isResearchLink ? isResearchOpen : undefined}
-                    aria-haspopup={isResearchLink ? "true" : undefined}
-                    className={cn(
-                      "nav-link-underline relative mx-3 inline-flex items-center gap-1.5 whitespace-nowrap font-semibold transition-all duration-500 hover:text-wealth-accent",
-                      isDarkHeroPage && !isScrolled
-                        ? "text-white drop-shadow-sm"
-                        : "text-wealth-secondary",
-                      isLinkActive(link.href) && "active text-wealth-accent",
-                      isScrolled ? "py-1 text-[15px]" : "py-2 text-[18px]",
-                      isResearchLink && isResearchOpen && "text-wealth-accent",
-                    )}
-                    href={link.href}
-                    onKeyDown={(event) => {
-                      if (isResearchLink && event.key === "Escape") {
-                        setIsResearchOpen(false);
-                        event.currentTarget.blur();
-                      }
-                    }}
+              if (isResearchLink) {
+                return (
+                  <li
+                    className={cn("nav-item research-item relative", isResearchOpen && "active")}
+                    key={link.label}
+                    ref={researchItemRef}
+                    onMouseEnter={openResearchMenu}
+                    onMouseLeave={closeResearchMenu}
                   >
-                    <span>{link.label}</span>
-                    {isResearchLink && (
-                      <ChevronDown
-                        aria-hidden="true"
+                    <button
+                      aria-controls="megaMenu"
+                      aria-expanded={isResearchOpen}
+                      aria-haspopup="true"
+                      className={cn(
+                        "nav-link flex items-center gap-[7px] bg-none border-0 cursor-pointer font-semibold transition-colors duration-200 text-[15px]",
+                        isDarkHeroPage && !isScrolled
+                          ? "text-white hover:text-[#ff8500]"
+                          : isResearchOpen
+                          ? "text-[#ff8500]"
+                          : "text-[#475467] hover:text-[#ff8500]",
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleResearchMenu();
+                      }}
+                      type="button"
+                    >
+                      <span>Research</span>
+                      <span
                         className={cn(
-                          "size-4 shrink-0 transition-transform duration-200",
-                          isDarkHeroPage && !isScrolled && !isResearchOpen && "text-white/80",
-                          isResearchOpen && "rotate-180",
+                          "chevron inline-block w-[7px] h-[7px] border-r-[1.5px] border-b-[1.5px] border-current transition-transform duration-250 ease-in-out",
+                          isResearchOpen
+                            ? "rotate-[225deg] mt-[4px]"
+                            : "rotate-45 -mt-[4px]",
                         )}
                       />
+                    </button>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={link.label}>
+                  <Link
+                    className={cn(
+                      "nav-link flex items-center gap-[7px] font-semibold transition-colors duration-200 text-[15px] no-underline",
+                      isDarkHeroPage && !isScrolled
+                        ? "text-white hover:text-[#ff8500]"
+                        : isLinkActive(link.href)
+                        ? "text-[#ff8500]"
+                        : "text-[#475467] hover:text-[#ff8500]",
                     )}
+                    href={link.href}
+                  >
+                    {link.label}
                   </Link>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
 
-          {/*Mobile Burger Toggle */}
+          {/* Desktop CTA / Mobile Toggle */}
           <div className="flex items-center gap-3">
             <div className="hidden xl:block">
               <Button
                 aria-label="Get started with Solid Wealth"
                 variant={pathname.startsWith("/research/") && pathname !== "/research" && !isScrolled ? "light-orange" : "black"}
                 className={cn(
-                  "group relative overflow-hidden transition-all duration-500 inline-flex",
-                  isScrolled ? "h-9 px-4 text-sm" : "h-12 px-7 text-base"
+                  "get-started rounded-full bg-[#050505] text-white font-semibold cursor-pointer border-0 transition-all duration-300 inline-flex items-center justify-center gap-2",
+                  isScrolled ? "h-10 px-5 text-sm" : "py-[13px] px-[24px] text-[14px]"
                 )}
-                icon={
-                  <ArrowRight
-                    aria-hidden="true"
-                    className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"
-                  />
-                }
               >
-                <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-44 pointer-events-none z-0" />
-                <span className="relative z-10">Get Started</span>
+                <span>Get Started →</span>
               </Button>
             </div>
 
@@ -269,10 +317,10 @@ export function Navbar() {
               aria-expanded={isMobileMenuOpen}
               aria-label="Toggle main menu"
               className={cn(
-                "inline-flex size-10 items-center justify-center rounded-full border transition hover:border-wealth-accent hover:text-wealth-accent focus:visible:outline-none xl:hidden",
+                "inline-flex size-10 items-center justify-center rounded-full border transition hover:border-[#ff8500] hover:text-[#ff8500] focus-visible:outline-none xl:hidden",
                 pathname.startsWith("/research/") && pathname !== "/research" && !isScrolled
                   ? "border-white/30 bg-white/10 text-white"
-                  : "border-wealth-border/40 bg-white/50 text-wealth-primary",
+                  : "border-gray-200 bg-white/80 text-[#101828]",
               )}
               onClick={() => {
                 setIsMobileMenuOpen((isOpen) => {
@@ -291,139 +339,132 @@ export function Navbar() {
           </div>
         </nav>
 
-        {/* Research Mega Menu */}
+        {/* MEGA DROPDOWN (DESKTOP) */}
         <div
-          aria-hidden={!isResearchOpen}
-          aria-label="Research curriculum"
+          id="megaMenu"
           className={cn(
-            "absolute left-1/2 top-[calc(100%+0.5rem)] hidden max-h-[calc(100svh-8rem)] w-[calc(100vw-3rem)] max-w-[1180px] -translate-x-1/2 overscroll-contain overflow-y-auto rounded-2xl border border-white/80 bg-white/75 backdrop-blur-3xl shadow-[0_30px_90px_rgba(15,26,44,0.16),0_4px_16px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.9)] transition-[opacity,transform,visibility] duration-300 xl:block",
+            "mega-menu absolute left-0 w-full bg-white border-t border-[#eeeeee] border-b border-[#e6e6e6] shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-all duration-200 ease-in-out z-50",
+            isScrolled ? "top-[calc(100%+0.5rem)] rounded-2xl" : "top-full",
             isResearchOpen
-              ? "visible translate-y-0 opacity-100"
-              : "pointer-events-none invisible -translate-y-2 opacity-0",
+              ? "opacity-100 visible translate-y-0 pointer-events-auto"
+              : "opacity-0 invisible -translate-y-2 pointer-events-none",
           )}
-          id="research-mega-menu"
-          onFocus={openResearchMenu}
           onMouseEnter={openResearchMenu}
           onMouseLeave={closeResearchMenu}
-          role="region"
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Frosted Header Bar */}
-          <div className="flex items-start justify-between gap-8 border-b border-white/60 bg-gradient-to-r from-amber-500/10 via-white/40 to-orange-500/10 backdrop-blur-md px-8 py-6 rounded-t-2xl">
-            <div>
-              <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-wealth-accent">
-                Solid Wealth Research
-              </p>
-              <h2 className="font-display text-2xl font-black tracking-tight text-wealth-primary">
-                Mutual Fund Investment Mastery
-              </h2>
-              <p className="mt-1 max-w-2xl text-xs sm:text-sm font-medium text-wealth-secondary/90">
-                A complete learning path from investing fundamentals to
-                building and reviewing real-world portfolios.
+          <div className="mega-inner w-[min(1100px,calc(100%-60px))] mx-auto grid grid-cols-1 md:grid-cols-[330px_1px_1fr_1px_1fr] gap-[28px] py-[30px]">
+            {/* LEFT FEATURE */}
+            <div className="feature-panel pr-0 md:pr-[10px] pb-6 md:pb-0 border-b md:border-b-0 border-[#eeeeee]">
+              <svg
+                className="illustration w-[180px] h-[150px] mx-auto mb-[18px] block"
+                viewBox="0 0 220 180"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+              >
+                {/* ground */}
+                <ellipse cx="110" cy="151" rx="78" ry="18" fill="#FFF1DE" />
+
+                {/* left building */}
+                <rect x="44" y="76" width="52" height="67" rx="4" fill="#FFE3BD" stroke="#FF9B24" strokeWidth="2" />
+                <rect x="52" y="86" width="9" height="10" fill="#ffffff" />
+                <rect x="66" y="86" width="9" height="10" fill="#ffffff" />
+                <rect x="80" y="86" width="9" height="10" fill="#ffffff" />
+                <rect x="52" y="103" width="9" height="10" fill="#ffffff" />
+                <rect x="66" y="103" width="9" height="10" fill="#ffffff" />
+                <rect x="80" y="103" width="9" height="10" fill="#ffffff" />
+                <rect x="64" y="121" width="13" height="22" fill="#FF9B24" />
+
+                {/* right building */}
+                <rect x="112" y="91" width="62" height="52" rx="4" fill="#FFF5E8" stroke="#FF9B24" strokeWidth="2" />
+                <rect x="121" y="102" width="12" height="11" fill="#FFD08B" />
+                <rect x="140" y="102" width="12" height="11" fill="#FFD08B" />
+                <rect x="159" y="102" width="8" height="11" fill="#FFD08B" />
+                <rect x="135" y="122" width="17" height="21" fill="#FF9B24" />
+
+                {/* research tower */}
+                <rect x="88" y="36" width="34" height="74" rx="12" fill="#FFF8EE" stroke="#FF8A00" strokeWidth="2" />
+                <ellipse cx="105" cy="38" rx="18" ry="6" fill="#FFD28F" stroke="#FF8A00" strokeWidth="2" />
+                <rect x="93" y="47" width="24" height="25" rx="5" fill="#FFB64D" />
+                <line x1="97" y1="79" x2="113" y2="79" stroke="#FF8A00" strokeWidth="2" />
+                <line x1="97" y1="86" x2="113" y2="86" stroke="#FF8A00" strokeWidth="2" />
+
+                {/* antenna */}
+                <line x1="105" y1="31" x2="105" y2="16" stroke="#FF8A00" strokeWidth="2" />
+                <circle cx="105" cy="12" r="5" fill="#FF8A00" />
+
+                {/* decorative chart */}
+                <path d="M28 124L37 114L46 118" stroke="#FF8A00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M172 72L183 61L193 67L205 50" stroke="#FF8A00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="183" cy="61" r="3" fill="#FF8A00" />
+                <circle cx="205" cy="50" r="3" fill="#FF8A00" />
+              </svg>
+
+              <Link
+                href="/research"
+                className="feature-link inline-flex items-center gap-[8px] mb-[8px] text-[#101828] text-[14px] font-bold no-underline hover:text-[#ff8500] transition-colors duration-200"
+                onClick={() => setIsResearchOpen(false)}
+              >
+                Explore Investment Research
+                <span>→</span>
+              </Link>
+
+              <p className="feature-description text-[#667085] text-[13px] leading-[1.6] m-0">
+                Learn mutual funds, markets, portfolio construction, risk and long-term investing with structured research.
               </p>
             </div>
-            <span className="mt-1 shrink-0 rounded-full border border-white/80 bg-white/70 backdrop-blur-md px-4 py-1.5 text-xs font-extrabold text-wealth-primary shadow-sm">
-              {courseCurriculum.length} modules
-            </span>
-          </div>
 
-          {/* Frosted Cards Track Grid */}
-          <div className="grid grid-cols-4 gap-4 px-6 py-6">
-            {researchTracks.map((track, trackIdx) => {
-              const modules = courseCurriculum.filter(
-                (module) => module.level === track.level,
-              );
+            {/* DIVIDER 1 */}
+            <div className="divider hidden md:block w-[1px] bg-[#e8e8e8]" />
 
-              // Indicator dot colors matching Craft design
-              const dotColors = [
-                "bg-amber-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]",
-                "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]",
-                "bg-emerald-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]",
-                "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]",
-              ];
-
-              const textColors = [
-                "text-[#d97706]",
-                "text-[#2563eb]",
-                "text-[#059669]",
-                "text-[#ea580c]",
-              ];
-
-              return (
-                <section
-                  className="bg-white/50 backdrop-blur-xl border border-white/80 rounded-lg p-4 shadow-[0_4px_24px_rgba(0,0,0,0.02)] transition-all duration-300 hover:bg-white/80 hover:shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:border-white flex flex-col justify-between"
-                  key={track.level}
+            {/* COLUMN 1 */}
+            <div className="menu-column flex flex-col gap-[24px]">
+              {column1Links.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="menu-link group block no-underline"
+                  onClick={() => setIsResearchOpen(false)}
                 >
-                  <div>
-                    <div className="mb-4">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className={cn("size-2 rounded-full shrink-0", dotColors[trackIdx % dotColors.length])} />
-                        <span
-                          className={cn(
-                            "text-[10px] font-black uppercase tracking-[0.14em]",
-                            textColors[trackIdx % textColors.length],
-                          )}
-                        >
-                          {track.level}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-extrabold text-wealth-primary tracking-tight">
-                        {track.label}
-                      </h3>
-                      <p className="mt-1 text-[11px] leading-relaxed text-wealth-secondary/80">
-                        {track.description}
-                      </p>
-                    </div>
+                  <h3 className="mb-[6px] text-[#182230] text-[14px] font-[650] transition-colors duration-200 group-hover:text-[#ff8500] m-0">
+                    {item.title}
+                  </h3>
+                  <p className="text-[#98a2b3] text-[12.5px] leading-[1.5] m-0">
+                    {item.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
 
-                    <ol className="space-y-1">
-                      {modules.map((module) => {
-                        const courseLevel = getCourseLevelForModule(
-                          module.moduleNumber,
-                        );
+            {/* DIVIDER 2 */}
+            <div className="divider hidden md:block w-[1px] bg-[#e8e8e8]" />
 
-                        return (
-                          <li key={module.id}>
-                            <Link
-                              className="group flex items-center gap-2 rounded-md px-2 py-1.5 transition-all duration-200 hover:bg-white/90 hover:shadow-sm hover:translate-x-0.5 focus-visible:bg-white/90 focus-visible:outline-none"
-                              href={`/research/${courseLevel?.id ?? "foundation"}#${module.id}`}
-                              onClick={() => setIsResearchOpen(false)}
-                            >
-                              <span className="flex size-5 shrink-0 items-center justify-center rounded bg-white/80 border border-black/5 text-[10px] font-bold tabular-nums text-wealth-primary shadow-2xs transition-colors group-hover:bg-wealth-accent group-hover:text-white group-hover:border-wealth-accent">
-                                {module.moduleNumber}
-                              </span>
-                              <span className="text-[12px] font-semibold leading-4 text-wealth-secondary transition-colors group-hover:text-wealth-primary">
-                                {module.title}
-                              </span>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-
-          {/* Frosted Footer Bar */}
-          <div className="flex items-center justify-between border-t border-white/60 bg-white/40 backdrop-blur-md px-8 py-4 text-xs rounded-b-2xl">
-            <p className="text-wealth-secondary/80 font-medium">
-              Theory, analysis, strategy, taxation, and portfolio management
-              in one structured curriculum.
-            </p>
-            <p className="font-extrabold text-wealth-primary tracking-wide">
-              Beginner to practical mastery
-            </p>
+            {/* COLUMN 2 */}
+            <div className="menu-column flex flex-col gap-[24px]">
+              {column2Links.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="menu-link group block no-underline"
+                  onClick={() => setIsResearchOpen(false)}
+                >
+                  <h3 className="mb-[6px] text-[#182230] text-[14px] font-[650] transition-colors duration-200 group-hover:text-[#ff8500] m-0">
+                    {item.title}
+                  </h3>
+                  <p className="text-[#98a2b3] text-[12.5px] leading-[1.5] m-0">
+                    {item.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Mobile Dropdown Panel */}
+        {/* MOBILE DROPDOWN PANEL */}
         {isMobileMenuOpen && (
           <div
             className={cn(
-              "absolute left-0 right-0 top-full mt-3 flex max-h-[calc(100svh-7rem)] animate-fade-in flex-col gap-4 overflow-y-auto overscroll-contain border border-wealth-border/90 p-4 shadow-wealth-lg backdrop-blur-xl sm:p-6 xl:hidden",
-              isScrolled
-                ? "rounded-[20px] bg-white/95"
-                : "rounded-none bg-white/100 border-x-0 border-b",
+              "absolute left-0 right-0 top-full mt-2 flex max-h-[calc(100svh-7rem)] flex-col gap-4 overflow-y-auto overscroll-contain border border-[#eeeeee] bg-white p-5 shadow-xl xl:hidden z-50 rounded-b-2xl",
             )}
           >
             <div className="flex flex-col gap-2">
@@ -435,9 +476,8 @@ export function Navbar() {
                         aria-controls="mobile-research-menu"
                         aria-expanded={isMobileResearchOpen}
                         className={cn(
-                          "flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-base font-semibold text-wealth-secondary transition-all duration-200 hover:bg-wealth-accent/5 hover:text-wealth-accent",
-                          isMobileResearchOpen &&
-                          "bg-wealth-accent-light/50 text-wealth-accent",
+                          "flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-base font-semibold text-[#475467] transition-all duration-200 hover:bg-[#fff7ed] hover:text-[#ff8500]",
+                          isMobileResearchOpen && "bg-[#fff7ed] text-[#ff8500]",
                         )}
                         onClick={() =>
                           setIsMobileResearchOpen((isOpen) => !isOpen)
@@ -456,73 +496,74 @@ export function Navbar() {
 
                       {isMobileResearchOpen && (
                         <div
-                          className="mt-2 rounded-2xl border border-wealth-border/70 bg-[#fffdf8] p-3 sm:p-4"
+                          className="mt-2 rounded-xl border border-[#eeeeee] bg-[#fffdf7] p-4 flex flex-col gap-5"
                           id="mobile-research-menu"
                         >
-                          <div className="mb-4 flex items-start justify-between gap-3 border-b border-wealth-border/60 pb-3">
-                            <div>
-                              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-wealth-accent">
-                                Research curriculum
-                              </p>
-                              <p className="mt-1 text-sm font-bold text-wealth-primary">
-                                Mutual Fund Investment Mastery
-                              </p>
-                            </div>
-                            <span className="shrink-0 rounded-full bg-wealth-surface-dim px-2 py-1 text-[10px] font-bold text-wealth-secondary">
-                              {courseCurriculum.length} modules
-                            </span>
+                          {/* Feature link */}
+                          <div className="pb-3 border-b border-[#eeeeee]">
+                            <Link
+                              href="/research"
+                              className="inline-flex items-center gap-2 text-sm font-bold text-[#101828] hover:text-[#ff8500]"
+                              onClick={() => {
+                                setIsMobileMenuOpen(false);
+                                setIsMobileResearchOpen(false);
+                              }}
+                            >
+                              Explore Investment Research →
+                            </Link>
+                            <p className="mt-1 text-xs text-[#667085] leading-relaxed m-0">
+                              Learn mutual funds, markets, portfolio construction, risk and long-term investing with structured research.
+                            </p>
                           </div>
 
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {researchTracks.map((track) => {
-                              const modules = courseCurriculum.filter(
-                                (module) => module.level === track.level,
-                              );
+                          {/* Column 1 */}
+                          <div className="flex flex-col gap-3">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff8500] m-0">
+                              Research Categories
+                            </p>
+                            {column1Links.map((item) => (
+                              <Link
+                                key={item.title}
+                                href={item.href}
+                                className="block no-underline"
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  setIsMobileResearchOpen(false);
+                                }}
+                              >
+                                <p className="text-xs font-bold text-[#182230] hover:text-[#ff8500] m-0">
+                                  {item.title}
+                                </p>
+                                <p className="text-[11px] text-[#98a2b3] m-0">
+                                  {item.description}
+                                </p>
+                              </Link>
+                            ))}
+                          </div>
 
-                              return (
-                                <section
-                                  className="rounded-xl border border-wealth-border/60 bg-white/60 p-3"
-                                  key={track.level}
-                                >
-                                  <span
-                                    className={cn(
-                                      "inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em]",
-                                      track.accentClass,
-                                    )}
-                                  >
-                                    {track.level}
-                                  </span>
-                                  <h3 className="mt-2 text-sm font-bold text-wealth-primary">
-                                    {track.label}
-                                  </h3>
-                                  <ol className="mt-2 space-y-1.5">
-                                    {modules.map((module) => {
-                                      const courseLevel = getCourseLevelForModule(
-                                        module.moduleNumber,
-                                      );
-
-                                      return (
-                                        <li key={module.id}>
-                                          <Link
-                                            className="flex items-start gap-2 rounded-md text-xs leading-4 text-wealth-secondary transition hover:text-wealth-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wealth-accent/40"
-                                            href={`/research/${courseLevel?.id ?? "foundation"}#${module.id}`}
-                                            onClick={() => {
-                                              setIsMobileMenuOpen(false);
-                                              setIsMobileResearchOpen(false);
-                                            }}
-                                          >
-                                            <span className="flex size-4 shrink-0 items-center justify-center rounded bg-wealth-surface-dim text-[8px] font-bold tabular-nums text-wealth-muted">
-                                              {module.moduleNumber}
-                                            </span>
-                                            <span>{module.title}</span>
-                                          </Link>
-                                        </li>
-                                      );
-                                    })}
-                                  </ol>
-                                </section>
-                              );
-                            })}
+                          {/* Column 2 */}
+                          <div className="flex flex-col gap-3 pt-2 border-t border-[#eeeeee]">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff8500] m-0">
+                              Analysis & Strategy
+                            </p>
+                            {column2Links.map((item) => (
+                              <Link
+                                key={item.title}
+                                href={item.href}
+                                className="block no-underline"
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  setIsMobileResearchOpen(false);
+                                }}
+                              >
+                                <p className="text-xs font-bold text-[#182230] hover:text-[#ff8500] m-0">
+                                  {item.title}
+                                </p>
+                                <p className="text-[11px] text-[#98a2b3] m-0">
+                                  {item.description}
+                                </p>
+                              </Link>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -533,9 +574,8 @@ export function Navbar() {
                 return (
                   <Link
                     className={cn(
-                      "flex w-full items-center rounded-xl px-4 py-3 text-base font-semibold text-wealth-secondary transition-all duration-200 hover:bg-wealth-accent/5 hover:text-wealth-accent",
-                      isLinkActive(link.href) &&
-                      "active bg-wealth-accent-light/50 text-wealth-accent",
+                      "flex w-full items-center rounded-xl px-4 py-3 text-base font-semibold text-[#475467] transition-all duration-200 hover:bg-[#fff7ed] hover:text-[#ff8500]",
+                      isLinkActive(link.href) && "bg-[#fff7ed] text-[#ff8500]",
                     )}
                     href={link.href}
                     key={link.label}
@@ -549,25 +589,18 @@ export function Navbar() {
                 );
               })}
             </div>
-            <div className="h-px bg-wealth-border/60 w-full my-1" />
+
+            <div className="h-px bg-[#eeeeee] w-full my-1" />
             <Button
               aria-label="Get started with Solid Wealth"
               variant="black"
-              className="w-full justify-center py-3 text-base group relative overflow-hidden"
-              icon={
-                <ArrowRight
-                  aria-hidden="true"
-                  className="size-5 relative z-10"
-                />
-              }
+              className="w-full justify-center py-3 text-base rounded-full bg-[#050505] text-white font-semibold"
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 setIsMobileResearchOpen(false);
               }}
-              size="md"
             >
-              <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-[450px] pointer-events-none z-0" />
-              <span className="relative z-10">Get Started</span>
+              Get Started →
             </Button>
           </div>
         )}

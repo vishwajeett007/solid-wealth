@@ -32,7 +32,9 @@ export function DownloadAppSection() {
           </p>
 
           <Link
-            href="#"
+            href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-3 bg-[#1e1e1e] text-white px-8 py-4 rounded-[14px] hover:bg-black transition-transform hover:scale-105 shadow-xl shadow-black/10"
           >
             <Image src={playstore} alt="Google Play" className="w-10 h-10" />

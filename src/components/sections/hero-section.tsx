@@ -39,6 +39,7 @@ export function HeroSection() {
   const line1Ref = useRef<HTMLSpanElement>(null);
   const line2Ref = useRef<HTMLSpanElement>(null);
   const headingWidthRef = useRef(0);
+  const headingNaturalTopRef = useRef(0);
   const line1WidthRef = useRef(0);
   const line2WidthRef = useRef(0);
   const shiftPxRef = useRef(0);
@@ -115,16 +116,31 @@ export function HeroSection() {
 
     // 2. Column 1: Main Text Container
     if (textRef.current) {
-      const tyBasePx = (tyBase * wHeight) / 100;
+      let textTranslateYPx = (tyBase * wHeight) / 100 + correctionY;
+
+      // On short desktop browser viewports (commonly seen on Windows laptops),
+      // the dome-avoidance correction can otherwise push the heading into the
+      // fixed navbar. Keep the animated heading below a reliable safe area.
+      if (!isMobileRef.current && headingNaturalTopRef.current > 0) {
+        const minimumDesktopHeadingTop = 128;
+        const projectedHeadingTop =
+          headingNaturalTopRef.current + textTranslateYPx;
+
+        if (projectedHeadingTop < minimumDesktopHeadingTop) {
+          textTranslateYPx +=
+            minimumDesktopHeadingTop - projectedHeadingTop;
+        }
+      }
+
       if (isMobileRef.current) {
         // Mobile layout centering
-        textRef.current.style.transform = `translate3d(0, ${tyBasePx + correctionY}px, 0)`;
+        textRef.current.style.transform = `translate3d(0, ${textTranslateYPx}px, 0)`;
       } else {
         // Desktop centering-to-split parallax transition
         // Use the measured natural column center deviation to center perfectly
         const txDesktop = (1 - tLayout) * shiftPxRef.current;
         const textScale = 0.96 + tLayout * 0.04;
-        textRef.current.style.transform = `translate3d(${txDesktop}px, ${tyBasePx + correctionY}px, 0) scale(${textScale})`;
+        textRef.current.style.transform = `translate3d(${txDesktop}px, ${textTranslateYPx}px, 0) scale(${textScale})`;
       }
 
       // Smooth centering to left-aligned sliding translation on both desktop and mobile
@@ -246,6 +262,7 @@ export function HeroSection() {
         const phoneRect = phoneRef.current.getBoundingClientRect();
 
         headingWidthRef.current = h1Rect.width;
+        headingNaturalTopRef.current = h1Rect.top;
         line1WidthRef.current = line1Rect.width;
         line2WidthRef.current = line2Rect.width;
 
