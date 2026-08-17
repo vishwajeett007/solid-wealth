@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import posterImg from "../../../public/poster.png";
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
@@ -152,9 +151,10 @@ export function ReviewsSection() {
                 tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: containerRef.current,
-                        start: "top top",
+                        start: "bottom bottom",
                         end: "+=100%",
                         pin: true,
+                        anticipatePin: 1,
                         scrub: 1.2,
                         invalidateOnRefresh: true,
                         onUpdate: (self) => {
@@ -169,24 +169,26 @@ export function ReviewsSection() {
                         },
                     },
                 });
+                const liftStart = 0.2;
+                tl.addLabel("lift", liftStart);
                 const offset2 = offsets[1] || { x: 0, y: 0 };
                 tl.to(cards[1], {
                     y: offset2.y - 180,
                     duration: 1.2,
                     ease: "power1.inOut",
-                }, 0);
+                }, "lift");
                 const offset1 = offsets[0] || { x: 0, y: 0 };
                 tl.to(cards[0], {
                     y: offset1.y - 140,
                     duration: 1.2,
                     ease: "power1.inOut",
-                }, 0.2);
+                }, "lift+=0.2");
                 const offset3 = offsets[2] || { x: 0, y: 0 };
                 tl.to(cards[2], {
                     y: offset3.y - 140,
                     duration: 1.2,
                     ease: "power1.inOut",
-                }, 0.3);
+                }, "lift+=0.3");
                 tl.to(cards[1], {
                     x: 0,
                     y: 0,
@@ -195,7 +197,7 @@ export function ReviewsSection() {
                     opacity: 1,
                     duration: 1.8,
                     ease: "power2.out",
-                }, 1.2);
+                }, "lift+=1.2");
                 tl.to(cards[0], {
                     x: 0,
                     y: 0,
@@ -204,7 +206,7 @@ export function ReviewsSection() {
                     opacity: 1,
                     duration: 1.8,
                     ease: "power2.out",
-                }, 1.4);
+                }, "lift+=1.4");
                 tl.to(cards[2], {
                     x: 0,
                     y: 0,
@@ -213,7 +215,7 @@ export function ReviewsSection() {
                     opacity: 1,
                     duration: 1.8,
                     ease: "power2.out",
-                }, 1.5);
+                }, "lift+=1.5");
             };
             buildAnimation();
             const handleResize = () => {
@@ -228,38 +230,18 @@ export function ReviewsSection() {
             };
         });
         mm.add("(max-width: 767px)", () => {
+            stopFloating();
             gsap.set(cards, { clearProps: "all" });
-            cards.forEach((card, idx) => {
-                if (!card)
-                    return;
-                gsap.fromTo(card, { y: 50, opacity: 0 }, {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: card,
-                        start: "top 88%",
-                        toggleActions: "play none none reverse",
-                    },
-                });
-            });
             if (envelopeRef.current) {
-                gsap.fromTo(envelopeRef.current, { y: 40, opacity: 0 }, {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: envelopeRef.current,
-                        start: "top 95%",
-                        toggleActions: "play none none reverse",
-                    },
-                });
+                gsap.set(envelopeRef.current, { clearProps: "all" });
             }
         });
+        return () => {
+            mm.revert();
+            stopFloating();
+        };
     }, { scope: containerRef });
-    return (<section ref={containerRef} id="reviews" className="relative w-full bg-[#FFFDF4] h-[85vh] min-h-[680px] max-h-[850px] overflow-hidden flex flex-col items-center justify-between pt-10 pb-0">
+    return (<section ref={containerRef} id="reviews" className="relative flex h-auto min-h-0 max-h-none w-full scroll-mt-24 flex-col items-center justify-between overflow-hidden bg-[#FFFDF4] pt-10 pb-0 md:h-[85vh] md:min-h-[680px] md:max-h-[850px]">
       
       <div className="absolute bottom-[-400px] left-1/2 -translate-x-1/2 w-[1400px] h-[1400px] bg-[#fe9800]/10 rounded-full blur-[160px] pointer-events-none z-0"/>
 
@@ -282,7 +264,7 @@ export function ReviewsSection() {
       </div>
 
       
-      <div className="relative w-full max-w-[1200px] flex-1 flex flex-col items-center justify-between px-4 md:px-8 mt-2 mb-0">
+      <div className="relative mt-2 mb-0 flex w-full max-w-[1200px] flex-1 flex-col items-center justify-between px-4 pb-36 md:px-8 md:pb-0">
         
         
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full max-w-[1100px] mx-auto z-20">
@@ -304,7 +286,7 @@ export function ReviewsSection() {
         </div>
 
         
-        <div ref={envelopeRef} className="absolute bottom-[-40px] md:bottom-[-60px] left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-10">
+        <div ref={envelopeRef} className="absolute bottom-0 md:bottom-[-60px] left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-10">
           <div className="absolute inset-0 w-full h-full" style={{
             backgroundImage: `url(/poster.png)`,
             backgroundSize: "100% 100%",
@@ -313,7 +295,7 @@ export function ReviewsSection() {
         </div>
 
         
-        <div className="absolute bottom-[-40px] md:bottom-[-60px] left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-30">
+        <div className="absolute bottom-0 md:bottom-[-60px] left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] md:w-[75%] lg:w-[700px] xl:w-[800px] aspect-[1027/437] select-none pointer-events-none z-30">
           
           <svg viewBox="0 0 1027 437" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
             <polygon points="0,270 513.5,437 1027,270 1027,437 0,437" fill="white"/>
@@ -331,7 +313,7 @@ export function ReviewsSection() {
           
           <div className="absolute left-1/2 bottom-[12%] -translate-x-1/2 w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-[#fe9800] rounded-full flex items-center justify-center shadow-lg border-[3px] md:border-4 border-white z-40">
             <div className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 relative flex items-center justify-center">
-              <Image src="/logo1.png" alt="Solid Wealth Logo" fill className="object-contain brightness-0 invert" priority/>
+              <Image src="/logo1.png" alt="Solid Wealth Logo" fill sizes="(max-width: 767px) 2rem, (max-width: 1023px) 2.5rem, 3rem" className="object-contain brightness-0 invert" priority/>
             </div>
           </div>
         </div>
@@ -342,7 +324,7 @@ export function ReviewsSection() {
 function ReviewCard({ review }: {
     review: Review;
 }) {
-    return (<div className={cn("bg-white border border-[#EBEFF5] rounded-[32px] p-8 lg:p-10 shadow-[0_8px_30px_rgb(15,26,44,0.04)]", "hover:shadow-[0_24px_50px_rgba(15,26,44,0.08)] hover:scale-[1.03] hover:-translate-y-1.5", "transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between h-full w-full")}>
+    return (<div className={cn("bg-white border border-[#EBEFF5] rounded-[32px] p-6 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(15,26,44,0.04)]", "hover:shadow-[0_24px_50px_rgba(15,26,44,0.08)] hover:scale-[1.03] hover:-translate-y-1.5", "transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between h-full w-full")}>
       
       <div className="flex items-center justify-between">
         
