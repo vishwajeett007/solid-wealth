@@ -23,7 +23,7 @@ export const navLinks: NavLinkItem[] = [
     { label: "Reviews", href: "/#reviews" },
     { label: "Contact", href: "/#contact" },
     { label: "Calculators", href: "/calculators" },
-    { label: "Research", href: "/research" },
+    { label: "Learn Investment", href: "/research" },
     { label: "Blog", href: "/blog" },
 ];
 export const avatarImages = [

@@ -49,7 +49,7 @@ export async function generateMetadata({ params, }: LevelPageProps): Promise<Met
         return {};
     const { level } = match;
     return {
-        title: `${level.title} | Solid Wealth Research`,
+        title: `${level.title} | Solid Wealth Investment Education`,
         description: `Learn ${level.focus.toLowerCase()} through modules ${level.moduleRange[0]}–${level.moduleRange[1]} of the Solid Wealth Mutual Fund Investment Mastery course.`,
     };
 }

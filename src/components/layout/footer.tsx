@@ -43,7 +43,7 @@ export function Footer() {
             <div className="flex flex-col gap-2 md:gap-3 text-base md:text-xl">
               {[
             { label: "Home", href: "/" },
-            { label: "Research", href: "/research" },
+            { label: "Learn Investment", href: "/research" },
             { label: "Calculators", href: "/calculators" },
             { label: "Mutual Funds", href: "/#mutual-funds" },
             { label: "Blogs", href: "/blog" },

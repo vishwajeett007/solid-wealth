@@ -262,6 +262,16 @@ const caseStudyExplanations: Record<string, string> = {
 };
 export const courseReferenceSources = [
     {
+        title: "SEBI Investor — Understanding Mutual Funds",
+        href: "https://investor.sebi.gov.in/understanding_mf.html",
+        description: "Official investor-education guide to mutual-fund structure, benefits, and disclosures",
+    },
+    {
+        title: "AMFI — Investor Knowledge Centre",
+        href: "https://www.amfiindia.com/investor",
+        description: "Fund types, costs, risks, disclosures, and investor services",
+    },
+    {
         title: "SEBI Master Circular for Mutual Funds — March 2026",
         href: "https://www.sebi.gov.in/sebi_data/attachdocs/mar-2026/1774024028162.pdf",
         description: "Current scheme, disclosure, and operating framework",
@@ -299,9 +309,23 @@ export function getTopicExplanation(courseModule: CourseModule, topic: string) {
 }
 export type CourseTopicLesson = {
     explanation: string;
+    detailedExplanation: string[];
+    conceptBreakdown: Array<{
+        title: string;
+        description: string;
+    }>;
     whyItMatters: string;
     practicalApplication: string;
     watchOutFor: string;
+    learningObjectives: string[];
+    evaluationSteps: string[];
+    reviewTable: Array<{
+        dimension: string;
+        question: string;
+        evidence: string;
+    }>;
+    commonMistakes: string[];
+    workedExample: string;
     keyTakeaways: string[];
 };
 const practicalApplications: Record<number, string> = {
@@ -363,19 +387,208 @@ const categoryLessons: Record<CourseModule["category"], {
         action: "Measure the concept at total-portfolio level and compare it with a documented target, tolerance range, and review process.",
     },
 };
+const categoryDeepDives: Record<CourseModule["category"], string[]> = {
+    Theory: [
+        "A strong understanding separates the name of the concept from its mechanics. Trace the participants, assets, cash flows, source of return, and source of risk before deciding what the idea means in practice.",
+        "The simplified textbook version is a starting point. Real outcomes can also be affected by inflation, time, fees, liquidity, tax, regulation, investor behaviour, and changing market conditions.",
+    ],
+    Analysis: [
+        "The value of an analytical concept comes from the question it helps answer, the quality of the input data, and the consistency of the comparison—not from whether the final number looks high or low.",
+        "Interpretation requires context. Use the same category, benchmark, dates, periods, and calculation method, then combine the result with a complementary return, risk, cost, or portfolio measure.",
+    ],
+    Strategy: [
+        "A strategy becomes useful only when it is converted into a repeatable implementation rule. The rule should identify its purpose, allocation or contribution limit, review date, and conditions for making a change.",
+        "Expected outcomes should be tested under more than one scenario. A weaker return, a market decline, an income interruption, higher costs, or an early liquidity need can expose assumptions that a base-case projection hides.",
+    ],
+    "Taxation & Compliance": [
+        "Tax and compliance conclusions are controlled by specific facts: the investor's status, scheme classification, transaction type, acquisition date, transaction date, and the rule effective on that date.",
+        "Keep the legal rule, calculation, withholding, reporting requirement, and final liability separate. A current official source and a dated working paper are essential whenever the result affects a real transaction.",
+    ],
+    "Portfolio Management": [
+        "Portfolio concepts must be measured across all holdings and goals together. A fund that looks reasonable on its own may duplicate another holding, increase concentration, weaken liquidity, or conflict with a near-term liability.",
+        "A complete review compares current exposures with written targets, tests the portfolio under adverse conditions, and converts observations into prioritised actions with measurable review or rebalancing triggers.",
+    ],
+};
+const categoryStudyGuides: Record<CourseModule["category"], {
+    objectives: string[];
+    steps: string[];
+    reviewTable: CourseTopicLesson["reviewTable"];
+    mistakes: string[];
+    workedExample: string;
+}> = {
+    Theory: {
+        objectives: [
+            "Explain the idea in plain language without relying on a memorised definition.",
+            "Identify the people, assets, cash flows, rules, and risks involved.",
+            "Connect the concept to a real investor goal or mutual-fund decision.",
+        ],
+        steps: [
+            "Start with the definition and underline every term that needs a separate explanation.",
+            "Draw the mechanism as a simple flow: who contributes, who manages, what changes value, and who receives the outcome.",
+            "Create one small numerical or everyday example and state the assumptions used.",
+            "Compare the concept with its closest alternative so the boundary between them is clear.",
+            "Finish by recording one benefit, one risk, and one situation where the concept may be unsuitable.",
+        ],
+        reviewTable: [
+            { dimension: "Meaning", question: "Can the concept be explained in one sentence?", evidence: "Definition in the lesson or official investor material" },
+            { dimension: "Mechanics", question: "Who or what creates the outcome?", evidence: "Cash-flow, ownership, or market-process map" },
+            { dimension: "Investor use", question: "Which goal or decision could it support?", evidence: "Goal, horizon, liquidity, and risk notes" },
+            { dimension: "Limit", question: "When can the simple explanation break down?", evidence: "Costs, regulation, uncertainty, and product documents" },
+        ],
+        mistakes: [
+            "Memorising a definition without understanding the mechanism behind it.",
+            "Assuming a benefit applies to every investor or every market environment.",
+            "Ignoring costs, liquidity, tax, inflation, and the possibility of loss.",
+        ],
+        workedExample: "A learner first writes a one-sentence definition, then draws the movement of money and ownership through the relevant participants. They attach the idea to a sample goal, compare it with the nearest alternative, and finish with the conditions that would make the conclusion change.",
+    },
+    Analysis: {
+        objectives: [
+            "Understand what the measure or research item is designed to reveal.",
+            "Use comparable data, periods, categories, and benchmarks.",
+            "Combine the result with complementary evidence before reaching a conclusion.",
+        ],
+        steps: [
+            "Write the decision question before collecting data so the analysis has a clear purpose.",
+            "Confirm the source, reporting date, formula, benchmark, category, and measurement period.",
+            "Calculate or record the result consistently for the fund, benchmark, and a suitable peer set.",
+            "Stress-test the conclusion across more than one period or market condition.",
+            "Translate the result into portfolio relevance and document what the metric cannot prove.",
+        ],
+        reviewTable: [
+            { dimension: "Source", question: "Is the data current and traceable?", evidence: "SID, factsheet, portfolio disclosure, or official database" },
+            { dimension: "Comparison", question: "Are category, benchmark, and period consistent?", evidence: "Like-for-like comparison sheet" },
+            { dimension: "Interpretation", question: "What does the result explain—and not explain?", evidence: "Written conclusion with a stated limitation" },
+            { dimension: "Portfolio fit", question: "Does the evidence improve the total portfolio?", evidence: "Allocation, overlap, risk, and goal review" },
+        ],
+        mistakes: [
+            "Selecting a fund from one attractive number or one favourable period.",
+            "Comparing unlike fund categories, benchmarks, or calculation methods.",
+            "Treating historical data as a forecast or guarantee of future performance.",
+        ],
+        workedExample: "A learner gathers the same dated source data for a scheme, its stated benchmark, and genuinely comparable peers. They calculate or record the measure across consistent periods, add a second risk or portfolio measure, and write a conclusion that separates observed evidence from expectations.",
+    },
+    Strategy: {
+        objectives: [
+            "Translate the strategy into a rule that can be followed consistently.",
+            "Identify the assumptions, costs, risks, and failure conditions.",
+            "Define how the strategy will be monitored and when it may be changed.",
+        ],
+        steps: [
+            "State the investor goal, horizon, liquidity need, and capacity for loss.",
+            "Write the strategy as an if-then rule with a target and maximum limit.",
+            "Model a base case, a weaker-return case, and an adverse market case.",
+            "Include implementation costs, tax effects, exit loads, and operational constraints.",
+            "Set a review date and objective triggers for rebalancing, pausing, or replacing the strategy.",
+        ],
+        reviewTable: [
+            { dimension: "Purpose", question: "Which goal is the strategy intended to serve?", evidence: "Goal amount, deadline, and priority" },
+            { dimension: "Rule", question: "Can another person implement it consistently?", evidence: "Written target, limit, trigger, and review date" },
+            { dimension: "Stress test", question: "What happens when returns disappoint?", evidence: "Base, weak, and adverse scenarios" },
+            { dimension: "Suitability", question: "Can the investor stay with the plan?", evidence: "Liquidity, loss capacity, behaviour, cost, and tax review" },
+        ],
+        mistakes: [
+            "Using a strategy because it recently performed well rather than because it fits the goal.",
+            "Leaving entry, exit, allocation, and review decisions undefined.",
+            "Changing course in response to emotion without checking the written rules.",
+        ],
+        workedExample: "A learner converts the strategy into a written implementation rule for a hypothetical goal. They set an allocation limit, model multiple outcomes, include costs and taxes, and specify the evidence that would justify continuing, rebalancing, or stopping it.",
+    },
+    "Taxation & Compliance": {
+        objectives: [
+            "Identify the investor, product, transaction, and date-specific facts that control the treatment.",
+            "Locate the current official rule rather than relying on an old summary.",
+            "Document the calculation, records, and professional input needed before implementation.",
+        ],
+        steps: [
+            "Record investor residency, scheme classification, purchase date, transaction date, and transaction type.",
+            "Check the current provision and effective date on an official government or regulatory source.",
+            "Separate tax rate, holding-period classification, withholding, reporting, and cash-flow effects.",
+            "Calculate a sample outcome and retain the source, assumptions, and supporting documents.",
+            "Escalate ambiguous or personally material cases to a qualified tax or legal professional.",
+        ],
+        reviewTable: [
+            { dimension: "Facts", question: "Which dates and classifications apply?", evidence: "Transaction statement and scheme classification" },
+            { dimension: "Rule", question: "Is the provision current for that date?", evidence: "Official circular, law, or department guidance" },
+            { dimension: "Calculation", question: "Are cost, gain, withholding, and reporting separated?", evidence: "Dated working paper with assumptions" },
+            { dimension: "Verification", question: "Does the case require professional review?", evidence: "Residency, materiality, ambiguity, and filing impact" },
+        ],
+        mistakes: [
+            "Applying an outdated tax summary to a transaction governed by newer rules.",
+            "Assuming a scheme's marketing name determines its legal or tax classification.",
+            "Confusing tax deducted at source with the investor's final tax liability.",
+        ],
+        workedExample: "A learner builds a dated transaction sheet containing the investor status, scheme classification, purchase and redemption dates, cost, proceeds, and current official source. They show the calculation separately from withholding and flag any assumption that needs professional confirmation.",
+    },
+    "Portfolio Management": {
+        objectives: [
+            "Evaluate the topic at total-portfolio level rather than fund by fund.",
+            "Connect holdings and allocation to goals, liabilities, liquidity, and risk capacity.",
+            "Define measurable limits and a repeatable review process.",
+        ],
+        steps: [
+            "List every holding, account, goal, cash flow, and near-term liability in one view.",
+            "Measure allocation, concentration, overlap, liquidity, costs, and the relevant risk exposure.",
+            "Compare the current portfolio with documented targets and tolerance ranges.",
+            "Test the portfolio under a market decline, income interruption, and unexpected liquidity need.",
+            "Write prioritised actions and set objective rebalancing and review triggers.",
+        ],
+        reviewTable: [
+            { dimension: "Role", question: "Does every holding have a defined job?", evidence: "Goal and portfolio-role map" },
+            { dimension: "Exposure", question: "Where is risk concentrated or duplicated?", evidence: "Allocation, overlap, sector, issuer, and style analysis" },
+            { dimension: "Resilience", question: "Can the portfolio fund needs during stress?", evidence: "Drawdown and liquidity stress test" },
+            { dimension: "Control", question: "When will the portfolio be reviewed or rebalanced?", evidence: "Tolerance bands, triggers, and review calendar" },
+        ],
+        mistakes: [
+            "Reviewing each fund independently while missing portfolio-level overlap or concentration.",
+            "Optimising expected return without protecting liquidity and essential goals.",
+            "Making frequent changes without a target allocation or measurable trigger.",
+        ],
+        workedExample: "A learner combines all holdings and goals in one worksheet, assigns a role to each position, and compares current exposures with target ranges. They stress-test liquidity and drawdown, then record only the changes supported by a documented portfolio rule.",
+    },
+};
 export function getCourseTopicLesson(courseModule: CourseModule, topic: string): CourseTopicLesson {
     const explanation = getTopicExplanation(courseModule, topic);
     const categoryLesson = categoryLessons[courseModule.category];
+    const studyGuide = categoryStudyGuides[courseModule.category];
     return {
         explanation,
+        detailedExplanation: [
+            `This topic belongs to ${courseModule.title.toLowerCase()}. The wider module context is: ${courseModule.description}`,
+            ...categoryDeepDives[courseModule.category],
+            "For an investor, this concept becomes actionable only after it is connected to a named goal, suitable time horizon, liquidity requirement, capacity for loss, existing portfolio, and current source documents.",
+        ],
+        conceptBreakdown: [
+            {
+                title: "Core meaning",
+                description: explanation,
+            },
+            {
+                title: "Where it fits",
+                description: `This topic is part of Module ${courseModule.moduleNumber}, ${courseModule.title}, and should be studied alongside the other concepts that shape the same decision.`,
+            },
+            {
+                title: "Decision use",
+                description: categoryLesson.action,
+            },
+            {
+                title: "Important limitation",
+                description: categoryLesson.caution,
+            },
+        ],
         whyItMatters: categoryLesson.why,
         practicalApplication: practicalApplications[courseModule.moduleNumber] ??
             `Apply ${topic} to a realistic investor example and document the assumptions, calculation, decision, and limitation.`,
         watchOutFor: categoryLesson.caution,
+        learningObjectives: studyGuide.objectives,
+        evaluationSteps: studyGuide.steps,
+        reviewTable: studyGuide.reviewTable,
+        commonMistakes: studyGuide.mistakes,
+        workedExample: studyGuide.workedExample,
         keyTakeaways: [
             explanation,
             categoryLesson.action,
-            `Connect ${topic} to the goal, time horizon, liquidity need, and risk capacity before using it in an investment decision.`,
+            "Connect this concept to the goal, time horizon, liquidity need, and risk capacity before using it in an investment decision.",
         ],
     };
 }

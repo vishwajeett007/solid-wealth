@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ChevronDown, ExternalLink, FileText, GraduationCap, ShieldCheck, } from "lucide-react";
-import type { CourseLevel, CourseModule } from "@/lib/course-curriculum";
+import { getTopicHref, type CourseLevel, type CourseModule } from "@/lib/course-curriculum";
 import { courseReferenceSources, getTopicExplanation, } from "@/lib/course-topic-explanations";
 type ResearchLevelPageProps = {
     level: CourseLevel;
@@ -26,7 +26,7 @@ export function ResearchLevelPage({ level, modules, nextLevel, previousLevel, }:
         <div className="mx-auto max-w-7xl">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white/55">
             <Link className="transition hover:text-white" href="/research">
-              Research
+              Investment Education
             </Link>
             <span aria-hidden="true">/</span>
             <span className="text-white/85">Level {level.levelNumber}</span>
@@ -168,21 +168,25 @@ export function ResearchLevelPage({ level, modules, nextLevel, previousLevel, }:
                             </div>)}
 
                           <div className="grid gap-3 xl:grid-cols-2">
-                            {group.topics.map((topic, topicIndex) => (<article className="rounded-2xl border border-wealth-border/70 bg-white p-4 transition hover:border-wealth-accent/35 hover:shadow-wealth-sm sm:p-5" id={`${courseModule.id}-topic-${groupIndex + 1}-${topicIndex + 1}`} key={topic}>
+                            {group.topics.map((topic, topicIndex) => (<Link aria-label={`Read the full lesson: ${topic}`} className="group rounded-2xl border border-wealth-border/70 bg-white p-4 transition hover:-translate-y-0.5 hover:border-wealth-accent/35 hover:shadow-wealth-sm sm:p-5" href={getTopicHref(courseModule, topic)} id={`${courseModule.id}-topic-${groupIndex + 1}-${topicIndex + 1}`} key={topic}>
                                 <div className="flex items-start gap-3">
                                   <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-wealth-accent-light text-[10px] font-extrabold tabular-nums text-wealth-accent">
                                     {String(topicIndex + 1).padStart(2, "0")}
                                   </span>
-                                  <div>
-                                    <h4 className="text-sm font-bold leading-5 text-wealth-primary sm:text-base">
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="text-sm font-bold leading-5 text-wealth-primary transition group-hover:text-wealth-accent sm:text-base">
                                       {topic}
                                     </h4>
                                     <p className="mt-2 text-sm leading-6 text-wealth-secondary">
                                       {getTopicExplanation(courseModule, topic)}
                                     </p>
+                                    <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-wealth-accent">
+                                      Read full lesson
+                                      <ArrowRight aria-hidden="true" className="size-3.5 transition-transform group-hover:translate-x-1"/>
+                                    </span>
                                   </div>
                                 </div>
-                              </article>))}
+                              </Link>))}
                           </div>
                         </section>))}
                     </div>

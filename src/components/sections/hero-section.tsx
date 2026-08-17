@@ -1,10 +1,9 @@
 "use client";
 import Image from "next/image";
-import { useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { HeroPhone } from "@/components/sections/hero-phone";
 import { Button } from "@/components/ui/button";
-import { SectionLabel } from "@/components/ui/section-label";
 import { SplitText } from "@/components/ui/split-text";
 import { avatarImages } from "@/lib/content";
 import { cn } from "@/lib/utils";
@@ -31,21 +30,18 @@ export function HeroSection() {
     const phoneShiftPxRef = useRef(0);
     const targetProgress = useRef(0);
     const currentProgress = useRef(0);
-    const isMobileRef = useRef(typeof window !== "undefined" ? window.innerWidth < 1024 : false);
+    const isMobileRef = useRef(false);
     const isRevealedRef = useRef(false);
-    const isAlignedLeftRef = useRef(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isRevealed, setIsRevealed] = useState(false);
-    const [isAlignedLeft, setIsAlignedLeft] = useState(false);
-    const updateElements = (progress: number) => {
+    const updateElements = useCallback((progress: number) => {
         const tReveal = Math.min(Math.max(progress / 0.3, 0), 1);
         const tLayout = Math.min(Math.max((progress - 0.45) / 0.55, 0), 1);
         const wHeight = window.innerHeight;
-        const wWidth = window.innerWidth;
         const easeLayout = tLayout < 0.5
             ? 4 * tLayout * tLayout * tLayout
             : 1 - Math.pow(-2 * tLayout + 2, 3) / 2;
-        const textYOffset = isMobile ? -8 : -8;
+        const textYOffset = -8;
         if (hemisphereRef.current) {
             const translateY = 70 - easeLayout * 48;
             const scale = 1.15 + easeLayout * 4.5;
@@ -60,14 +56,16 @@ export function HeroSection() {
             ? (1 - progress) * -5 - 4 + textYOffset * (1 - tLayout)
             : (1 - tLayout) * (tReveal * -5) + tLayout * -4 + textYOffset * (1 - tLayout);
         let correctionY = 0;
-        if (h1Ref.current && containerRef.current) {
+        if (h1Ref.current && containerRef.current && hemisphereRef.current) {
             const h = wHeight;
-            const naturalH1Bottom = h / 2 + (isMobile ? -20 : -10);
+            const naturalH1Bottom = h / 2 + (isMobileRef.current ? -20 : -10);
             const tyBasePx = h * (tyBase / 100);
             const currentTranslateY = 70 - easeLayout * 48;
             const currentScale = 1.15 + easeLayout * 4.5;
-            const translateYPx = 1350 * (currentTranslateY / 100);
-            const hemisphereTop = (h - 675 + translateYPx) - (675 * currentScale);
+            const domeHeight = hemisphereRef.current.offsetHeight || 1350;
+            const domeRadius = domeHeight / 2;
+            const translateYPx = domeHeight * (currentTranslateY / 100);
+            const hemisphereTop = (h - domeRadius + translateYPx) - (domeRadius * currentScale);
             const margin = 24;
             const requiredCorrection = Math.min(0, hemisphereTop - (naturalH1Bottom + tyBasePx) - margin);
             const fadeFactor = Math.max(0, 1 - progress / 0.3);
@@ -166,7 +164,7 @@ export function HeroSection() {
                 }
             }
         }
-    };
+    }, []);
     useEffect(() => {
         let animFrameId: number | null = null;
         let isRunning = false;
@@ -225,12 +223,6 @@ export function HeroSection() {
                     isRevealedRef.current = shouldReveal;
                     setIsRevealed(shouldReveal);
                 }
-                const tLayoutVal = Math.min(Math.max((currentProgress.current - 0.45) / 0.55, 0), 1);
-                const shouldAlignLeft = tLayoutVal > 0.95;
-                if (shouldAlignLeft !== isAlignedLeftRef.current) {
-                    isAlignedLeftRef.current = shouldAlignLeft;
-                    setIsAlignedLeft(shouldAlignLeft);
-                }
                 isRunning = false;
                 animFrameId = null;
                 return;
@@ -241,12 +233,6 @@ export function HeroSection() {
             if (shouldReveal !== isRevealedRef.current) {
                 isRevealedRef.current = shouldReveal;
                 setIsRevealed(shouldReveal);
-            }
-            const tLayoutVal = Math.min(Math.max((currentProgress.current - 0.45) / 0.55, 0), 1);
-            const shouldAlignLeft = tLayoutVal > 0.95;
-            if (shouldAlignLeft !== isAlignedLeftRef.current) {
-                isAlignedLeftRef.current = shouldAlignLeft;
-                setIsAlignedLeft(shouldAlignLeft);
             }
             animFrameId = requestAnimationFrame(tick);
         };
@@ -273,14 +259,14 @@ export function HeroSection() {
             if (animFrameId)
                 cancelAnimationFrame(animFrameId);
         };
-    }, []);
+    }, [updateElements]);
     return (<div ref={containerRef} className="relative w-full bg-white/80 z-10" style={{ height: isMobile ? "110vh" : SCROLL_TRACK_HEIGHT }}>
       
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
         
-        <div ref={hemisphereRef} className="absolute bottom-0 left-1/2 rounded-full bg-[#fe9800] pointer-events-none z-0" style={{
-            width: "1350px",
-            height: "1350px",
+        <div ref={hemisphereRef} className="absolute bottom-0 left-1/2 rounded-[50%] bg-[#fe9800] pointer-events-none z-0" style={{
+            width: "clamp(900px, 116vw, 1400px)",
+            height: "clamp(760px, 176dvh, 1350px)",
             transform: "translate3d(-50%, 70%, 0) scale(1.15)",
             transformOrigin: "center center",
             opacity: 0.9,
@@ -288,9 +274,9 @@ export function HeroSection() {
         }}/>
 
         
-        <div ref={ringRef} className="absolute bottom-0 left-1/2 rounded-full border-4 border-[#fe9800] bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(254,152,0,0.18),inset_0_0_50px_rgba(254,152,0,0.1)]" style={{
-            width: "1400px",
-            height: "1400px",
+        <div ref={ringRef} className="absolute bottom-0 left-1/2 rounded-[50%] border-4 border-[#fe9800] bg-transparent pointer-events-none z-0 shadow-[0_0_50px_rgba(254,152,0,0.18),inset_0_0_50px_rgba(254,152,0,0.1)]" style={{
+            width: "clamp(950px, 120vw, 1450px)",
+            height: "clamp(810px, calc(176dvh + 50px), 1400px)",
             transform: "translate3d(-50%, 70%, 0) scale(1.15)",
             transformOrigin: "center center",
             opacity: 0.9,
@@ -300,9 +286,9 @@ export function HeroSection() {
         }}/>
 
         
-        <div className="mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-15 xl:px-18 grid items-center gap-8 lg:grid-cols-[1.2fr_0.8fr] xl:grid-cols-[1.15fr_0.85fr] lg:gap-8 xl:gap-16 z-10 relative h-full pt-16">
+        <div className="relative z-10 mx-auto grid h-full w-full max-w-[1800px] items-center gap-6 px-4 pt-16 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8 lg:px-15 xl:grid-cols-[1.15fr_0.85fr] xl:gap-16 xl:px-18 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pt-14">
           
-          <div ref={textRef} className="flex flex-col gap-6 relative z-20 min-w-0" style={{
+          <div ref={textRef} className="relative z-20 flex min-w-0 flex-col gap-6 [@media(max-height:700px)]:gap-4" style={{
             textAlign: "center",
             alignItems: "center",
             willChange: "transform",
@@ -310,7 +296,7 @@ export function HeroSection() {
             
             
 
-            <h1 ref={h1Ref} className={cn("w-full animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]", "text-[40px] sm:text-5xl md:text-6xl lg:text-[72px] xl:text-[84px] 2xl:text-[90px] leading-[1.1] tracking-tight")}>
+            <h1 ref={h1Ref} className={cn("w-full animate-fade-up font-black text-[#0f1a2c] [animation-delay:100ms]", "text-[clamp(38px,10vw,60px)] leading-[1.08] tracking-tight lg:text-[clamp(52px,min(6.2vw,9.5dvh),90px)] lg:leading-[1.04]")}>
               <span className="block whitespace-normal sm:whitespace-nowrap">
                 <span ref={line1Ref} className="inline-block will-change-transform">
                   Reimagine{" "}
@@ -327,24 +313,24 @@ export function HeroSection() {
             </h1>
 
             
-            <div ref={subContentRef} className="flex flex-col gap-6 w-full" style={{ opacity: 0, transform: "translate3d(0, 20px, 0)" }}>
-              <SplitText text="Experience next-generation wealth management. Transparent, secure, and designed for the modern investor who values clarity over complexity." className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820]" delay={20} duration={0.6} ease="power3.out" splitType="words" from={{ opacity: 0, y: 15 }} to={{ opacity: 1, y: 0 }} threshold={0.1} textAlign="left" trigger={isRevealed}/>
+            <div ref={subContentRef} className="flex w-full flex-col gap-6 [@media(max-height:700px)]:gap-3" style={{ opacity: 0, transform: "translate3d(0, 20px, 0)" }}>
+              <SplitText text="Experience next-generation wealth management. Transparent, secure, and designed for the modern investor who values clarity over complexity." className="max-w-[460px] text-[17px] leading-relaxed text-[#3F3820] [@media(max-height:700px)]:max-w-[390px] [@media(max-height:700px)]:text-[14px] [@media(max-height:700px)]:leading-[1.55]" delay={20} duration={0.6} ease="power3.out" splitType="words" from={{ opacity: 0, y: 15 }} to={{ opacity: 1, y: 0 }} threshold={0.1} textAlign="left" trigger={isRevealed}/>
 
               <div className="flex animate-fade-up flex-wrap gap-3 [animation-delay:300ms] justify-start">
                 <a href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" className="no-underline">
-                  <Button variant="black" className="group relative overflow-hidden" icon={<ArrowRight aria-hidden="true" className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"/>} size="lg">
+                  <Button variant="black" className="group relative overflow-hidden [@media(max-height:700px)]:h-11 [@media(max-height:700px)]:px-5 [@media(max-height:700px)]:text-sm" icon={<ArrowRight aria-hidden="true" className="size-4 transition-transform duration-200 group-hover:translate-x-1 relative z-10"/>} size="lg">
                     <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-20 transition-all duration-1000 ease-out group-hover:-translate-x-56 pointer-events-none z-0"/>
                     <span className="relative z-10">Get Started</span>
                   </Button>
                 </a>
-                <Button size="lg" variant="ghost" className="bg-white text-black border-black">
+                <Button size="lg" variant="ghost" className="border-black bg-white text-black [@media(max-height:700px)]:h-11 [@media(max-height:700px)]:px-5 [@media(max-height:700px)]:text-sm">
                   Learn More
                 </Button>
               </div>
 
               <div className="flex animate-fade-up items-center gap-3.5 [animation-delay:450ms] justify-start">
                 <div className="flex">
-                  {avatarImages.map((avatar, index) => (<Image alt={avatar.alt} className={cn("size-[38px] rounded-full border-[2.5px] border-wealth-surface object-cover", index > 0 && "-ml-2.5")} height={38} key={avatar.src} src={avatar.src} width={38}/>))}
+                  {avatarImages.map((avatar, index) => (<Image alt={avatar.alt} className={cn("size-[38px] rounded-full border-[2.5px] border-wealth-surface object-cover [@media(max-height:700px)]:size-8", index > 0 && "-ml-2.5")} height={38} key={avatar.src} src={avatar.src} width={38}/>))}
                 </div>
                 
               </div>

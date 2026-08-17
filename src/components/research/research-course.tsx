@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowDown, ArrowRight, BookOpen, Calculator, Check, ChevronDown, GraduationCap, Layers3, Search, ShieldCheck, Sparkles, Target, } from "lucide-react";
-import { courseCurriculum, courseDeliveryFormat, courseLevels, getModulesForLevel, professionalDeepDives, } from "@/lib/course-curriculum";
+import { courseCurriculum, courseDeliveryFormat, courseLevels, getModulesForLevel, getTopicHref, professionalDeepDives, } from "@/lib/course-curriculum";
 import { cn } from "@/lib/utils";
 const levelThemes = [
     {
@@ -84,7 +84,7 @@ export function ResearchCourse() {
           <div className="mx-auto max-w-4xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-wealth-accent/20 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-wealth-accent shadow-wealth-sm">
               <Sparkles aria-hidden="true" className="size-4"/>
-              Solid Wealth Research Academy
+              Solid Wealth Investment Education
             </div>
             <h1 className="font-display text-4xl font-extrabold tracking-[-0.04em] text-wealth-primary sm:text-5xl lg:text-7xl">
               Mutual Fund Investment
@@ -239,15 +239,12 @@ export function ResearchCourse() {
                   <div className="space-y-3">
                     {level.modules.map((courseModule) => {
                     const isOpen = openModules.includes(courseModule.moduleNumber);
-                    return (<article className={cn("scroll-mt-32 overflow-hidden rounded-2xl border bg-[#fffdf8] transition", isOpen
-                            ? `${theme.border} shadow-wealth-sm`
-                            : "border-wealth-border/80 hover:border-wealth-accent/40")} id={courseModule.id} key={courseModule.id}>
-                          <button aria-controls={`${courseModule.id}-content`} aria-expanded={isOpen} className="flex w-full items-start gap-3 p-4 text-left sm:items-center sm:gap-5 sm:p-5" onClick={() => toggleModule(courseModule.moduleNumber)} type="button">
-                            <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold tabular-nums sm:size-12 sm:text-sm", theme.number)}>
-                              {courseModule.moduleNumber}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="flex flex-wrap items-center gap-2">
+                    return (<article className={cn("scroll-mt-32 overflow-hidden rounded-2xl border bg-[#fffdf8] shadow-[0_6px_20px_rgba(15,26,44,0.06)] transition-all duration-200", isOpen
+                            ? `${theme.border} shadow-[0_12px_32px_rgba(15,26,44,0.10)]`
+                            : "border-wealth-border/80 hover:-translate-y-0.5 hover:border-wealth-accent/40 hover:shadow-[0_10px_28px_rgba(15,26,44,0.09)]")} id={courseModule.id} key={courseModule.id}>
+                          <button aria-controls={`${courseModule.id}-content`} aria-expanded={isOpen} className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 p-4 text-left sm:gap-x-5 sm:p-5" onClick={() => toggleModule(courseModule.moduleNumber)} type="button">
+                            <span className="col-start-1 row-start-1 min-w-0">
+                              <span className="flex min-h-10 flex-wrap items-center gap-2 sm:min-h-12">
                                 <span className="font-display text-base font-bold text-wealth-primary sm:text-lg">
                                   {courseModule.title}
                                 </span>
@@ -262,7 +259,12 @@ export function ResearchCourse() {
                                 {courseModule.topics.length} core topics
                               </span>
                             </span>
-                            <ChevronDown aria-hidden="true" className={cn("mt-2 size-5 shrink-0 text-wealth-muted transition-transform duration-200 sm:mt-0", isOpen && "rotate-180 text-wealth-accent")}/>
+                            <span className="col-start-2 row-start-1 flex min-h-10 items-center gap-3 self-start sm:min-h-12">
+                              <span className="text-xs font-extrabold tabular-nums text-wealth-accent sm:text-sm">
+                                {String(courseModule.moduleNumber).padStart(2, "0")}
+                              </span>
+                              <ChevronDown aria-hidden="true" className={cn("size-5 shrink-0 text-wealth-muted transition-transform duration-200", isOpen && "rotate-180 text-wealth-accent")}/>
+                            </span>
                           </button>
 
                           {isOpen && (<div className="border-t border-wealth-border/70 bg-white px-4 py-5 sm:px-6 sm:py-6" id={`${courseModule.id}-content`}>
@@ -277,7 +279,7 @@ export function ResearchCourse() {
                                         </h4>)}
                                       <ul className="space-y-2">
                                         {subsection.topics.map((topic) => (<li key={topic}>
-                                            <Link className="group flex items-start gap-2 text-sm leading-5 text-wealth-secondary transition hover:text-wealth-accent" href={`/research/${level.id}#${courseModule.id}`}>
+                                            <Link className="group flex items-start gap-2 text-sm leading-5 text-wealth-secondary transition hover:text-wealth-accent" href={getTopicHref(courseModule, topic)}>
                                               <Check aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-wealth-accent transition-transform group-hover:scale-110"/>
                                               <span className="group-hover:underline underline-offset-2">
                                                 {topic}
@@ -289,7 +291,7 @@ export function ResearchCourse() {
                                     </div>))}
                                 </div>) : (<ul className="grid gap-x-8 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
                                   {courseModule.topics.map((topic) => (<li key={topic}>
-                                      <Link className="group flex items-start gap-2 text-sm leading-5 text-wealth-secondary transition hover:text-wealth-accent" href={`/research/${level.id}#${courseModule.id}`}>
+                                      <Link className="group flex items-start gap-2 text-sm leading-5 text-wealth-secondary transition hover:text-wealth-accent" href={getTopicHref(courseModule, topic)}>
                                         <Check aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-wealth-accent transition-transform group-hover:scale-110"/>
                                         <span className="group-hover:underline underline-offset-2">
                                           {topic}

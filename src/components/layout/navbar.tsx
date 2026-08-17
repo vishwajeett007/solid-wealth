@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/lib/content";
@@ -23,7 +23,6 @@ const column1Links = researchLevelLinks.slice(0, 4);
 const column2Links = researchLevelLinks.slice(4);
 export function Navbar() {
     const pathname = usePathname();
-    const router = useRouter();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobileResearchOpen, setIsMobileResearchOpen] = useState(false);
@@ -31,11 +30,6 @@ export function Navbar() {
     const [isResearchOpen, setIsResearchOpen] = useState(false);
     const researchCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const researchItemRef = useRef<HTMLLIElement>(null);
-    const handleLevelClick = () => {
-        setIsResearchOpen(false);
-        setIsMobileMenuOpen(false);
-        setIsMobileResearchOpen(false);
-    };
     const cancelResearchClose = () => {
         if (researchCloseTimer.current) {
             clearTimeout(researchCloseTimer.current);
@@ -51,10 +45,6 @@ export function Navbar() {
         researchCloseTimer.current = setTimeout(() => {
             setIsResearchOpen(false);
         }, 180);
-    };
-    const toggleResearchMenu = () => {
-        cancelResearchClose();
-        setIsResearchOpen((prev) => !prev);
     };
     useEffect(() => {
         const handleScroll = () => {
@@ -81,6 +71,8 @@ export function Navbar() {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
                 setIsResearchOpen(false);
+                setIsMobileMenuOpen(false);
+                setIsMobileResearchOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -92,6 +84,29 @@ export function Navbar() {
     }, []);
     useEffect(() => {
         return () => cancelResearchClose();
+    }, []);
+    useEffect(() => {
+        if (!isMobileMenuOpen) {
+            return;
+        }
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isMobileMenuOpen]);
+    useEffect(() => {
+        const desktopNavigation = window.matchMedia("(min-width: 1280px)");
+        const handleBreakpointChange = (event: MediaQueryListEvent) => {
+            if (event.matches) {
+                setIsMobileMenuOpen(false);
+                setIsMobileResearchOpen(false);
+            }
+        };
+        desktopNavigation.addEventListener("change", handleBreakpointChange);
+        return () => {
+            desktopNavigation.removeEventListener("change", handleBreakpointChange);
+        };
     }, []);
     useEffect(() => {
         if (pathname !== "/") {
@@ -144,34 +159,37 @@ export function Navbar() {
         }
         return false;
     };
-    return (<header className={cn("fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-out", isScrolled ? "top-4 px-4 sm:px-6" : "top-0 px-0 bg-transparent")}>
+    return (<header className={cn("fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-out", isScrolled ? "top-2 px-2 sm:top-4 sm:px-6" : "top-0 px-0 bg-transparent")}>
       <div className={cn("w-full transition-all duration-500 ease-out flex flex-col justify-center relative", isScrolled
-            ? "max-w-[1000px] lg:max-w-[1200px] rounded-[15px] shadow-lg py-3 px-6 lg:px-8 bg-white/95 backdrop-blur-xl border border-gray-200"
-            : "max-w-full rounded-none py-3 px-4 sm:px-8 lg:px-16 shadow-none bg-white border-b border-[#eeeeee]")}>
-        <nav aria-label="Main navigation" className="flex w-full items-center justify-between h-[50px] sm:h-[58px]">
+            ? "max-w-[1000px] lg:max-w-[1200px] rounded-[15px] shadow-lg py-2 px-3 sm:py-3 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-xl border border-gray-200"
+            : "max-w-full rounded-none py-3 px-3 sm:px-8 lg:px-12 2xl:px-16 shadow-none bg-white border-b border-[#eeeeee]")}>
+        <nav aria-label="Main navigation" className="flex h-[50px] w-full items-center justify-between sm:h-[58px]">
           
-          <Link className={cn("font-display font-extrabold tracking-normal text-[#ff8500] hover:opacity-90 transition-all duration-500 flex items-center gap-2 no-underline", isScrolled ? "text-xl" : "text-[24px]")} style={{ fontFamily: "var(--font-righteous)" }} href="/">
-            <Image src="/logo1.png" alt="Solid Wealth Logo" width={32} height={32} className={cn("inline-flex shrink-0 transition-all duration-500 object-contain", isScrolled ? "w-6 h-6" : "w-8 h-8")}/>
+          <Link className={cn("flex min-w-0 items-center gap-2 whitespace-nowrap font-display font-extrabold tracking-normal text-[#ff8500] no-underline transition-all duration-500 hover:opacity-90", isScrolled ? "text-[19px] sm:text-xl" : "text-xl sm:text-[24px]")} style={{ fontFamily: "var(--font-righteous)" }} href="/" onClick={() => {
+            setIsMobileMenuOpen(false);
+            setIsMobileResearchOpen(false);
+          }}>
+            <Image src="/logo1.png" alt="Solid Wealth Logo" width={32} height={32} className={cn("inline-flex shrink-0 object-contain transition-all duration-500", isScrolled ? "size-6" : "size-7 sm:size-8")}/>
             Solid Wealth
           </Link>
 
           
-          <ul className="hidden items-center gap-[34px] xl:flex list-none m-0 p-0">
+          <ul className="hidden items-center gap-[22px] 2xl:gap-[34px] xl:flex list-none m-0 p-0">
             {navLinks.map((link) => {
-            const isResearchLink = link.label === "Research";
+            const isResearchLink = link.href === "/research";
             if (isResearchLink) {
                 return (<li className={cn("nav-item research-item relative", isResearchOpen && "active")} key={link.label} ref={researchItemRef} onMouseEnter={openResearchMenu} onMouseLeave={closeResearchMenu}>
                     <Link aria-controls="research-mega-menu" aria-expanded={isResearchOpen} aria-haspopup="true" className={cn("nav-link nav-link-underline flex items-center gap-[7px] font-semibold transition-colors duration-200 text-[15px] py-1 no-underline", isResearchOpen || isLinkActive(link.href)
                         ? "active text-[#ff8500]"
                         : "text-[#475467] hover:text-[#ff8500]")} href="/research" onClick={() => setIsResearchOpen(false)}>
-                      <span>Research</span>
+                      <span>{link.label}</span>
                       <span className={cn("chevron inline-block w-[7px] h-[7px] border-r-[1.5px] border-b-[1.5px] border-current transition-transform duration-250 ease-in-out", isResearchOpen
                         ? "rotate-[225deg] mt-[4px]"
                         : "rotate-45 -mt-[4px]")}/>
                     </Link>
 
                     
-                    <div aria-hidden={!isResearchOpen} aria-label="Investment research" id="research-mega-menu" className={cn("mega-menu fixed left-0 right-0 z-50 hidden w-full border-y border-[#e8e8e8] bg-white shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-[opacity,transform,visibility] duration-200 ease-in-out xl:block", isScrolled ? "top-[72px]" : "top-[82px]", isResearchOpen
+                      <div aria-hidden={!isResearchOpen} aria-label="Investment education" id="research-mega-menu" className={cn("mega-menu fixed left-0 right-0 z-50 hidden w-full border-y border-[#e8e8e8] bg-white shadow-[0_14px_28px_rgba(16,24,40,0.08)] transition-[opacity,transform,visibility] duration-200 ease-in-out xl:block", isScrolled ? "top-[84px]" : "top-[82px]", isResearchOpen
                         ? "opacity-100 visible translate-y-0 pointer-events-auto"
                         : "opacity-0 invisible -translate-y-2 pointer-events-none")} onMouseEnter={openResearchMenu} onMouseLeave={closeResearchMenu} role="region">
                       <div className="mega-inner w-[min(1100px,calc(100%-60px))] mx-auto grid grid-cols-1 md:grid-cols-[330px_1px_1fr_1px_1fr] gap-[28px] py-[30px]">
@@ -217,7 +235,7 @@ export function Navbar() {
                           </svg>
 
                           <Link href="/research" className="feature-link inline-flex items-center gap-[8px] mb-[8px] text-[#101828] text-[14px] font-bold no-underline hover:text-[#ff8500] transition-colors duration-200" onClick={() => setIsResearchOpen(false)}>
-                            Explore Investment Research
+                            Explore Investment Education
                             <span aria-hidden="true">→</span>
                           </Link>
 
@@ -274,13 +292,13 @@ export function Navbar() {
             <div className="hidden xl:block">
               <a href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" className="no-underline">
                 <Button aria-label="Get started with Solid Wealth" variant="black" className={cn("get-started rounded-full bg-[#050505] text-white font-semibold cursor-pointer border-0 transition-all duration-300 inline-flex items-center justify-center gap-2", isScrolled ? "h-10 px-5 text-sm" : "py-[13px] px-[24px] text-[14px]")}>
-                  <span>Get Started →</span>
+                  <span>Get Started</span>
                 </Button>
               </a>
             </div>
 
             
-            <button aria-expanded={isMobileMenuOpen} aria-label="Toggle main menu" className={cn("inline-flex size-10 items-center justify-center rounded-full border transition hover:border-[#ff8500] hover:text-[#ff8500] focus-visible:outline-none xl:hidden", "border-gray-200 bg-white/80 text-[#101828]")} onClick={() => {
+            <button aria-controls="mobile-navigation" aria-expanded={isMobileMenuOpen} aria-label="Toggle main menu" className={cn("inline-flex size-10 shrink-0 items-center justify-center rounded-full border transition hover:border-[#ff8500] hover:text-[#ff8500] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff8500] focus-visible:ring-offset-2 xl:hidden", "border-gray-200 bg-white/80 text-[#101828]")} onClick={() => {
             setIsMobileMenuOpen((isOpen) => {
                 if (isOpen)
                     setIsMobileResearchOpen(false);
@@ -293,24 +311,24 @@ export function Navbar() {
         </nav>
 
         
-        {isMobileMenuOpen && (<div className={cn("absolute left-0 right-0 top-full mt-2 flex max-h-[calc(100svh-7rem)] flex-col gap-4 overflow-y-auto overscroll-contain border border-[#eeeeee] bg-white p-5 shadow-xl xl:hidden z-50 rounded-b-2xl")}>
+        {isMobileMenuOpen && (<nav aria-label="Mobile navigation" className={cn("absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 flex max-h-[calc(100dvh-5.75rem)] flex-col gap-3 overflow-y-auto overscroll-contain border border-[#eeeeee] bg-white p-3 shadow-xl xl:hidden sm:left-auto sm:w-[430px] sm:p-5", isScrolled ? "rounded-2xl" : "rounded-b-2xl sm:rounded-2xl")} id="mobile-navigation">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => {
-                if (link.label === "Research") {
+                if (link.href === "/research") {
                     return (<div key={link.label}>
-                      <button aria-controls="mobile-research-menu" aria-expanded={isMobileResearchOpen} className={cn("flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-base font-semibold text-[#475467] transition-all duration-200 hover:bg-[#fff7ed] hover:text-[#ff8500]", isMobileResearchOpen && "bg-[#fff7ed] text-[#ff8500]")} onClick={() => setIsMobileResearchOpen((isOpen) => !isOpen)} type="button">
+                      <button aria-controls="mobile-research-menu" aria-expanded={isMobileResearchOpen} className={cn("flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#475467] transition-all duration-200 hover:bg-[#fff7ed] hover:text-[#ff8500] sm:px-4 sm:py-3 sm:text-base", (isMobileResearchOpen || isLinkActive(link.href)) && "bg-[#fff7ed] text-[#ff8500]")} onClick={() => setIsMobileResearchOpen((isOpen) => !isOpen)} type="button">
                         <span>{link.label}</span>
                         <ChevronDown aria-hidden="true" className={cn("size-4 transition-transform duration-200", isMobileResearchOpen && "rotate-180")}/>
                       </button>
 
-                      {isMobileResearchOpen && (<div className="mt-2 rounded-xl border border-[#eeeeee] bg-[#fffdf7] p-4 flex flex-col gap-5" id="mobile-research-menu">
+                      {isMobileResearchOpen && (<div className="mt-2 flex flex-col gap-4 rounded-xl border border-[#eeeeee] bg-[#fffdf7] p-3 sm:gap-5 sm:p-4" id="mobile-research-menu">
                           
                           <div className="pb-3 border-b border-[#eeeeee]">
                             <Link href="/research" className="inline-flex items-center gap-2 text-sm font-bold text-[#101828] hover:text-[#ff8500]" onClick={() => {
                                 setIsMobileMenuOpen(false);
                                 setIsMobileResearchOpen(false);
                             }}>
-                              Explore Investment Research →
+                              Explore Investment Education →
                             </Link>
                             <p className="mt-1 text-xs text-[#667085] leading-relaxed m-0">
                               Follow all 8 learning levels, from investment foundations to a complete portfolio-planning capstone.
@@ -329,7 +347,7 @@ export function Navbar() {
                                 <p className="text-xs font-bold text-[#182230] hover:text-[#ff8500] m-0">
                                   {item.title}
                                 </p>
-                                <p className="text-[11px] text-[#98a2b3] m-0">
+                                <p className="m-0 text-[11px] leading-4 text-[#98a2b3]">
                                   {item.description}
                                 </p>
                               </Link>))}
@@ -347,7 +365,7 @@ export function Navbar() {
                                 <p className="text-xs font-bold text-[#182230] hover:text-[#ff8500] m-0">
                                   {item.title}
                                 </p>
-                                <p className="text-[11px] text-[#98a2b3] m-0">
+                                <p className="m-0 text-[11px] leading-4 text-[#98a2b3]">
                                   {item.description}
                                 </p>
                               </Link>))}
@@ -355,7 +373,7 @@ export function Navbar() {
                         </div>)}
                     </div>);
                 }
-                return (<Link className={cn("flex w-full items-center rounded-xl px-4 py-3 text-base font-semibold text-[#475467] transition-all duration-200 hover:bg-[#fff7ed] hover:text-[#ff8500]", isLinkActive(link.href) && "bg-[#fff7ed] text-[#ff8500]")} href={link.href} key={link.label} onClick={() => {
+                return (<Link className={cn("flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-semibold text-[#475467] transition-all duration-200 hover:bg-[#fff7ed] hover:text-[#ff8500] sm:px-4 sm:py-3 sm:text-base", isLinkActive(link.href) && "bg-[#fff7ed] text-[#ff8500]")} href={link.href} key={link.label} onClick={() => {
                         setIsMobileMenuOpen(false);
                         setIsMobileResearchOpen(false);
                     }}>
@@ -364,7 +382,7 @@ export function Navbar() {
             })}
             </div>
 
-            <div className="h-px bg-[#eeeeee] w-full my-1"/>
+            <div className="my-1 h-px w-full bg-[#eeeeee]"/>
             <a href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" className="w-full no-underline" onClick={() => {
                 setIsMobileMenuOpen(false);
                 setIsMobileResearchOpen(false);
@@ -373,7 +391,7 @@ export function Navbar() {
                 Get Started →
               </Button>
             </a>
-          </div>)}
+          </nav>)}
       </div>
     </header>);
 }
