@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FaApple } from "react-icons/fa";
 import playstore from "../../../public/404 notfound/playstore.png";
+import { appLinks } from "@/lib/app-links";
 export function DownloadAppSection() {
     return (<section id="download-app" className="relative w-full bg-[#FFFDF4] pt-16 overflow-hidden mb-8">
       
@@ -27,17 +29,30 @@ export function DownloadAppSection() {
             Best Investing Platform For You!
           </p>
 
-          <Link href="https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-[#1e1e1e] text-white px-8 py-4 rounded-[14px] hover:bg-black transition-transform hover:scale-105 shadow-xl shadow-black/10">
-            <Image src={playstore} alt="Google Play" className="w-10 h-10"/>
-            <div className="flex flex-col items-start leading-none">
-              <span className="text-xs text-gray-300 font-medium tracking-wide">
-                Download on the
-              </span>
-              <span className="text-lg font-bold mt-1">
-                Play Store
-              </span>
-            </div>
-          </Link>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href={appLinks.android} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-[#1e1e1e] text-white px-8 py-4 rounded-[14px] hover:bg-black transition-transform hover:scale-105 shadow-xl shadow-black/10">
+              <Image src={playstore} alt="Google Play" className="w-10 h-10"/>
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-xs text-gray-300 font-medium tracking-wide">
+                  Download on the
+                </span>
+                <span className="text-lg font-bold mt-1">
+                  Play Store
+                </span>
+              </div>
+            </Link>
+            <Link href={appLinks.ios} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-[#1e1e1e] text-white px-8 py-4 rounded-[14px] hover:bg-black transition-transform hover:scale-105 shadow-xl shadow-black/10">
+              <FaApple aria-hidden="true" className="size-10"/>
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-xs text-gray-300 font-medium tracking-wide">
+                  Download on the
+                </span>
+                <span className="text-lg font-bold mt-1">
+                  App Store
+                </span>
+              </div>
+            </Link>
+          </div>
         </div>
 
         

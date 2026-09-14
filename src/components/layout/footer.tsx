@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { FaPlay, FaLinkedinIn, FaFacebookF, FaInstagram, FaEnvelope } from "react-icons/fa";
+import { FaApple, FaPlay, FaLinkedinIn, FaFacebookF, FaInstagram, FaEnvelope } from "react-icons/fa";
+import { appLinks } from "@/lib/app-links";
 export function Footer() {
     return (<footer className="w-full bg-[#FFFDF4] px-3 sm:px-6 lg:px-8 pb-4 md:pb-6">
       <div className="mx-auto max-w-[95%] bg-[#0f172a] rounded-xl p-6 lg:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl">
@@ -26,8 +27,9 @@ export function Footer() {
             
             <div className="flex gap-2.5 md:gap-3 mt-1">
               {[
-            { icon: FaPlay, label: "Google Play Store", href: "https://play.google.com/store/apps/details?id=com.solidwealth.app&pcampaignid=web_share" },
-            { icon: FaLinkedinIn, label: "LinkedIn", href: "#" },
+            { icon: FaPlay, label: "Google Play Store", href: appLinks.android },
+            { icon: FaApple, label: "Apple App Store", href: appLinks.ios },
+            { icon: FaLinkedinIn, label: "LinkedIn", href: "https://www.linkedin.com/company/solid-wealth/?originalSubdomain=in" },
             { icon: FaFacebookF, label: "Facebook", href: "#" },
             { icon: FaInstagram, label: "Instagram", href: "#" },
             { icon: FaEnvelope, label: "Email", href: "mailto:support@solidwealth.in" }

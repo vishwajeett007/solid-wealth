@@ -18,6 +18,10 @@
   --wealth-dark-border: #1e293b;
   --wealth-danger: #ef4444;
   --wealth-teal: #06b6d4;
+  /* Market movement. Darker steps than --wealth-danger, which only reaches
+     3.69:1 on the cream background and so cannot carry text. */
+  --wealth-up: #15803d;
+  --wealth-down: #b91c1c;
 }
 
 @theme inline {
@@ -39,6 +43,8 @@
   --color-wealth-dark-border: var(--wealth-dark-border);
   --color-wealth-danger: var(--wealth-danger);
   --color-wealth-teal: var(--wealth-teal);
+  --color-wealth-up: var(--wealth-up);
+  --color-wealth-down: var(--wealth-down);
 
   --font-sans: var(--font-dm-sans);
   --font-display: var(--font-sora);

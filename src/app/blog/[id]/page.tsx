@@ -321,7 +321,7 @@ export default function BlogDetailPage() {
     });
     return (<div className="min-h-screen bg-wealth-bg font-sans text-wealth-primary pb-24">
       
-      <div className="max-w-6xl mx-auto px-4 pt-8 md:pt-12">
+      <div className="max-w-6xl mx-auto px-4 pt-28 sm:pt-32 md:pt-36">
         
         
         <div className="flex items-center justify-between mb-8">

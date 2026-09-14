@@ -18,5 +18,17 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+    async rewrites() {
+        return [
+            {
+                source: "/mutual-funds-research/top-performing-mutual-funds",
+                destination: "/mutual-funds",
+            },
+            {
+                source: "/mutual-funds-research/fund-card",
+                destination: "/mutual-funds/fund-card",
+            },
+        ];
+    },
 };
 export default nextConfig;

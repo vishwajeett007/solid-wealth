@@ -761,7 +761,7 @@ export default function BlogPage() {
     return (<div className="w-full bg-wealth-bg font-sans text-wealth-primary min-h-screen pb-20">
 
       
-      {viewingAssetChart === "gold" ? (<div className="max-w-6xl mx-auto px-4 pt-24 sm:pt-28 animate-fade-up">
+      {viewingAssetChart === "gold" ? (<div className="max-w-6xl mx-auto px-4 pt-28 sm:pt-32 lg:pt-36 animate-fade-up">
           
           <div className="flex items-center justify-between mb-8">
             <button onClick={() => setViewingAssetChart(null)} className="inline-flex items-center gap-1.5 px-4 py-2 border border-wealth-border bg-white rounded-xl text-xs font-bold hover:bg-wealth-surface-dim transition-all text-wealth-secondary cursor-pointer shadow-wealth-sm">
@@ -912,7 +912,7 @@ export default function BlogPage() {
               </ul>
             </div>
           </div>
-        </div>) : (<div className="max-w-6xl mx-auto px-4 pt-24 sm:pt-28">
+        </div>) : (<div className="max-w-6xl mx-auto px-4 pt-28 sm:pt-32 lg:pt-36">
 
           
           <div className="text-center space-y-1.5 mb-10">
