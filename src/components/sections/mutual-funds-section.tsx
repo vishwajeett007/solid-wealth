@@ -4,7 +4,7 @@ import { X, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { appLinks } from "@/lib/app-links";
 import { cn } from "@/lib/utils";
-// Shape of /api/nav/company-summary/. Backends from before the AMFI column
+// Shape of /api/nav/company-summary. Backends from before the AMFI column
 // change omit nav_date, sebi_category, plan and option, and send a null NAV.
 interface Scheme {
     scheme_code: string;
@@ -127,9 +127,10 @@ export function MutualFundsSection() {
     useEffect(() => {
         const controller = new AbortController();
         const load = async () => {
-            const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://solidwealthindia.com";
             try {
-                const res = await fetch(`${baseUrl}/api/nav/company-summary/`, { signal: controller.signal });
+                // Same payload as the backend's /api/nav/company-summary/, but proxied
+                // through our route handler, which caches it until midnight IST.
+                const res = await fetch("/api/nav/company-summary", { signal: controller.signal });
                 if (!res.ok)
                     throw new Error(`Company NAV summary request failed with ${res.status}`);
                 const data: ApiResponse = await res.json();
