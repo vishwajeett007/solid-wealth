@@ -821,7 +821,9 @@ const CalculatorLayout = ({
                 >
                   <img src="/Printable.svg" alt="Template Header" className="w-full h-auto object-cover opacity-80" />
 
-                  <div className="absolute top-0 left-0 w-full h-full pt-[250px] px-16 flex flex-col pb-16">
+                  {/* pb-20 keeps content clear of the www.solidwealth.in mark the
+                      Printable.svg template draws over the bottom ~68px of the page. */}
+                  <div className="absolute top-0 left-0 w-full h-full pt-[250px] px-16 flex flex-col pb-20">
                     <div className="flex justify-between items-end border-b-2 border-gray-100 pb-5 mb-5">
                       <div>
                         <span className="text-xs font-bold tracking-widest text-[#fe9800] uppercase">
@@ -988,7 +990,8 @@ const CalculatorLayout = ({
                       className="w-full h-auto object-cover opacity-80 absolute top-0 left-0 pointer-events-none"
                     />
 
-                    <div className="relative z-10 w-full h-full pt-[220px] px-14 flex flex-col pb-12">
+                    {/* pb-20: same footer band reserved as page 1. */}
+                    <div className="relative z-10 w-full h-full pt-[220px] px-14 flex flex-col pb-20">
                       {/* Page 2 Header */}
                       <div className="flex justify-between items-end border-b-2 border-gray-100 pb-3 mb-3">
                         <div>

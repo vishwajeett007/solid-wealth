@@ -38,6 +38,10 @@ interface Blog {
     category: "news" | "funds" | "commodities" | "nri_naval";
     tag: string;
     image: string;
+    // Present on posts written by the nightly batch.
+    generated?: boolean;
+    sourceName?: string;
+    sourceUrl?: string;
 }
 const PREDEFINED_ASSETS = [
     { symbol: "AAPL", name: "Apple Inc.", type: "Stock" },
@@ -534,6 +538,7 @@ export default function BlogPage() {
     const [liveGoldChange, setLiveGoldChange] = useState(0.36);
     const [liveSilverChange, setLiveSilverChange] = useState(1.17);
     const [activeBlogDetail, setActiveBlogDetail] = useState<Blog | null>(null);
+    const [dailyBlogs, setDailyBlogs] = useState<Blog[]>([]);
     useEffect(() => {
         const timer = setTimeout(() => {
             setMounted(true);
@@ -596,6 +601,22 @@ export default function BlogPage() {
             }
         }, 0);
         return () => clearTimeout(timer);
+    }, []);
+    // Today's server-written batch. It is deliberately not persisted to
+    // localStorage: the server rotates it daily, and a stale copy in a visitor's
+    // browser would outlive the day it was written for.
+    useEffect(() => {
+        const controller = new AbortController();
+        fetch("/api/blogs", { signal: controller.signal })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (Array.isArray(data?.posts)) setDailyBlogs(data.posts as Blog[]);
+            })
+            .catch((err) => {
+                if ((err as Error).name !== "AbortError")
+                    console.error("Failed to load today's posts:", err);
+            });
+        return () => controller.abort();
     }, []);
     useEffect(() => {
         if (!mounted || blogs.length === 0)
@@ -743,7 +764,8 @@ export default function BlogPage() {
         return { line, area };
     };
     const activeChartCoords = getChartCoordinates(goldChartDataMap[chartTimeframe], 600, 200);
-    const filteredBlogs = blogs.filter(blog => {
+    const allBlogs = [...dailyBlogs, ...blogs.filter(blog => !dailyBlogs.some(daily => daily.id === blog.id))];
+    const filteredBlogs = allBlogs.filter(blog => {
         const matchesCategory = blog.category === activeTab;
         const matchesSearch = blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             blog.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1044,6 +1066,9 @@ export default function BlogPage() {
                     <div className="absolute top-4 left-4 bg-yellow-400 text-slate-900 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-md shadow-sm border border-yellow-300">
                       {featuredBlog.tag}
                     </div>
+                    {featuredBlog.generated && (<div className="absolute top-4 right-4 bg-slate-900/85 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md" title="Written automatically, not reviewed by an editor">
+                        AI
+                      </div>)}
                   </div>
 
                   <div className="lg:w-1/2 p-6 md:p-8 flex flex-col justify-between space-y-6">
@@ -1088,6 +1113,9 @@ export default function BlogPage() {
                         <div className="absolute top-3 left-3 bg-[#fef3c7] text-[#b45309] text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-md tracking-wider border border-[#fde68a]">
                           {blog.tag}
                         </div>
+                        {blog.generated && (<div className="absolute top-3 right-3 bg-slate-900/85 text-white text-[9px] font-extrabold uppercase tracking-wider px-2 py-1 rounded-md" title="Written automatically, not reviewed by an editor">
+                            AI
+                          </div>)}
                       </div>
 
                       <div className="p-6 flex-1 flex flex-col justify-between space-y-4">

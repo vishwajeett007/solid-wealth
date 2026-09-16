@@ -24,6 +24,10 @@ interface Blog {
     category: "news" | "funds" | "commodities" | "nri_naval";
     tag: string;
     image: string;
+    // Present on posts written by the nightly batch.
+    generated?: boolean;
+    sourceName?: string;
+    sourceUrl?: string;
 }
 interface FinanceData {
     symbol: string;
@@ -180,6 +184,20 @@ export default function BlogDetailPage() {
             catch (e) {
                 console.error("Failed to parse blogs from localStorage", e);
             }
+        }
+        // Posts from the nightly batch are served by the API, not stored in this
+        // browser, so they are looked up there before falling back to a stub.
+        if (id.startsWith("auto-")) {
+            let cancelled = false;
+            fetch("/api/blogs")
+                .then((res) => (res.ok ? res.json() : null))
+                .then((data) => {
+                    if (cancelled) return;
+                    const found = (data?.posts as Blog[] | undefined)?.find((post) => post.id === id);
+                    if (found) setBlog(found);
+                })
+                .catch((error) => console.error("Failed to load today's post:", error));
+            return () => { cancelled = true; };
         }
         if (FALLBACK_BLOGS[id]) {
             setBlog({
@@ -373,6 +391,18 @@ export default function BlogDetailPage() {
                   </span>
                 </div>
               </div>
+
+              {/* Batch-written posts say so, and credit the reporting they read. */}
+              {blog.generated && (<div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-xs text-amber-900">
+                  <span className="font-bold">AI-generated commentary.</span>{" "}
+                  Written automatically from market data{blog.sourceName ? " and published reporting" : ""} and not reviewed by a human editor. Not investment advice.
+                  {blog.sourceUrl && (<>
+                      {" "}Source:{" "}
+                      <a href={blog.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-2 hover:text-amber-700">
+                        {blog.sourceName}
+                      </a>
+                    </>)}
+                </div>)}
             </div>
 
             

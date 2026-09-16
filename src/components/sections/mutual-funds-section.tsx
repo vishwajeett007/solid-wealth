@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, ArrowRight } from "lucide-react";
+import { X, ArrowRight, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { appLinks } from "@/lib/app-links";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,7 @@ interface Fund {
     isinReinvestment: string | null;
 }
 const PAGE_SIZE = 6;
+const SUGGESTION_LIMIT = 50;
 const GROUPS = ["All", "Equity", "Debt", "Hybrid", "Other"];
 const MONTHS: Record<string, string> = {
     jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
@@ -124,6 +125,10 @@ export function MutualFundsSection() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeIndex, setActiveIndex] = useState(0);
     const [selectedFund, setSelectedFund] = useState<Fund | null>(null);
+    const [isNameListOpen, setIsNameListOpen] = useState(false);
+    const [highlighted, setHighlighted] = useState(0);
+    const searchBoxRef = React.useRef<HTMLDivElement>(null);
+    const listRef = React.useRef<HTMLUListElement>(null);
     useEffect(() => {
         const controller = new AbortController();
         const load = async () => {
@@ -153,9 +158,11 @@ export function MutualFundsSection() {
         setStatus("loading");
         setReloadKey((key) => key + 1);
     };
-    const pagesData = React.useMemo(() => {
+    // One filtered list feeds both the card grid and the name dropdown, so the
+    // dropdown always offers exactly what selecting it will show.
+    const filteredFunds = React.useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
-        const filtered = allFunds.filter((fund) => {
+        return allFunds.filter((fund) => {
             const matchesGroup = selectedGroup === "All" || fund.group === selectedGroup;
             const matchesSearch = query === "" ||
                 fund.name.toLowerCase().includes(query) ||
@@ -163,12 +170,61 @@ export function MutualFundsSection() {
                 fund.schemeCode.includes(query);
             return matchesGroup && matchesSearch;
         });
+    }, [allFunds, selectedGroup, searchQuery]);
+    const pagesData = React.useMemo(() => {
         const pages: Fund[][] = [];
-        for (let i = 0; i < filtered.length; i += PAGE_SIZE) {
-            pages.push(filtered.slice(i, i + PAGE_SIZE));
+        for (let i = 0; i < filteredFunds.length; i += PAGE_SIZE) {
+            pages.push(filteredFunds.slice(i, i + PAGE_SIZE));
         }
         return pages;
-    }, [allFunds, selectedGroup, searchQuery]);
+    }, [filteredFunds]);
+    // Rendering all 4,000+ names at once janks the dropdown; the rest stay
+    // reachable by typing, and the footer says how many are hidden.
+    const suggestions = React.useMemo(() => filteredFunds.slice(0, SUGGESTION_LIMIT), [filteredFunds]);
+    // Close the dropdown on an outside click, and keep the highlighted row in view
+    // while arrowing through it.
+    useEffect(() => {
+        if (!isNameListOpen)
+            return;
+        const onPointerDown = (event: PointerEvent) => {
+            if (!searchBoxRef.current?.contains(event.target as Node))
+                setIsNameListOpen(false);
+        };
+        document.addEventListener("pointerdown", onPointerDown);
+        return () => document.removeEventListener("pointerdown", onPointerDown);
+    }, [isNameListOpen]);
+    useEffect(() => {
+        if (isNameListOpen)
+            listRef.current?.children[highlighted]?.scrollIntoView({ block: "nearest" });
+    }, [highlighted, isNameListOpen]);
+    const selectFundName = (fund: Fund) => {
+        setSearchQuery(fund.name);
+        setActiveIndex(0);
+        setIsNameListOpen(false);
+        setHighlighted(0);
+    };
+    const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Escape") {
+            setIsNameListOpen(false);
+            return;
+        }
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            if (!isNameListOpen) {
+                setIsNameListOpen(true);
+                return;
+            }
+            if (suggestions.length === 0)
+                return;
+            const step = event.key === "ArrowDown" ? 1 : -1;
+            setHighlighted((current) => (current + step + suggestions.length) % suggestions.length);
+            return;
+        }
+        if (event.key === "Enter" && isNameListOpen && suggestions[highlighted]) {
+            event.preventDefault();
+            selectFundName(suggestions[highlighted]);
+        }
+    };
     const latestNavDate = React.useMemo(() => allFunds.reduce<string | null>((latest, fund) => (fund.navDate && (!latest || fund.navDate > latest) ? fund.navDate : latest), null), [allFunds]);
     const totalPages = pagesData.length;
     const paginationItems = React.useMemo(() => {
@@ -205,16 +261,39 @@ export function MutualFundsSection() {
           </div>
 
 
-          <div className="relative md:absolute md:right-0 w-full md:max-w-xs h-12 flex-shrink-0 z-30">
-            <div className="w-full h-full flex items-center bg-[#F8FAFC] border border-slate-200 focus-within:border-[#0B1F3A] focus-within:bg-white rounded-full absolute inset-0 px-4 transition-colors">
+          <div ref={searchBoxRef} className="relative md:absolute md:right-0 w-full md:max-w-xs flex-shrink-0 z-30">
+            <div className="w-full h-12 flex items-center bg-[#F8FAFC] border border-slate-200 focus-within:border-[#0B1F3A] focus-within:bg-white rounded-full px-4 transition-colors">
               <svg className="text-gray-400 flex-shrink-0 w-4 h-4 mr-2" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
-              <input type="text" placeholder="Search fund, AMC or scheme code..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); }} className="w-full bg-transparent outline-none font-semibold text-[#0B1F3A] placeholder:text-gray-400 text-sm py-2"/>
-              {searchQuery && (<button onClick={() => { setSearchQuery(""); setActiveIndex(0); }} className="text-gray-400 hover:text-gray-600 flex-shrink-0 cursor-pointer mr-1" aria-label="Clear search">
+              <input type="text" role="combobox" aria-expanded={isNameListOpen} aria-controls="fund-name-list" aria-autocomplete="list" aria-activedescendant={isNameListOpen && suggestions[highlighted] ? `fund-option-${suggestions[highlighted].schemeCode}` : undefined} placeholder="Search or pick a fund name..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(0); setHighlighted(0); setIsNameListOpen(true); }} onFocus={() => setIsNameListOpen(true)} onKeyDown={onSearchKeyDown} className="w-full bg-transparent outline-none font-semibold text-[#0B1F3A] placeholder:text-gray-400 text-sm py-2"/>
+              {searchQuery && (<button onClick={() => { setSearchQuery(""); setActiveIndex(0); setHighlighted(0); }} className="text-gray-400 hover:text-gray-600 flex-shrink-0 cursor-pointer mr-1" aria-label="Clear search">
                   <X className="size-4"/>
                 </button>)}
+              <button type="button" onClick={() => setIsNameListOpen((open) => !open)} className="text-gray-400 hover:text-[#0B1F3A] flex-shrink-0 cursor-pointer" aria-label={isNameListOpen ? "Hide fund names" : "Show fund names"} tabIndex={-1}>
+                <ChevronDown className={cn("size-4 transition-transform", isNameListOpen && "rotate-180")}/>
+              </button>
             </div>
+
+            {isNameListOpen && (<div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                {suggestions.length === 0 ? (<p className="px-4 py-6 text-sm text-gray-400 text-center">No fund matches that name.</p>) : (<>
+                    <ul ref={listRef} id="fund-name-list" role="listbox" aria-label="Fund names" className="max-h-80 overflow-y-auto py-1">
+                      {suggestions.map((fund, index) => (<li key={fund.schemeCode} id={`fund-option-${fund.schemeCode}`} role="option" aria-selected={index === highlighted} onMouseEnter={() => setHighlighted(index)} onClick={() => selectFundName(fund)} className={cn("px-4 py-2.5 cursor-pointer", index === highlighted ? "bg-[#FFF8EB]" : "hover:bg-slate-50")}>
+                          <p className="text-sm font-semibold text-[#0B1F3A] leading-snug line-clamp-2" title={fund.name}>
+                            {fund.name}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5 truncate">
+                            {[fund.company, fund.category].filter(Boolean).join(" · ")}
+                          </p>
+                        </li>))}
+                    </ul>
+                    <p className="px-4 py-2 text-[11px] text-gray-400 border-t border-slate-100 bg-slate-50/60">
+                      {filteredFunds.length > SUGGESTION_LIMIT
+                ? `Showing ${SUGGESTION_LIMIT} of ${filteredFunds.length.toLocaleString("en-IN")} funds — keep typing to narrow it down.`
+                : `${filteredFunds.length.toLocaleString("en-IN")} fund${filteredFunds.length === 1 ? "" : "s"} match.`}
+                    </p>
+                  </>)}
+              </div>)}
           </div>
         </div>
 
@@ -343,7 +422,14 @@ export function MutualFundsSection() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <p className="text-lg font-bold text-[#0B1F3A] mb-1">No mutual funds found</p>
-            <p className="text-sm text-gray-400">Try adjusting your filters or search query to find matching schemes.</p>
+            <p className="text-sm text-gray-400">
+              {searchQuery.trim()
+                ? `Nothing matches "${searchQuery.trim()}"${selectedGroup === "All" ? "" : ` in ${selectedGroup}`}.`
+                : `No ${selectedGroup} schemes in today's AMFI list.`}
+            </p>
+            {(searchQuery.trim() || selectedGroup !== "All") && (<button onClick={() => { setSearchQuery(""); setSelectedGroup("All"); setActiveIndex(0); setIsNameListOpen(false); }} className="mt-5 px-6 py-2.5 rounded-full bg-[#0B1F3A] hover:bg-[#152e52] text-white text-sm font-bold transition-colors cursor-pointer">
+                Show all {allFunds.length.toLocaleString("en-IN")} funds
+              </button>)}
           </div>)}
       </div>
 

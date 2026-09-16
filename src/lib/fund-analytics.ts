@@ -8,7 +8,8 @@
 // XIRR within ~0.1. Category averages and ranks use AMFI's category list, which
 // differs slightly from the vendor's fund universe.
 
-const AMFI_NAV_URL = "https://portal.amfiindia.com/spages/NAVAll.txt";
+// Also read by lib/nav-company-summary.ts, which needs the category headings.
+export const AMFI_NAV_URL = "https://portal.amfiindia.com/spages/NAVAll.txt";
 const MFAPI_URL = "https://api.mfapi.in/mf";
 const REVALIDATE_SECONDS = 6 * 60 * 60;
 const FETCH_CONCURRENCY = 8;

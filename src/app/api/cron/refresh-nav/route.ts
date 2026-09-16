@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchNavCompanySummaryText } from "@/lib/nav-company-summary";
+import { fetchNavCompanySummary } from "@/lib/nav-company-summary";
 
 // GET /api/cron/refresh-nav
 // Point a scheduler at this for midnight IST (crontab runs in UTC: `30 18 * * *`).
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     try {
-        const body = await fetchNavCompanySummaryText();
+        const { body } = await fetchNavCompanySummary();
         return NextResponse.json({ refreshedAt: new Date().toISOString(), bytes: body.length });
     }
     catch (error) {

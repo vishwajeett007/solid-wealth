@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchMarketQuote } from "@/lib/market-quote";
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get("symbol");
@@ -6,27 +7,20 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Symbol is required" }, { status: 400 });
     }
     try {
-        const res = await fetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`, {
-            headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",
-            },
-        });
-        if (!res.ok) {
-            throw new Error(`Yahoo Finance API returned status ${res.status}`);
-        }
-        const data = await res.json();
-        const result = data.quoteResponse?.result?.[0];
+        // Was Yahoo's v7 quote API, which now answers 401 for everyone, so every
+        // response here was quietly coming from the mock block below.
+        const result = await fetchMarketQuote(symbol);
         if (!result) {
-            return NextResponse.json({ error: `No market data found for symbol "${symbol}"` }, { status: 404 });
+            throw new Error(`No quote available for ${symbol}`);
         }
-        let name = result.longName || result.shortName || result.symbol;
-        let price = result.regularMarketPrice;
-        let change = result.regularMarketChange;
-        let changePercent = result.regularMarketChangePercent;
+        let name = result.name;
+        let price = result.price;
+        let change = result.change;
+        const changePercent = result.changePercent;
         let currency = result.currency || "USD";
-        let high = result.regularMarketDayHigh;
-        let low = result.regularMarketDayLow;
-        let volume = result.regularMarketVolume;
+        let high = result.high;
+        let low = result.low;
+        let volume = result.volume;
         let marketCap = result.marketCap;
         if (symbol === "GC=F") {
             name = "Gold Price - MCX";
